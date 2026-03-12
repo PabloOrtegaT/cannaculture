@@ -1,0 +1,25 @@
+{
+  "name": "base-ecommerce",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @base-ecommerce/web",
+    "build": "npm run build --workspace @base-ecommerce/web",
+    "start": "npm run start --workspace @base-ecommerce/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "npm run test:e2e --workspace @base-ecommerce/web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "prettier": "^3.6.2"
+  }
+}

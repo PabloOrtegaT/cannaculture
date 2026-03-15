@@ -10,6 +10,10 @@
     "preview": "npm run cf:build && opennextjs-cloudflare preview",
     "deploy": "npm run cf:build && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "db:generate": "drizzle-kit generate --config drizzle.config.ts",
+    "db:migrate:local": "wrangler d1 migrations apply base-ecommerce --local --config wrangler.jsonc",
+    "db:migrate:remote": "wrangler d1 migrations apply base-ecommerce --remote --config wrangler.jsonc",
+    "db:seed": "node ./scripts/seed-auth-dev.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
@@ -17,14 +21,20 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@auth/drizzle-adapter": "^1.11.1",
     "@base-ecommerce/domain": "file:../../packages/domain",
     "@base-ecommerce/ui": "file:../../packages/ui",
     "@base-ecommerce/validation": "file:../../packages/validation",
     "@tanstack/react-table": "^8.21.3",
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.1",
     "next": "16.1.6",
+    "next-auth": "^4.24.13",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "recharts": "^3.8.0"
+    "recharts": "^3.8.0",
+    "resend": "^6.9.3",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.17.1",
@@ -37,6 +47,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.0.7",
+    "drizzle-kit": "^0.31.9",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "jsdom": "^27.0.1",

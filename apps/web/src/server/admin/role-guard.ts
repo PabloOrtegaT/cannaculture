@@ -1,5 +1,9 @@
+import { headers } from "next/headers";
 import { canRolePerform, type Permission, type Role } from "@base-ecommerce/domain";
-import { getAdminRole } from "./session";
+import { normalizeHost, resolveHostPolicy } from "@/server/config/host-policy";
+import { getAuthRuntimeConfig, getHostRuntimeConfig } from "@/server/config/runtime-env";
+import { getSessionUser, requireRoleForPermission } from "@/server/auth/session";
+import { isRecentAuthentication } from "@/server/auth/refresh-session-policy";
 
 export const adminRouteKeys = ["dashboard", "products", "content", "coupons", "import"] as const;
 export type AdminRouteKey = (typeof adminRouteKeys)[number];
@@ -21,18 +25,71 @@ export function canAccessAdminPermission(role: Role, permission: Permission) {
   return canRolePerform(role, permission);
 }
 
-export function getRouteAccess(route: AdminRouteKey, env: NodeJS.ProcessEnv = process.env) {
-  const role = getAdminRole(env);
+export async function assertAdminHostAccess() {
+  const requestHeaders = await headers();
+  const requestHost = normalizeHost(requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"));
+  const hostConfig = getHostRuntimeConfig();
+  const policy = resolveHostPolicy({
+    appBaseUrl: hostConfig.appBaseUrl,
+    adminBaseUrl: hostConfig.adminBaseUrl,
+  });
+
+  if (!policy.adminHost || policy.adminHost === policy.appHost) {
+    return true;
+  }
+
+  if (requestHost !== policy.adminHost) {
+    throw new Error("Admin routes/actions must be accessed from the admin host.");
+  }
+
+  if (hostConfig.adminRequireCfAccess) {
+    const cfIdentity = requestHeaders.get("cf-access-authenticated-user-email");
+    if (!cfIdentity) {
+      throw new Error("Cloudflare Access authentication is required for admin.");
+    }
+  }
+  return true;
+}
+
+export async function getRouteAccess(route: AdminRouteKey) {
+  try {
+    await assertAdminHostAccess();
+  } catch {
+    return {
+      role: null,
+      allowed: false,
+    };
+  }
+
+  const user = await getSessionUser();
+  if (!user) {
+    return {
+      role: null,
+      allowed: false,
+    };
+  }
+
+  const role = user.role;
   return {
     role,
     allowed: canAccessAdminRoute(role, route),
   };
 }
 
-export function getPermissionAccess(permission: Permission, env: NodeJS.ProcessEnv = process.env) {
-  const role = getAdminRole(env);
-  return {
-    role,
-    allowed: canAccessAdminPermission(role, permission),
-  };
+export async function ensurePermission(permission: Permission) {
+  await assertAdminHostAccess();
+  const role = await requireRoleForPermission(permission);
+
+  if (permission.endsWith(":write")) {
+    const user = await getSessionUser();
+    if (!user) {
+      throw new Error("Unauthorized.");
+    }
+    const recentWindowMs = getAuthRuntimeConfig().adminRefreshIdleHours * 60 * 60 * 1000;
+    if (!isRecentAuthentication(user.authenticatedAt, recentWindowMs)) {
+      throw new Error("Recent authentication is required for this admin action.");
+    }
+  }
+
+  return role;
 }

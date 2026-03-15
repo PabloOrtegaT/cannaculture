@@ -1,24 +1,18 @@
 import { roleSchema, type Role } from "@base-ecommerce/domain";
+import { getSessionUser, requireSessionUser } from "@/server/auth/session";
+import { assertAdminHostAccess } from "./role-guard";
 
-export const ADMIN_ROLE_ENV_KEY = "ADMIN_ROLE";
-export const defaultAdminRole: Role = "owner";
-
-export function resolveAdminRole(input?: string | null): Role {
-  if (!input) {
-    return defaultAdminRole;
+export async function getAdminRole(): Promise<Role | null> {
+  await assertAdminHostAccess();
+  const user = await getSessionUser();
+  if (!user) {
+    return null;
   }
-
-  return roleSchema.parse(input);
+  return roleSchema.parse(user.role);
 }
 
-export function getAdminRole(env: NodeJS.ProcessEnv = process.env): Role {
-  try {
-    return resolveAdminRole(env[ADMIN_ROLE_ENV_KEY]);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown validation error.";
-    throw new Error(
-      `Invalid ${ADMIN_ROLE_ENV_KEY} value "${env[ADMIN_ROLE_ENV_KEY]}". ` +
-        `Expected one of: owner, manager, catalog. ${message}`,
-    );
-  }
+export async function requireAdminRole(): Promise<Role> {
+  await assertAdminHostAccess();
+  const user = await requireSessionUser();
+  return roleSchema.parse(user.role);
 }

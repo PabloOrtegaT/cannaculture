@@ -1,11 +1,23 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { resolveHostPolicy } from "@/server/config/host-policy";
+import { getHostRuntimeConfig } from "@/server/config/runtime-env";
+import { getSessionUser } from "@/server/auth/session";
 
-export default function StorefrontLayout({
+export const dynamic = "force-dynamic";
+
+export default async function StorefrontLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getSessionUser();
+  const hostConfig = getHostRuntimeConfig();
+  const hostPolicy = resolveHostPolicy({
+    appBaseUrl: hostConfig.appBaseUrl,
+    adminBaseUrl: hostConfig.adminBaseUrl,
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-6xl px-6 py-6">
@@ -21,7 +33,21 @@ export default function StorefrontLayout({
               <Link href="/cart" className="hover:underline">
                 Cart
               </Link>
-              <Link href="/admin" className="hover:underline">
+              {user ? (
+                <>
+                  <Link href="/account" className="hover:underline">
+                    Account
+                  </Link>
+                  <Link href="/logout" className="hover:underline">
+                    Logout
+                  </Link>
+                </>
+              ) : (
+                <Link href="/login" className="hover:underline">
+                  Login
+                </Link>
+              )}
+              <Link href={`${hostPolicy.adminBaseUrl}/admin`} className="hover:underline">
                 Admin
               </Link>
             </nav>

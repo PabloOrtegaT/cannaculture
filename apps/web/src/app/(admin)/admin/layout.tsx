@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { canAccessAdminRoute, type AdminRouteKey } from "@/server/admin/role-guard";
 import { getAdminRole } from "@/server/admin/session";
+
+export const dynamic = "force-dynamic";
 
 const adminNavigation: { href: string; label: string; route: AdminRouteKey }[] = [
   { href: "/admin", label: "Dashboard", route: "dashboard" },
@@ -11,12 +14,15 @@ const adminNavigation: { href: string; label: string; route: AdminRouteKey }[] =
   { href: "/admin/import", label: "Import", route: "import" },
 ];
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const role = getAdminRole();
+  const role = await getAdminRole();
+  if (!role) {
+    redirect("/login?next=/admin");
+  }
 
   return (
     <div className="min-h-screen bg-muted">

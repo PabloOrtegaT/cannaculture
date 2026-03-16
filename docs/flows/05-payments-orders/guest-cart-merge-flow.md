@@ -17,6 +17,9 @@ Users add items before logging in. After login, cart contents must be merged int
 3. System redirects to `/auth/sync-cart`.
 4. Guest cart is posted to merge endpoint.
 5. Merged cart is persisted server-side and reflected on `/cart`.
+6. In local E2E runs, use split hosts:
+   - storefront: `http://storefront.lvh.me:3000`
+   - admin: `http://admin.lvh.me:3000`
 
 ## How it works
 
@@ -26,6 +29,8 @@ Users add items before logging in. After login, cart contents must be merged int
 - Quantities merge and clamp to available stock.
 - Unavailable lines are kept with warning reason and excluded from checkout subtotal.
 - Merge summary reports merged/adjusted/unavailable outcomes.
+- Local E2E startup runs D1 migration + seed before server boot to keep merge test fixtures deterministic.
+- Local seed resets owner refresh sessions and cart lines so merge test baselines remain deterministic across reruns.
 
 ## Why this approach
 
@@ -63,6 +68,7 @@ Users add items before logging in. After login, cart contents must be merged int
 
 - Merge summary is persisted in UI state for user review.
 - Merge endpoint returns explicit error codes for unauthorized/invalid payload.
+- E2E asserts final login/cart URL hosts remain local test hosts to catch env misrouting.
 
 ## Security considerations
 
@@ -83,4 +89,3 @@ Users add items before logging in. After login, cart contents must be merged int
 - Add merge telemetry counters (merged, adjusted, unavailable per session).
 - Add manual line-resolution actions for unavailable items.
 - Add cross-device cart conflict handling windows.
-

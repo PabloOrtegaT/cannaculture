@@ -22,6 +22,11 @@ Optional local host split for admin surface:
 - `ADMIN_BASE_URL=http://admin.lvh.me:3000`
 - run dev and open `http://storefront.lvh.me:3000` for storefront, `http://admin.lvh.me:3000/admin` for admin.
 
+Runtime env precedence:
+
+- Explicit process env values win over Cloudflare context vars.
+- This keeps local/dev/E2E redirects on local hosts even when `wrangler.jsonc` has production domain vars.
+
 ## Run locally
 
 ```bash
@@ -50,14 +55,24 @@ Seed commands by environment:
 npm run lint
 npm run typecheck
 npm run test
+npm run test:e2e
 ```
+
+E2E defaults:
+
+- Storefront host: `http://storefront.lvh.me:3000`
+- Admin host: `http://admin.lvh.me:3000`
+- E2E always runs local migration + seed before starting dev server.
+- Set `PLAYWRIGHT_REUSE_EXISTING_SERVER=1` only if you intentionally want to reuse a running server.
+- Set `PLAYWRIGHT_PORT` to change E2E server port if needed.
 
 ## D05 Auth + Cart foundation
 
 - Auth stack: Auth.js (`next-auth`) + Drizzle adapter + JWT sessions + rotating refresh sessions.
 - Persistence: Cloudflare D1 (`DB` binding) + Drizzle migrations.
 - Guest cart merges into authenticated server cart after login via `/auth/sync-cart`.
-- Dedicated admin host routing is enforced by middleware when `ADMIN_BASE_URL` differs from `APP_BASE_URL`.
+- Dedicated admin host routing is enforced by proxy when `ADMIN_BASE_URL` differs from `APP_BASE_URL`.
+- When storefront/admin use subdomains of the same parent domain, auth and refresh cookies use a shared parent-domain scope for cross-subdomain continuity.
 
 ## Documentation
 
@@ -102,8 +117,7 @@ If you are deploying only to `workers.dev` (no custom domain yet), set:
 - `APP_BASE_URL=https://<your-worker>.<your-subdomain>.workers.dev`
 - `ADMIN_BASE_URL=https://<your-worker>.<your-subdomain>.workers.dev`
 
-This repository currently defaults both to:
-`https://base-ecommerce.ortegapablo96.workers.dev` in `apps/web/wrangler.jsonc`.
+Current default deploy domains are defined in `apps/web/wrangler.jsonc` (`vars.APP_BASE_URL` and `vars.ADMIN_BASE_URL`).
 
 Required environment variables for deploy:
 

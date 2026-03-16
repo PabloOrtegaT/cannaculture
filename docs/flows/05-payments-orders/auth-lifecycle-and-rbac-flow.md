@@ -18,6 +18,10 @@ The platform needs real authentication with role-based authorization so admin op
 3. Open `/login` and sign in with credentials or available OAuth providers.
 4. Open `/admin`; access depends on role in session user profile.
 5. Use `/forgot-password` and `/reset-password` for password recovery.
+6. For local host-split testing, use:
+   - storefront: `http://storefront.lvh.me:3000` (manual dev)
+   - admin: `http://admin.lvh.me:3000` (manual dev)
+   - Playwright E2E defaults to port `3000`.
 
 ## How it works
 
@@ -25,6 +29,8 @@ The platform needs real authentication with role-based authorization so admin op
 - Credentials provider validates password hash and verified-email state.
 - Session strategy is JWT-backed with rotating refresh sessions in D1.
 - Admin route pages and server actions enforce permission checks from session role.
+- Runtime env resolution gives precedence to process env overrides to keep local/E2E host routing deterministic.
+- Split-host setups use shared parent-domain cookie scope when possible (for example `storefront.*` and `admin.*`), enabling authenticated continuity across subdomains.
 
 ## Why this approach
 
@@ -42,9 +48,9 @@ The platform needs real authentication with role-based authorization so admin op
 ## Data contracts or schemas involved
 
 - Auth tables:
-  - `user`, `account`, `session`, `verificationToken`, `passwordResetToken`
+  - `user`, `account`, `authRefreshSession`, `verificationToken`, `passwordResetToken`
 - Session user contract:
-  - `id`, `email`, `role`, `emailVerified`
+  - `id`, `email`, `role`, `emailVerified`, `sid`, `authenticatedAt`
 - Role/permission model from `@base-ecommerce/domain`.
 
 ## Failure modes and edge cases
@@ -58,6 +64,7 @@ The platform needs real authentication with role-based authorization so admin op
 
 - Validation and permission errors surface explicit messages.
 - Auth provider flags are environment-driven and visible in login UI state.
+- E2E login helper asserts final host belongs to local allowed hosts to detect accidental production-domain redirects early.
 
 ## Security considerations
 

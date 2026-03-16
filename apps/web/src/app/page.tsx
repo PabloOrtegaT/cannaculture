@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@base-ecommerce/ui";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ProductCard } from "@/components/storefront/product-card";
+import { isAdminRole } from "@/server/admin/role-guard";
 import { getSessionUser } from "@/server/auth/session";
 import { getHomeContent, listCatalogProducts } from "@/server/data/storefront-service";
 
@@ -15,6 +16,7 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const user = await getSessionUser();
+  const canOpenAdmin = Boolean(user && isAdminRole(user.role));
   const home = getHomeContent();
   const catalogProducts = listCatalogProducts();
 
@@ -31,9 +33,11 @@ export default async function HomePage() {
             <Button asChild>
               <Link href="/catalog">Explore catalog</Link>
             </Button>
-            <Button asChild variant="outline">
-              <Link href="/admin">Admin snapshot</Link>
-            </Button>
+            {canOpenAdmin && (
+              <Button asChild variant="outline">
+                <Link href="/admin">Admin snapshot</Link>
+              </Button>
+            )}
             <Button asChild variant="outline">
               <Link href={user ? "/account" : "/login"}>{user ? "My account" : "Login"}</Link>
             </Button>

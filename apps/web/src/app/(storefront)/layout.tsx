@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { resolveHostPolicy } from "@/server/config/host-policy";
-import { getHostRuntimeConfig } from "@/server/config/runtime-env";
+import { isAdminRole } from "@/server/admin/role-guard";
 import { getSessionUser } from "@/server/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -12,13 +11,7 @@ export default async function StorefrontLayout({
   children: React.ReactNode;
 }>) {
   const user = await getSessionUser();
-  const hostConfig = getHostRuntimeConfig();
-  const hostPolicy = resolveHostPolicy({
-    appBaseUrl: hostConfig.appBaseUrl,
-    adminBaseUrl: hostConfig.adminBaseUrl,
-  });
-  const adminHostSplitEnabled = Boolean(hostPolicy.adminHost && hostPolicy.appHost && hostPolicy.adminHost !== hostPolicy.appHost);
-  const adminHref = adminHostSplitEnabled ? `${hostPolicy.adminBaseUrl}/admin` : "/admin";
+  const canOpenAdmin = Boolean(user && isAdminRole(user.role));
 
   return (
     <div className="min-h-screen bg-background">
@@ -49,9 +42,11 @@ export default async function StorefrontLayout({
                   Login
                 </Link>
               )}
-              <Link href={adminHref} className="hover:underline">
-                Admin
-              </Link>
+              {canOpenAdmin && (
+                <Link href="/admin" className="hover:underline">
+                  Admin
+                </Link>
+              )}
             </nav>
             <ThemeToggle />
           </div>

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { forbidden, redirect } from "next/navigation";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { canAccessAdminRoute, type AdminRouteKey } from "@/server/admin/role-guard";
-import { getAdminRole } from "@/server/admin/session";
+import { canAccessAdminRoute, type AdminRouteKey, assertAdminHostAccess, isAdminRole } from "@/server/admin/role-guard";
+import { getSessionUser } from "@/server/auth/session";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +19,16 @@ export default async function AdminLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const role = await getAdminRole();
-  if (!role) {
+  await assertAdminHostAccess();
+  const user = await getSessionUser();
+  if (!user) {
     redirect("/login?next=/admin");
   }
+  if (!isAdminRole(user.role)) {
+    forbidden();
+  }
+
+  const role = user.role;
 
   return (
     <div className="min-h-screen bg-muted">

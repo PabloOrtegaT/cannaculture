@@ -7,7 +7,7 @@
     "build": "node ./scripts/run-next.mjs build",
     "start": "node ./scripts/run-next.mjs start",
     "cf:preflight": "node ./scripts/check-d1-config.mjs",
-    "cf:build": "opennextjs-cloudflare build",
+    "cf:build": "node ./scripts/clean-opennext-build.mjs && opennextjs-cloudflare build",
     "preview": "npm run cf:build && opennextjs-cloudflare preview",
     "deploy": "npm run cf:preflight && npm run cf:build && opennextjs-cloudflare deploy",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",

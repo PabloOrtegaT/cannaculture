@@ -28,7 +28,7 @@ export default defineConfig({
       NEXTAUTH_URL: nextAuthBaseUrl,
       ADMIN_REQUIRE_CF_ACCESS: process.env.ADMIN_REQUIRE_CF_ACCESS ?? "false",
       PORT: process.env.PORT ?? localPort,
-      STORE_PROFILE: process.env.STORE_PROFILE ?? "prints-3d",
+      STORE_PROFILE: process.env.STORE_PROFILE ?? "pc-components",
       AUTH_SECRET: process.env.AUTH_SECRET ?? "playwright-auth-secret-please-change",
       AUTH_REFRESH_TOKEN_SECRET: process.env.AUTH_REFRESH_TOKEN_SECRET ?? "playwright-refresh-secret-please-change",
     },

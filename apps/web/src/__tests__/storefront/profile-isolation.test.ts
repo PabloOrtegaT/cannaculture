@@ -23,7 +23,7 @@ describe("storefront profile isolation", () => {
 
     const categories = listCategories();
     expect(categories).toHaveLength(1);
-    expect(categories[0]?.templateKey).toBe("plant-seeds");
+    expect(categories[0]?.templateKey).toBe("pc-components");
   });
 
   it.each<StoreProfile>(["prints-3d", "pc-components", "plant-seeds"])(

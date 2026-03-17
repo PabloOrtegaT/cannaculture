@@ -3,7 +3,7 @@ import { categoryTemplateKeySchema, type CategoryTemplateKey } from "../catalog/
 export const storeProfileSchema = categoryTemplateKeySchema;
 export type StoreProfile = CategoryTemplateKey;
 
-export const defaultStoreProfile: StoreProfile = "plant-seeds";
+export const defaultStoreProfile: StoreProfile = "pc-components";
 
 export function resolveStoreProfile(input?: string | null): StoreProfile {
   if (!input) {

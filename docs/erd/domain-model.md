@@ -112,4 +112,4 @@ Each set uses typed attributes (`string`, `number`, `boolean`, `enum`) validated
   - `prints-3d`
   - `pc-components`
   - `plant-seeds`
-- Default profile for local/dev fallback: `plant-seeds`.
+- Default profile for local/dev fallback: `pc-components`.

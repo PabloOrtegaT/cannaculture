@@ -21,6 +21,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
+    "test:coverage:target": "node ./scripts/report-coverage-target.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
   },

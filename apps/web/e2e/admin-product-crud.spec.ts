@@ -29,4 +29,26 @@ test("admin product create and edit flow", async ({ page }) => {
   await editForm.getByRole("button", { name: "Save product changes" }).click();
 
   await expect(page.locator("tr", { hasText: updatedName }).first()).toBeVisible();
+  await expect(page.getByTestId("flash-toast")).toContainText("Product updated");
+
+  const variantRowLocator = () => page.locator("tr", { hasText: updatedName }).filter({ hasText: "Default" }).first();
+
+  await variantRowLocator().getByRole("link", { name: "Edit" }).click();
+  const editVariantForm = page.getByRole("heading", { name: "Edit variant" });
+  await expect(editVariantForm).toBeVisible();
+  await expect(page.getByText("Current stock: 8")).toBeVisible();
+  await page.getByLabel("Stock mode").selectOption("adjust");
+  await page.getByLabel("Stock value").fill("2");
+  await page.getByRole("button", { name: "Save variant changes" }).click();
+  await expect(page.getByTestId("flash-toast")).toContainText("Variant updated");
+
+  await variantRowLocator().getByRole("link", { name: "Edit" }).click();
+  await expect(page.getByText("Current stock: 10")).toBeVisible();
+  await page.getByLabel("Stock mode").selectOption("set");
+  await page.getByLabel("Stock value").fill("4");
+  await page.getByRole("button", { name: "Save variant changes" }).click();
+  await expect(page.getByTestId("flash-toast")).toContainText("Variant updated");
+
+  await variantRowLocator().getByRole("link", { name: "Edit" }).click();
+  await expect(page.getByText("Current stock: 4")).toBeVisible();
 });

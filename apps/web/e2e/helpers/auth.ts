@@ -55,7 +55,7 @@ function buildLoginUrl(nextPath: string) {
 }
 
 export async function loginAsSeedOwner(page: Page, options: LoginOptions = {}) {
-  const nextPath = options.nextPath ?? "/auth/sync-cart";
+  const nextPath = options.nextPath ?? "/auth/sync-cart?next=%2Fcart";
   await page.goto(buildLoginUrl(nextPath));
   await page.getByLabel("Email").fill("owner@base-ecommerce.local");
   await page.getByLabel("Password").fill("ChangeMe123!");

@@ -7,8 +7,22 @@ export default defineConfig({
     setupFiles: ["./src/test/setup.ts"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "html"],
+      reporter: ["text", "html", "json-summary"],
       reportsDirectory: "./coverage",
+      include: [
+        "src/app/api/**/route.ts",
+        "src/app/(admin)/admin/actions.ts",
+        "src/server/admin/mutation-errors.ts",
+        "src/server/admin/role-guard.ts",
+        "src/server/admin/stock-mode.ts",
+        "src/server/config/host-policy.ts",
+      ],
+      thresholds: {
+        lines: 90,
+        branches: 90,
+        functions: 90,
+        statements: 90,
+      },
     },
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
   },

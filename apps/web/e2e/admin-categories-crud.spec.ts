@@ -24,4 +24,10 @@ test("admin category create and edit flow", async ({ page }) => {
   await editForm.getByRole("button", { name: "Save category changes" }).click();
 
   await expect(page.locator("tr", { hasText: updatedName }).first()).toBeVisible();
+  await expect(page.getByTestId("flash-toast")).toContainText("Category updated");
+
+  await page.locator("tr", { hasText: updatedName }).first().getByRole("link", { name: "Edit" }).click();
+  await editForm.getByLabel("Slug").fill("--");
+  await editForm.getByRole("button", { name: "Save category changes" }).click();
+  await expect(page.getByTestId("flash-toast")).toContainText("slug");
 });

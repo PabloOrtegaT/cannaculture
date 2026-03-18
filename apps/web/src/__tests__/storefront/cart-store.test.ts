@@ -3,34 +3,38 @@ import { emptyCartState } from "@/features/cart/cart";
 import { emptyCartMergeSummary } from "@/features/cart/merge-summary";
 import { useCartStore } from "@/features/cart/cart-store";
 
+const sampleItem = {
+  productId: "p1",
+  variantId: "v1",
+  name: "Product One",
+  variantName: "Default",
+  href: "/catalog/category/product-one",
+  currency: "MXN",
+  unitPriceCents: 2000,
+  stockOnHand: 10,
+} as const;
+
 describe("zustand cart store", () => {
   beforeEach(() => {
     window.localStorage.clear();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+      }),
+    );
+    useCartStore.getState().hydrateCart(emptyCartState);
     useCartStore.setState({
-      cart: emptyCartState,
       mergeSummary: emptyCartMergeSummary,
       lastSyncSummary: emptyCartMergeSummary,
-      syncStatus: "idle",
-      syncError: null,
-      pendingVariantIds: [],
     });
   });
 
   it("adds item and persists cart", () => {
-    useCartStore.getState().addItem(
-      {
-        productId: "p1",
-        variantId: "v1",
-        name: "Product One",
-        variantName: "Default",
-        href: "/catalog/category/product-one",
-        currency: "MXN",
-        unitPriceCents: 2000,
-        stockOnHand: 10,
-      },
-      1,
-    );
+    useCartStore.getState().addItem(sampleItem, 1);
 
     expect(useCartStore.getState().cart.items[0]?.variantId).toBe("v1");
     expect(window.localStorage.getItem("base-ecommerce-cart")).toContain("\"variantId\":\"v1\"");
@@ -73,19 +77,7 @@ describe("zustand cart store", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    useCartStore.getState().addItem(
-      {
-        productId: "p1",
-        variantId: "v1",
-        name: "Product One",
-        variantName: "Default",
-        href: "/catalog/category/product-one",
-        currency: "MXN",
-        unitPriceCents: 2000,
-        stockOnHand: 10,
-      },
-      1,
-    );
+    useCartStore.getState().addItem(sampleItem, 1);
 
     useCartStore.getState().updateQuantity("v1", 3);
 
@@ -97,6 +89,140 @@ describe("zustand cart store", () => {
       expect(useCartStore.getState().cart.items[0]?.quantity).toBe(3);
       expect(useCartStore.getState().pendingVariantIds).toHaveLength(0);
       expect(useCartStore.getState().syncStatus).toBe("idle");
+    });
+  });
+
+  it("skips sync error state for unauthorized server responses", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    useCartStore.getState().addItem(sampleItem, 1);
+
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(useCartStore.getState().pendingVariantIds).toHaveLength(0);
+      expect(useCartStore.getState().syncError).toBeNull();
+      expect(useCartStore.getState().syncStatus).toBe("idle");
+    });
+  });
+
+  it("surfaces sync errors and recovers on next successful write", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          cart: {
+            items: [
+              {
+                ...sampleItem,
+                quantity: 2,
+              },
+            ],
+          },
+          summary: emptyCartMergeSummary,
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    useCartStore.getState().addItem(sampleItem, 1);
+
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(useCartStore.getState().syncStatus).toBe("error");
+      expect(useCartStore.getState().syncError).toContain("Could not sync cart");
+    });
+
+    useCartStore.getState().updateQuantity("v1", 2);
+
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(useCartStore.getState().syncStatus).toBe("idle");
+      expect(useCartStore.getState().syncError).toBeNull();
+      expect(useCartStore.getState().cart.items[0]?.quantity).toBe(2);
+    });
+  });
+
+  it("syncs replaceCart and clearCart snapshots to server", async () => {
+    const fetchMock = vi.fn(async (_url: unknown, init?: { body?: unknown }) => {
+      const body = typeof init?.body === "string" ? JSON.parse(init.body) : { items: [] };
+      return {
+        ok: true,
+        json: async () => ({
+          cart: body,
+          summary: emptyCartMergeSummary,
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    useCartStore.getState().replaceCart({
+      items: [
+        { ...sampleItem, quantity: 1 },
+        {
+          ...sampleItem,
+          productId: "p2",
+          variantId: "v2",
+          name: "Product Two",
+          quantity: 2,
+        },
+      ],
+    });
+
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(useCartStore.getState().cart.items).toHaveLength(2);
+    });
+
+    useCartStore.getState().clearCart();
+
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(useCartStore.getState().cart.items).toHaveLength(0);
+      expect(window.localStorage.getItem("base-ecommerce-cart")).toContain("\"items\":[]");
+    });
+  });
+
+  it("handles removeItem and ignores empty variant ids while queuing sync", async () => {
+    const fetchMock = vi.fn(async (_url: unknown, init?: { body?: unknown }) => {
+      const body = typeof init?.body === "string" ? JSON.parse(init.body) : { items: [] };
+      return {
+        ok: true,
+        json: async () => ({
+          cart: body,
+          summary: emptyCartMergeSummary,
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    useCartStore.getState().replaceCart({
+      items: [
+        { ...sampleItem, quantity: 1 },
+        {
+          ...sampleItem,
+          variantId: "",
+          quantity: 1,
+        },
+      ],
+    });
+
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    useCartStore.getState().removeItem("v1");
+
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(useCartStore.getState().cart.items.find((item) => item.variantId === "v1")).toBeUndefined();
     });
   });
 });

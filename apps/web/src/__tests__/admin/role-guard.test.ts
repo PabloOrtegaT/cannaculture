@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canAccessAdminPermission, canAccessAdminRoute, isAdminRole } from "@/server/admin/role-guard";
+import { canAccessAdminPermission, canAccessAdminRoute, isAdminRole, isValidAdminMutationOrigin } from "@/server/admin/role-guard";
 
 describe("admin route guards", () => {
   it("owner can access all admin routes", () => {
@@ -36,5 +36,12 @@ describe("admin route guards", () => {
     expect(canAccessAdminPermission("manager", "orders:write")).toBe(true);
     expect(canAccessAdminPermission("catalog", "orders:write")).toBe(false);
     expect(canAccessAdminPermission("catalog", "catalog:write")).toBe(false);
+  });
+
+  it("validates mutation origin host constraints for admin writes", () => {
+    expect(isValidAdminMutationOrigin("admin.spookynexus.com", "admin.spookynexus.com", "")).toBe(true);
+    expect(isValidAdminMutationOrigin("admin.spookynexus.com", "", "admin.spookynexus.com")).toBe(true);
+    expect(isValidAdminMutationOrigin("admin.spookynexus.com", "spookynexus.com", "admin.spookynexus.com")).toBe(false);
+    expect(isValidAdminMutationOrigin("admin.spookynexus.com", "", "spookynexus.com")).toBe(false);
   });
 });

@@ -1,23 +1,12 @@
 import Link from "next/link";
+import { StorefrontAuthLinks } from "@/components/auth/storefront-auth-links";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { isAdminRole } from "@/server/admin/role-guard";
-import { getSessionUser } from "@/server/auth/session";
-import { resolveAdminEntryHref } from "@/server/config/host-policy";
-import { getHostRuntimeConfig } from "@/server/config/runtime-env";
-
-export const dynamic = "force-dynamic";
 
 export default async function StorefrontLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getSessionUser();
-  const canOpenAdmin = Boolean(user && isAdminRole(user.role));
-  const hostConfig = getHostRuntimeConfig();
-  const adminHref = resolveAdminEntryHref(hostConfig.appBaseUrl, hostConfig.adminBaseUrl, "/admin");
-  const adminHrefIsAbsolute = adminHref.startsWith("http://") || adminHref.startsWith("https://");
-
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-6xl px-6 py-6">
@@ -33,31 +22,7 @@ export default async function StorefrontLayout({
               <Link href="/cart" className="hover:underline">
                 Cart
               </Link>
-              {user ? (
-                <>
-                  <Link href="/account" className="hover:underline">
-                    Account
-                  </Link>
-                  <Link href="/logout" className="hover:underline">
-                    Logout
-                  </Link>
-                </>
-              ) : (
-                <Link href="/login" className="hover:underline">
-                  Login
-                </Link>
-              )}
-              {canOpenAdmin && (
-                adminHrefIsAbsolute ? (
-                  <a href={adminHref} className="hover:underline">
-                    Admin
-                  </a>
-                ) : (
-                  <Link href={adminHref} className="hover:underline" prefetch={false}>
-                    Admin
-                  </Link>
-                )
-              )}
+              <StorefrontAuthLinks />
             </nav>
             <ThemeToggle />
           </div>

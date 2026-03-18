@@ -31,8 +31,8 @@ export function CartView({ authenticated }: CartViewProps) {
       if (!response.ok) {
         return;
       }
-      const payload = (await response.json()) as { cart: typeof cart };
-      hydrateCart(payload.cart);
+      const payload = (await response.json()) as { cart: typeof cart; version: number };
+      hydrateCart(payload.cart, { version: payload.version });
     };
 
     loadServerCart();

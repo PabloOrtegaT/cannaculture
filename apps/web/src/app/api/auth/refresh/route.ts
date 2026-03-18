@@ -3,8 +3,28 @@ import { readRefreshTokenForCurrentRequest, setRefreshCookie } from "@/server/au
 import { getRequestClientContext, resolveSurfaceFromRequest } from "@/server/auth/request-context";
 import { rotateRefreshSessionByToken } from "@/server/auth/refresh-sessions";
 import { normalizeHost } from "@/server/config/host-policy";
+import { trackWarn } from "@/server/observability/telemetry";
+import { enforceRateLimit, getClientIpFromRequest } from "@/server/security/rate-limit";
 
 export async function POST(request: Request) {
+  const clientIp = getClientIpFromRequest(request);
+  const rateLimit = enforceRateLimit({
+    key: `auth:refresh:${clientIp}`,
+    maxRequests: 120,
+    windowMs: 60_000,
+  });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many refresh attempts." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      },
+    );
+  }
+
   const surface = resolveSurfaceFromRequest(request);
   const token = await readRefreshTokenForCurrentRequest(surface);
   if (!token) {
@@ -13,6 +33,11 @@ export async function POST(request: Request) {
 
   const rotated = await rotateRefreshSessionByToken(token, getRequestClientContext(request));
   if (!rotated) {
+    trackWarn({
+      scope: "api.auth.refresh",
+      message: "invalid_or_expired_session",
+      metadata: { ip: clientIp, surface },
+    });
     return NextResponse.json({ error: "Invalid or expired refresh session." }, { status: 401 });
   }
 

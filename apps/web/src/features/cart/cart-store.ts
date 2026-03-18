@@ -16,6 +16,7 @@ type CartSyncStatus = "idle" | "syncing" | "error";
 
 type CartStoreState = {
   cart: CartState;
+  serverVersion: number | null;
   mergeSummary: CartMergeSummary;
   lastSyncSummary: CartMergeSummary;
   syncStatus: CartSyncStatus;
@@ -24,7 +25,7 @@ type CartStoreState = {
   addItem: (item: Omit<CartItem, "quantity">, quantity: number) => void;
   updateQuantity: (variantId: string, quantity: number) => void;
   removeItem: (variantId: string) => void;
-  hydrateCart: (cart: CartState) => void;
+  hydrateCart: (cart: CartState, options?: { version?: number | null }) => void;
   replaceCart: (cart: CartState) => void;
   applyMergeSummary: (summary: CartMergeSummary) => void;
   clearMergeSummary: () => void;
@@ -48,6 +49,15 @@ type ServerSyncResult =
       payload: {
         cart: CartState;
         summary: CartMergeSummary;
+        version: number;
+      };
+    }
+  | {
+      kind: "conflict";
+      payload: {
+        cart: CartState;
+        summary: CartMergeSummary;
+        version: number;
       };
     }
   | {
@@ -57,7 +67,7 @@ type ServerSyncResult =
       kind: "error";
     };
 
-async function persistCartToServer(cart: CartState) {
+async function persistCartToServer(cart: CartState, version: number | null) {
   if (typeof window === "undefined" || typeof fetch !== "function") {
     return { kind: "skip" } satisfies ServerSyncResult;
   }
@@ -70,11 +80,29 @@ async function persistCartToServer(cart: CartState) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(cart),
+      body: JSON.stringify({
+        cart,
+        ...(typeof version === "number" ? { version } : {}),
+      }),
     });
     if (!response.ok) {
       if (response.status === 401) {
         return { kind: "skip" } satisfies ServerSyncResult;
+      }
+      if (response.status === 409) {
+        const payload = (await response.json()) as {
+          cart: CartState;
+          version: number;
+          summary?: CartMergeSummary;
+        };
+        return {
+          kind: "conflict",
+          payload: {
+            cart: payload.cart,
+            summary: payload.summary ?? emptyCartMergeSummary,
+            version: payload.version,
+          },
+        } satisfies ServerSyncResult;
       }
       return { kind: "error" } satisfies ServerSyncResult;
     }
@@ -82,6 +110,7 @@ async function persistCartToServer(cart: CartState) {
     const payload = (await response.json()) as {
       cart: CartState;
       summary: CartMergeSummary;
+      version: number;
     };
     return { kind: "ok", payload } satisfies ServerSyncResult;
   } catch {
@@ -92,7 +121,10 @@ async function persistCartToServer(cart: CartState) {
 
 export const useCartStore = create<CartStoreState>((set, get) => {
   let syncInFlight = false;
-  let queuedSnapshot: CartState | null = null;
+  let queuedSnapshot: {
+    cart: CartState;
+    version: number | null;
+  } | null = null;
   const queuedVariantIds = new Set<string>();
   const pendingVariantIds = new Set<string>();
 
@@ -117,7 +149,7 @@ export const useCartStore = create<CartStoreState>((set, get) => {
     queuedVariantIds.clear();
     syncViewState();
 
-    const result = await persistCartToServer(snapshot);
+    const result = await persistCartToServer(snapshot.cart, snapshot.version);
 
     for (const variantId of inFlightVariantIds) {
       if (!queuedVariantIds.has(variantId)) {
@@ -129,11 +161,30 @@ export const useCartStore = create<CartStoreState>((set, get) => {
       set({
         syncError: "Could not sync cart with server. Changes will retry on the next update.",
       });
+    } else if (result.kind === "conflict") {
+      persistCart(result.payload.cart);
+      set({
+        cart: result.payload.cart,
+        serverVersion: result.payload.version,
+        lastSyncSummary: result.payload.summary,
+        syncError: null,
+      });
+      queuedSnapshot = {
+        cart: snapshot.cart,
+        version: result.payload.version,
+      };
+      for (const variantId of inFlightVariantIds) {
+        if (variantId) {
+          queuedVariantIds.add(variantId);
+          pendingVariantIds.add(variantId);
+        }
+      }
     } else if (result.kind === "ok") {
       const payload = result.payload;
       persistCart(payload.cart);
       set((state) => ({
         cart: payload.cart,
+        serverVersion: payload.version,
         lastSyncSummary: payload.summary,
         mergeSummary: payload.summary.messages.length > 0 ? payload.summary : state.mergeSummary,
         syncError: null,
@@ -151,7 +202,10 @@ export const useCartStore = create<CartStoreState>((set, get) => {
   };
 
   const enqueueSync = (cart: CartState, variantIds: string[]) => {
-    queuedSnapshot = cart;
+    queuedSnapshot = {
+      cart,
+      version: get().serverVersion,
+    };
     for (const variantId of variantIds) {
       if (!variantId) {
         continue;
@@ -166,6 +220,7 @@ export const useCartStore = create<CartStoreState>((set, get) => {
 
   return {
     cart: getInitialCartState(),
+    serverVersion: null,
     mergeSummary: emptyCartMergeSummary,
     lastSyncSummary: emptyCartMergeSummary,
     syncStatus: "idle",
@@ -189,13 +244,14 @@ export const useCartStore = create<CartStoreState>((set, get) => {
       set({ cart: next });
       enqueueSync(next, [variantId]);
     },
-    hydrateCart: (cart) => {
+    hydrateCart: (cart, options) => {
       queuedSnapshot = null;
       queuedVariantIds.clear();
       pendingVariantIds.clear();
       persistCart(cart);
       set({
         cart,
+        serverVersion: typeof options?.version === "number" ? options.version : null,
         pendingVariantIds: [],
         syncStatus: "idle",
         syncError: null,

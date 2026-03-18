@@ -25,7 +25,7 @@ describe("api/auth/forgot-password route", () => {
 
     const response = await POST(request);
 
-    expect(response.status).toBe(307);
+    expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("http://localhost:3000/forgot-password?error=invalid_input");
     expect(requestPasswordResetMock).not.toHaveBeenCalled();
   });
@@ -41,7 +41,7 @@ describe("api/auth/forgot-password route", () => {
     const response = await POST(request);
 
     expect(requestPasswordResetMock).toHaveBeenCalledWith("user@example.com", "http://localhost:3000");
-    expect(response.status).toBe(307);
+    expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("http://localhost:3000/forgot-password?sent=1");
   });
 });

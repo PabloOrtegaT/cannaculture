@@ -11,12 +11,12 @@ function nowDate() {
   return new Date();
 }
 
-async function getOrCreateCartId(userId: string) {
+async function getOrCreateCart(userId: string) {
   const db = getDb();
   const rows = await db.select().from(cartsTable).where(eq(cartsTable.userId, userId)).limit(1);
   const existing = rows[0];
   if (existing) {
-    return existing.id;
+    return existing;
   }
 
   const [created] = await db
@@ -32,7 +32,7 @@ async function getOrCreateCartId(userId: string) {
   if (!created) {
     throw new Error("Could not create cart.");
   }
-  return created.id;
+  return created;
 }
 
 function mapCartItemRowToCartItem(row: typeof cartItemsTable.$inferSelect): CartItem {
@@ -51,18 +51,64 @@ function mapCartItemRowToCartItem(row: typeof cartItemsTable.$inferSelect): Cart
 }
 
 export async function getUserCart(userId: string): Promise<CartState> {
+  const snapshot = await getUserCartSnapshot(userId);
+  return snapshot.cart;
+}
+
+export async function getUserCartSnapshot(userId: string): Promise<{
+  cart: CartState;
+  version: number;
+}> {
   const db = getDb();
-  const cartId = await getOrCreateCartId(userId);
-  const rows = await db.select().from(cartItemsTable).where(eq(cartItemsTable.cartId, cartId));
+  const cart = await getOrCreateCart(userId);
+  const rows = await db.select().from(cartItemsTable).where(eq(cartItemsTable.cartId, cart.id));
 
   return {
-    items: rows.map(mapCartItemRowToCartItem),
+    cart: {
+      items: rows.map(mapCartItemRowToCartItem),
+    },
+    version: cart.updatedAt.getTime(),
   };
 }
 
-export async function replaceUserCart(userId: string, cart: CartState) {
+export async function replaceUserCart(
+  userId: string,
+  cart: CartState,
+  options?: {
+    expectedVersion?: number;
+  },
+): Promise<
+  | {
+      ok: true;
+      version: number;
+    }
+  | {
+      ok: false;
+      reason: "version_conflict";
+      snapshot: {
+        cart: CartState;
+        version: number;
+      };
+    }
+> {
   const db = getDb();
-  const cartId = await getOrCreateCartId(userId);
+  const cartRow = await getOrCreateCart(userId);
+  const currentVersion = cartRow.updatedAt.getTime();
+  if (typeof options?.expectedVersion === "number" && options.expectedVersion !== currentVersion) {
+    const rows = await db.select().from(cartItemsTable).where(eq(cartItemsTable.cartId, cartRow.id));
+    return {
+      ok: false,
+      reason: "version_conflict",
+      snapshot: {
+        cart: {
+          items: rows.map(mapCartItemRowToCartItem),
+        },
+        version: currentVersion,
+      },
+    };
+  }
+
+  const cartId = cartRow.id;
   await db.delete(cartItemsTable).where(eq(cartItemsTable.cartId, cartId));
 
   if (cart.items.length > 0) {
@@ -102,12 +148,18 @@ export async function replaceUserCart(userId: string, cart: CartState) {
     }
   }
 
+  const now = nowDate();
   await db
     .update(cartsTable)
     .set({
-      updatedAt: nowDate(),
+      updatedAt: now,
     })
     .where(eq(cartsTable.id, cartId));
+
+  return {
+    ok: true,
+    version: now.getTime(),
+  };
 }
 
 export function resolveVariantFromActiveCatalog(variantId: string): VariantResolution {
@@ -177,6 +229,20 @@ export async function reconcileCartState(cart: CartState): Promise<{
   });
 }
 
+export async function reconcileCartStateAgainstServer(input: {
+  requestedCart: CartState;
+  serverCart: CartState;
+}): Promise<{
+  cart: CartState;
+  summary: CartMergeSummary;
+}> {
+  return mergeCartStates({
+    guestCart: input.requestedCart,
+    serverCart: input.serverCart,
+    resolveVariant: resolveVariantFromActiveCatalog,
+  });
+}
+
 export function getVariantAvailability(variantId: string) {
   const resolution = resolveVariantFromActiveCatalog(variantId);
   if (resolution.status === "available") {
@@ -198,15 +264,26 @@ export function getVariantAvailability(variantId: string) {
 export async function mergeGuestCartIntoUserCart(userId: string, guestCart: CartState): Promise<{
   cart: CartState;
   summary: CartMergeSummary;
+  version: number;
 }> {
-  const existing = await getUserCart(userId);
+  const existing = await getUserCartSnapshot(userId);
   const merged = await mergeCartStates({
     guestCart,
-    serverCart: existing,
+    serverCart: existing.cart,
     resolveVariant: resolveVariantFromActiveCatalog,
   });
-  await replaceUserCart(userId, merged.cart);
-  return merged;
+  const replaceResult = await replaceUserCart(userId, merged.cart);
+  if (!replaceResult.ok) {
+    return {
+      ...merged,
+      version: replaceResult.snapshot.version,
+    };
+  }
+
+  return {
+    ...merged,
+    version: replaceResult.version,
+  };
 }
 
 export async function getActiveUserCount() {

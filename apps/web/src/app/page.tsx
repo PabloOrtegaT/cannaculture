@@ -1,27 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@base-ecommerce/ui";
+import { HomeAuthActions } from "@/components/auth/home-auth-actions";
+import { JsonLdScript } from "@/components/seo/json-ld-script";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ProductCard } from "@/components/storefront/product-card";
-import { isAdminRole } from "@/server/admin/role-guard";
-import { getSessionUser } from "@/server/auth/session";
-import { resolveAdminEntryHref } from "@/server/config/host-policy";
-import { getHostRuntimeConfig } from "@/server/config/runtime-env";
 import { getHomeContent, listCatalogProducts } from "@/server/data/storefront-service";
+import { createPageMetadata } from "@/server/seo/metadata";
+import { buildArticleJsonLd } from "@/server/seo/structured-data";
 
-export const metadata: Metadata = {
-  title: "Base Ecommerce | News, Sales, and Featured Products",
+export const metadata: Metadata = createPageMetadata({
+  title: "News, Sales, and Featured Products",
   description: "Stay updated with latest news, active discounts, and featured products.",
-};
+  pathname: "/",
+  type: "website",
+});
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function HomePage() {
-  const user = await getSessionUser();
-  const canOpenAdmin = Boolean(user && isAdminRole(user.role));
-  const hostConfig = getHostRuntimeConfig();
-  const adminHref = resolveAdminEntryHref(hostConfig.appBaseUrl, hostConfig.adminBaseUrl, "/admin");
-  const adminHrefIsAbsolute = adminHref.startsWith("http://") || adminHref.startsWith("https://");
   const home = getHomeContent();
   const catalogProducts = listCatalogProducts();
 
@@ -38,20 +35,7 @@ export default async function HomePage() {
             <Button asChild>
               <Link href="/catalog">Explore catalog</Link>
             </Button>
-            {canOpenAdmin && (
-              <Button asChild variant="outline">
-                {adminHrefIsAbsolute ? (
-                  <a href={adminHref}>Admin snapshot</a>
-                ) : (
-                  <Link href={adminHref} prefetch={false}>
-                    Admin snapshot
-                  </Link>
-                )}
-              </Button>
-            )}
-            <Button asChild variant="outline">
-              <Link href={user ? "/account" : "/login"}>{user ? "My account" : "Login"}</Link>
-            </Button>
+            <HomeAuthActions />
             <ThemeToggle />
           </div>
         </section>
@@ -105,13 +89,24 @@ export default async function HomePage() {
           <h2 className="text-2xl font-semibold tracking-tight">News</h2>
           <div className="grid gap-3">
             {home.news.map((news) => (
-              <article key={news.id} className="rounded-lg border bg-card p-4 text-card-foreground">
+              <article id={`news-${news.id}`} key={news.id} className="rounded-lg border bg-card p-4 text-card-foreground">
                 <h3 className="font-medium">{news.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{news.summary}</p>
               </article>
             ))}
           </div>
         </section>
+
+        {home.news.map((news) => (
+          <JsonLdScript
+            key={`article-jsonld-${news.id}`}
+            value={buildArticleJsonLd({
+              headline: news.title,
+              description: news.summary,
+              pathname: `/#news-${news.id}`,
+            })}
+          />
+        ))}
       </div>
     </main>
   );

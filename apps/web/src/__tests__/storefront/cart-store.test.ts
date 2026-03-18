@@ -73,6 +73,7 @@ describe("zustand cart store", () => {
           ],
         },
         summary: emptyCartMergeSummary,
+        version: 1,
       }),
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -109,6 +110,41 @@ describe("zustand cart store", () => {
     });
   });
 
+  it("retries once after a version conflict and keeps latest cart intent", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 409,
+        json: async () => ({
+          cart: { items: [] },
+          summary: emptyCartMergeSummary,
+          version: 7,
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          cart: {
+            items: [{ ...sampleItem, quantity: 1 }],
+          },
+          summary: emptyCartMergeSummary,
+          version: 8,
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    useCartStore.getState().hydrateCart(emptyCartState, { version: 6 });
+    useCartStore.getState().addItem(sampleItem, 1);
+
+    await vi.waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(useCartStore.getState().cart.items[0]?.quantity).toBe(1);
+      expect(useCartStore.getState().serverVersion).toBe(8);
+      expect(useCartStore.getState().syncError).toBeNull();
+    });
+  });
+
   it("surfaces sync errors and recovers on next successful write", async () => {
     const fetchMock = vi
       .fn()
@@ -128,6 +164,7 @@ describe("zustand cart store", () => {
             ],
           },
           summary: emptyCartMergeSummary,
+          version: 2,
         }),
       });
     vi.stubGlobal("fetch", fetchMock);
@@ -152,12 +189,14 @@ describe("zustand cart store", () => {
 
   it("syncs replaceCart and clearCart snapshots to server", async () => {
     const fetchMock = vi.fn(async (_url: unknown, init?: { body?: unknown }) => {
-      const body = typeof init?.body === "string" ? JSON.parse(init.body) : { items: [] };
+      const payload = typeof init?.body === "string" ? JSON.parse(init.body) as { cart?: { items: unknown[] } } : {};
+      const cart = payload.cart ?? { items: [] };
       return {
         ok: true,
         json: async () => ({
-          cart: body,
+          cart,
           summary: emptyCartMergeSummary,
+          version: 3,
         }),
       };
     });
@@ -192,12 +231,14 @@ describe("zustand cart store", () => {
 
   it("handles removeItem and ignores empty variant ids while queuing sync", async () => {
     const fetchMock = vi.fn(async (_url: unknown, init?: { body?: unknown }) => {
-      const body = typeof init?.body === "string" ? JSON.parse(init.body) : { items: [] };
+      const payload = typeof init?.body === "string" ? JSON.parse(init.body) as { cart?: { items: unknown[] } } : {};
+      const cart = payload.cart ?? { items: [] };
       return {
         ok: true,
         json: async () => ({
-          cart: body,
+          cart,
           summary: emptyCartMergeSummary,
+          version: 4,
         }),
       };
     });

@@ -38,6 +38,7 @@ describe("api/cart/merge route", () => {
     mergeGuestCartIntoUserCartMock.mockResolvedValue({
       cart: { items: [] },
       summary: { mergedLines: [], adjustedLines: [], unavailableLines: [], messages: [] },
+      version: 1,
     });
   });
 
@@ -87,6 +88,7 @@ describe("api/cart/merge route", () => {
     const mergeResult = {
       cart: { items: [{ variantId: "variant-1", quantity: 1 }] },
       summary: { mergedLines: ["variant-1"], adjustedLines: [], unavailableLines: [], messages: [] },
+      version: 2,
     };
     mergeGuestCartIntoUserCartMock.mockResolvedValue(mergeResult);
 

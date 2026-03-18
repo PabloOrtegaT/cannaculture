@@ -31,7 +31,7 @@ describe("api/auth/register route", () => {
 
     const response = await POST(request);
 
-    expect(response.status).toBe(307);
+    expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("http://localhost:3000/register?error=invalid_input");
     expect(registerEmailPasswordUserMock).not.toHaveBeenCalled();
   });

@@ -1,8 +1,29 @@
 import { NextResponse } from "next/server";
+import { trackError, trackWarn } from "@/server/observability/telemetry";
+import { enforceRateLimit, getClientIpFromRequest } from "@/server/security/rate-limit";
 import { requestPasswordReset } from "@/server/auth/service";
 import { forgotPasswordInputSchema } from "@/server/auth/validation";
 
+function redirect303(request: Request, pathname: string) {
+  return NextResponse.redirect(new URL(pathname, request.url), { status: 303 });
+}
+
 export async function POST(request: Request) {
+  const clientIp = getClientIpFromRequest(request);
+  const rateLimit = enforceRateLimit({
+    key: `auth:forgot-password:${clientIp}`,
+    maxRequests: 12,
+    windowMs: 60_000,
+  });
+  if (!rateLimit.allowed) {
+    trackWarn({
+      scope: "api.auth.forgot-password",
+      message: "rate_limited",
+      metadata: { ip: clientIp, retryAfterSeconds: rateLimit.retryAfterSeconds },
+    });
+    return redirect303(request, "/forgot-password?error=rate_limited");
+  }
+
   const requestOrigin = new URL(request.url).origin;
   const formData = await request.formData();
   const payload = forgotPasswordInputSchema.safeParse({
@@ -10,9 +31,14 @@ export async function POST(request: Request) {
   });
 
   if (!payload.success) {
-    return NextResponse.redirect(new URL("/forgot-password?error=invalid_input", request.url));
+    return redirect303(request, "/forgot-password?error=invalid_input");
   }
 
-  await requestPasswordReset(payload.data.email, requestOrigin);
-  return NextResponse.redirect(new URL("/forgot-password?sent=1", request.url));
+  try {
+    await requestPasswordReset(payload.data.email, requestOrigin);
+    return redirect303(request, "/forgot-password?sent=1");
+  } catch (error) {
+    trackError("api.auth.forgot-password", error, { ip: clientIp });
+    return redirect303(request, "/forgot-password?error=request_failed");
+  }
 }

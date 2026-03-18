@@ -20,6 +20,7 @@ type MergeResponse = {
       unavailableReason?: string;
     }>;
   };
+  version: number;
   summary: {
     mergedLines: string[];
     adjustedLines: Array<{
@@ -84,9 +85,12 @@ export function CartSyncClient({ nextPath }: CartSyncClientProps) {
           return;
         }
 
-        const serverPayload = (await serverCartResponse.json()) as { cart: MergeResponse["cart"] };
+        const serverPayload = (await serverCartResponse.json()) as {
+          cart: MergeResponse["cart"];
+          version: number;
+        };
         if (guestCart.items.length === 0 || hasSameLineQuantities(guestCart, serverPayload.cart)) {
-          hydrateCart(serverPayload.cart);
+          hydrateCart(serverPayload.cart, { version: serverPayload.version });
           router.replace(destination);
           return;
         }
@@ -100,14 +104,14 @@ export function CartSyncClient({ nextPath }: CartSyncClientProps) {
         });
 
         if (!response.ok) {
-          hydrateCart(serverPayload.cart);
+          hydrateCart(serverPayload.cart, { version: serverPayload.version });
           setError("Could not sync cart. Redirecting...");
           window.setTimeout(() => router.replace(destination), 800);
           return;
         }
 
         const payload = (await response.json()) as MergeResponse;
-        hydrateCart(payload.cart);
+        hydrateCart(payload.cart, { version: payload.version });
         applyMergeSummary(payload.summary);
         router.replace(destination);
       } catch {

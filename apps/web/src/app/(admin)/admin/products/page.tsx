@@ -435,7 +435,7 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
               className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               required
             />
-            <div className="grid gap-2 sm:grid-cols-3">
+            <div className="grid gap-2 sm:grid-cols-4">
               <div>
                 <label className="block text-xs font-medium text-muted-foreground" htmlFor="edit-variant-price">
                   Price (cents)
@@ -464,20 +464,38 @@ export default async function AdminProductsPage({ searchParams }: AdminProductsP
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground" htmlFor="edit-variant-stock">
-                  Stock
+                <label className="block text-xs font-medium text-muted-foreground" htmlFor="edit-variant-stock-mode">
+                  Stock mode
+                </label>
+                <select
+                  id="edit-variant-stock-mode"
+                  name="stockMode"
+                  defaultValue="set"
+                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="set">Set exact stock</option>
+                  <option value="adjust">Adjust by delta (+/-)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground" htmlFor="edit-variant-stock-value">
+                  Stock value
                 </label>
                 <input
-                  id="edit-variant-stock"
+                  id="edit-variant-stock-value"
                   type="number"
-                  min={0}
-                  name="stockOnHand"
+                  name="stockValue"
                   defaultValue={selectedVariantForEdit.stockOnHand}
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                   required
                 />
               </div>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Current stock: <span className="font-medium text-foreground">{selectedVariantForEdit.stockOnHand}</span>. Use
+              <span className="font-medium"> set </span>to replace or
+              <span className="font-medium"> adjust </span>to add/remove units.
+            </p>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" name="isDefault" defaultChecked={selectedVariantForEdit.isDefault} />
               Set as default variant

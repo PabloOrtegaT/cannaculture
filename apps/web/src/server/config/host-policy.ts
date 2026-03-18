@@ -93,6 +93,19 @@ export function buildAbsoluteUrl(baseUrl: string, pathname: string, search = "")
   return url.toString();
 }
 
+export function resolveAdminEntryHref(appBaseUrl: string, adminBaseUrl: string, pathname = "/admin") {
+  const policy = resolveHostPolicy({
+    appBaseUrl,
+    adminBaseUrl,
+  });
+
+  if (!policy.adminHost || policy.adminHost === policy.appHost) {
+    return pathname;
+  }
+
+  return buildAbsoluteUrl(policy.adminBaseUrl, pathname);
+}
+
 export function isLocalDevelopmentHost(host: string) {
   const normalized = normalizeHost(host);
   return normalized === "localhost" || normalized === "127.0.0.1" || normalized.endsWith(".lvh.me");

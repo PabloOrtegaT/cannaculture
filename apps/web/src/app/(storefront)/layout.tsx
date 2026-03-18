@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { isAdminRole } from "@/server/admin/role-guard";
 import { getSessionUser } from "@/server/auth/session";
+import { resolveAdminEntryHref } from "@/server/config/host-policy";
+import { getHostRuntimeConfig } from "@/server/config/runtime-env";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,9 @@ export default async function StorefrontLayout({
 }>) {
   const user = await getSessionUser();
   const canOpenAdmin = Boolean(user && isAdminRole(user.role));
+  const hostConfig = getHostRuntimeConfig();
+  const adminHref = resolveAdminEntryHref(hostConfig.appBaseUrl, hostConfig.adminBaseUrl, "/admin");
+  const adminHrefIsAbsolute = adminHref.startsWith("http://") || adminHref.startsWith("https://");
 
   return (
     <div className="min-h-screen bg-background">
@@ -43,9 +48,15 @@ export default async function StorefrontLayout({
                 </Link>
               )}
               {canOpenAdmin && (
-                <Link href="/admin" className="hover:underline">
-                  Admin
-                </Link>
+                adminHrefIsAbsolute ? (
+                  <a href={adminHref} className="hover:underline">
+                    Admin
+                  </a>
+                ) : (
+                  <Link href={adminHref} className="hover:underline" prefetch={false}>
+                    Admin
+                  </Link>
+                )
               )}
             </nav>
             <ThemeToggle />

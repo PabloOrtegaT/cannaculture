@@ -39,6 +39,8 @@ import { formatCurrencyCents } from "@/features/admin/format";
 import { getActiveStoreProfile } from "@/server/config/store-profile";
 import { parseProductCsv } from "./csv-import";
 import { getProfileRuntimeStore } from "@/server/data/runtime-store";
+import { createAdminMutationError } from "./mutation-errors";
+import { resolveVariantStockOnHand, type AdminVariantStockMode } from "./stock-mode";
 
 function nowIso() {
   return new Date().toISOString();
@@ -132,12 +134,12 @@ export function updateAdminCategory(input: { id: string; name: string; slug: str
   const { profile, store } = getActiveProfileContext();
   const categoryIndex = store.categories.findIndex((category) => category.id === input.id);
   if (categoryIndex < 0) {
-    throw new Error("Category not found.");
+    throw createAdminMutationError("not_found", "Category not found.");
   }
 
   const currentCategory = store.categories[categoryIndex];
   if (!currentCategory) {
-    throw new Error("Category not found.");
+    throw createAdminMutationError("not_found", "Category not found.");
   }
 
   const existingSlugs = new Set(store.categories.filter((category) => category.id !== input.id).map((category) => category.slug));
@@ -359,7 +361,7 @@ export function createAdminProduct(input: {
   const { store, categoryById } = getActiveProfileContext();
   const category = categoryById.get(input.categoryId);
   if (!category) {
-    throw new Error("Category not found.");
+    throw createAdminMutationError("not_found", "Category not found.");
   }
 
   const existingProductSlugs = new Set(store.products.map((product) => product.slug));
@@ -435,16 +437,16 @@ export function updateAdminProduct(input: {
   const { store, categoryById } = getActiveProfileContext();
   const productIndex = store.products.findIndex((product) => product.id === input.id);
   if (productIndex < 0) {
-    throw new Error("Product not found.");
+    throw createAdminMutationError("not_found", "Product not found.");
   }
 
   const currentProduct = store.products[productIndex];
   if (!currentProduct) {
-    throw new Error("Product not found.");
+    throw createAdminMutationError("not_found", "Product not found.");
   }
   const category = categoryById.get(input.categoryId);
   if (!category) {
-    throw new Error("Category not found.");
+    throw createAdminMutationError("not_found", "Category not found.");
   }
 
   const existingSlugs = new Set(store.products.filter((product) => product.id !== currentProduct.id).map((product) => product.slug));
@@ -515,7 +517,7 @@ export function createAdminVariant(input: {
   const { store, productById } = getActiveProfileContext();
   const product = productById.get(input.productId);
   if (!product) {
-    throw new Error("Product not found.");
+    throw createAdminMutationError("not_found", "Product not found.");
   }
 
   const existingVariantSkus = new Set(store.variants.map((variant) => variant.sku));
@@ -563,21 +565,23 @@ export function updateAdminVariant(input: {
   name: string;
   priceCents: number;
   compareAtPriceCents?: number;
-  stockOnHand: number;
+  stockMode: AdminVariantStockMode;
+  stockValue: number;
   isDefault: boolean;
 }) {
   const { store } = getActiveProfileContext();
   const variantIndex = store.variants.findIndex((variant) => variant.id === input.id);
   if (variantIndex < 0) {
-    throw new Error("Variant not found.");
+    throw createAdminMutationError("not_found", "Variant not found.");
   }
 
   const currentVariant = store.variants[variantIndex];
   if (!currentVariant) {
-    throw new Error("Variant not found.");
+    throw createAdminMutationError("not_found", "Variant not found.");
   }
   const existingSkus = new Set(store.variants.filter((variant) => variant.id !== currentVariant.id).map((variant) => variant.sku));
   const nextSku = ensureUniqueText(normalizeSku(input.sku), existingSkus);
+  const nextStockOnHand = resolveVariantStockOnHand(currentVariant.stockOnHand, input.stockMode, input.stockValue);
 
   updateVariantInputSchema.parse({
     id: currentVariant.id,
@@ -585,7 +589,7 @@ export function updateAdminVariant(input: {
     name: input.name,
     priceCents: input.priceCents,
     ...(typeof input.compareAtPriceCents === "number" ? { compareAtPriceCents: input.compareAtPriceCents } : {}),
-    stockOnHand: input.stockOnHand,
+    stockOnHand: nextStockOnHand,
     isDefault: input.isDefault,
   });
 
@@ -601,7 +605,7 @@ export function updateAdminVariant(input: {
     name: input.name.trim(),
     priceCents: input.priceCents,
     ...(typeof input.compareAtPriceCents === "number" ? { compareAtPriceCents: input.compareAtPriceCents } : { compareAtPriceCents: undefined }),
-    stockOnHand: input.stockOnHand,
+    stockOnHand: nextStockOnHand,
     isDefault: input.isDefault,
     updatedAt: nowIso(),
   });
@@ -649,12 +653,12 @@ export function setAdminNewsStatus(newsId: string, status: "draft" | "published"
   const { store } = getActiveProfileContext();
   const index = store.newsPosts.findIndex((news) => news.id === newsId);
   if (index < 0) {
-    throw new Error("News item not found.");
+    throw createAdminMutationError("not_found", "News item not found.");
   }
 
   const current = store.newsPosts[index];
   if (!current) {
-    throw new Error("News item not found.");
+    throw createAdminMutationError("not_found", "News item not found.");
   }
   const now = nowIso();
   store.newsPosts[index] = newsPostSchema.parse({
@@ -695,7 +699,7 @@ export function setAdminPromoBannerActive(bannerId: string, isActive: boolean) {
   const { store } = getActiveProfileContext();
   const index = store.promoBanners.findIndex((banner) => banner.id === bannerId);
   if (index < 0) {
-    throw new Error("Promo banner not found.");
+    throw createAdminMutationError("not_found", "Promo banner not found.");
   }
 
   store.promoBanners[index] = promoBannerSchema.parse({
@@ -732,7 +736,7 @@ export function setAdminFeaturedSaleActive(featuredSaleId: string, isActive: boo
   const { store } = getActiveProfileContext();
   const index = store.featuredSales.findIndex((featured) => featured.id === featuredSaleId);
   if (index < 0) {
-    throw new Error("Featured sale not found.");
+    throw createAdminMutationError("not_found", "Featured sale not found.");
   }
 
   store.featuredSales[index] = featuredSaleSchema.parse({
@@ -784,7 +788,7 @@ export function setAdminCouponActive(couponId: string, isActive: boolean) {
   const { store } = getActiveProfileContext();
   const index = store.coupons.findIndex((coupon) => coupon.id === couponId);
   if (index < 0) {
-    throw new Error("Coupon not found.");
+    throw createAdminMutationError("not_found", "Coupon not found.");
   }
 
   const currentCoupon = store.coupons[index];

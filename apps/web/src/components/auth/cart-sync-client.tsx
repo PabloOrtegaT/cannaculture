@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/features/cart/cart-store";
 import { readCartFromStorage } from "@/features/cart/storage";
@@ -35,14 +35,32 @@ type MergeResponse = {
   };
 };
 
-export function CartSyncClient() {
+type CartSyncClientProps = {
+  nextPath: string;
+};
+
+function normalizeNextPath(rawPath: string) {
+  if (rawPath.startsWith("/")) {
+    return rawPath;
+  }
+  return "/";
+}
+
+export function CartSyncClient({ nextPath }: CartSyncClientProps) {
   const router = useRouter();
   const hydrateCart = useCartStore((state) => state.hydrateCart);
   const applyMergeSummary = useCartStore((state) => state.applyMergeSummary);
   const [error, setError] = useState<string | null>(null);
   const guestCart = useMemo(() => readCartFromStorage(), []);
+  const destination = useMemo(() => normalizeNextPath(nextPath), [nextPath]);
+  const hasStarted = useRef(false);
 
   useEffect(() => {
+    if (hasStarted.current) {
+      return;
+    }
+    hasStarted.current = true;
+
     const hasSameLineQuantities = (left: MergeResponse["cart"], right: MergeResponse["cart"]) => {
       const leftByVariant = new Map(left.items.map((item) => [item.variantId, item.quantity]));
       const rightByVariant = new Map(right.items.map((item) => [item.variantId, item.quantity]));
@@ -61,14 +79,15 @@ export function CartSyncClient() {
       try {
         const serverCartResponse = await fetch("/api/cart", { method: "GET" });
         if (!serverCartResponse.ok) {
-          setError("Could not sync cart. You can continue and review your cart manually.");
+          setError("Could not sync cart. Redirecting...");
+          window.setTimeout(() => router.replace(destination), 800);
           return;
         }
 
         const serverPayload = (await serverCartResponse.json()) as { cart: MergeResponse["cart"] };
         if (guestCart.items.length === 0 || hasSameLineQuantities(guestCart, serverPayload.cart)) {
           hydrateCart(serverPayload.cart);
-          router.replace("/cart");
+          router.replace(destination);
           return;
         }
 
@@ -82,21 +101,23 @@ export function CartSyncClient() {
 
         if (!response.ok) {
           hydrateCart(serverPayload.cart);
-          setError("Could not sync cart. You can continue and review your cart manually.");
+          setError("Could not sync cart. Redirecting...");
+          window.setTimeout(() => router.replace(destination), 800);
           return;
         }
 
         const payload = (await response.json()) as MergeResponse;
         hydrateCart(payload.cart);
         applyMergeSummary(payload.summary);
-        router.replace("/cart");
+        router.replace(destination);
       } catch {
-        setError("Could not sync cart. You can continue and review your cart manually.");
+        setError("Could not sync cart. Redirecting...");
+        window.setTimeout(() => router.replace(destination), 800);
       }
     };
 
-    run();
-  }, [applyMergeSummary, guestCart, hydrateCart, router]);
+    void run();
+  }, [applyMergeSummary, destination, guestCart, hydrateCart, router]);
 
   if (error) {
     return (
@@ -105,7 +126,7 @@ export function CartSyncClient() {
         <button
           type="button"
           onClick={() => {
-            router.replace("/cart");
+            router.replace(destination);
           }}
           className="rounded-md border px-3 py-2 text-sm hover:bg-muted"
         >

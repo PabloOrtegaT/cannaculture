@@ -39,7 +39,7 @@ export function LoginForm({ callbackUrl, googleEnabled, facebookEnabled }: Login
         return;
       }
 
-      window.location.href = result.url ?? callbackUrl;
+      window.location.replace(callbackUrl);
     });
   };
 
@@ -104,4 +104,3 @@ export function LoginForm({ callbackUrl, googleEnabled, facebookEnabled }: Login
     </div>
   );
 }
-

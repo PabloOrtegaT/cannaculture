@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/login-form";
-import { buildAbsoluteUrl, isAdminPath, resolveHostPolicy } from "@/server/config/host-policy";
-import { getHostRuntimeConfig, getOAuthProviderFlags } from "@/server/config/runtime-env";
+import { getOAuthProviderFlags } from "@/server/config/runtime-env";
 
 export const metadata: Metadata = {
   title: "Login | Base Ecommerce",
@@ -21,16 +20,9 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = (await searchParams) ?? {};
   const providerFlags = getOAuthProviderFlags();
-  const nextPath = params.next && params.next.startsWith("/") ? params.next : "/auth/sync-cart";
-  const hostConfig = getHostRuntimeConfig();
-  const hostPolicy = resolveHostPolicy({
-    appBaseUrl: hostConfig.appBaseUrl,
-    adminBaseUrl: hostConfig.adminBaseUrl,
-  });
+  const nextPath = params.next && params.next.startsWith("/") ? params.next : "/auth/sync-cart?next=%2F";
   const afterLoginPath = `/auth/after-login?next=${encodeURIComponent(nextPath)}`;
-  const adminHostSplitEnabled = Boolean(hostPolicy.adminHost && hostPolicy.appHost && hostPolicy.adminHost !== hostPolicy.appHost);
-  const callbackUrl =
-    isAdminPath(nextPath) && adminHostSplitEnabled ? buildAbsoluteUrl(hostPolicy.adminBaseUrl, afterLoginPath) : afterLoginPath;
+  const callbackUrl = afterLoginPath;
 
   return (
     <main className="mx-auto w-full max-w-lg space-y-4 px-6 py-10">

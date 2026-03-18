@@ -62,9 +62,24 @@ export function getAuthRuntimeConfig() {
 }
 
 export function getHostRuntimeConfig() {
+  const isDev = process.env.NODE_ENV === "development" || process.env.NEXTJS_ENV === "development";
   const env = getRuntimeEnvironment();
-  const appBaseUrl = env.APP_BASE_URL ?? "http://127.0.0.1:3000";
-  const adminBaseUrl = env.ADMIN_BASE_URL ?? appBaseUrl;
+
+  // In development, only use APP_BASE_URL/ADMIN_BASE_URL if they were set
+  // explicitly by the developer in process.env (via .env.local or .dev.vars),
+  // not when they leak from the wrangler.jsonc vars section through the
+  // Cloudflare context. The wrangler vars contain production URLs that must
+  // not be used in local development.
+  const explicitAppBaseUrl = process.env.APP_BASE_URL;
+  const explicitAdminBaseUrl = process.env.ADMIN_BASE_URL;
+
+  const appBaseUrl = isDev
+    ? (explicitAppBaseUrl ?? "http://127.0.0.1:3000")
+    : (env.APP_BASE_URL ?? "http://127.0.0.1:3000");
+  const adminBaseUrl = isDev
+    ? (explicitAdminBaseUrl ?? appBaseUrl)
+    : (env.ADMIN_BASE_URL ?? appBaseUrl);
+
   return {
     appBaseUrl,
     adminBaseUrl,

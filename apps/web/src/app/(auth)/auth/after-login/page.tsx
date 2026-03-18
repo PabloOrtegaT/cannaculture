@@ -10,7 +10,7 @@ type AfterLoginPageProps = {
 
 function normalizeNextPath(input?: string) {
   if (!input || !input.startsWith("/")) {
-    return "/auth/sync-cart";
+    return "/auth/sync-cart?next=%2F";
   }
   return input;
 }

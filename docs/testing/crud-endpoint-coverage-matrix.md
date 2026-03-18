@@ -15,7 +15,8 @@
 | `/api/auth/sessions` | `GET` | yes | yes | n/a | n/a |
 | `/api/auth/sessions/[id]` | `DELETE` | yes | yes | n/a | yes |
 | `/api/auth/verify` | `GET` | yes | n/a | yes | service-driven redirect |
-| `/api/cart` | `GET`, `POST` | yes | yes | yes | n/a |
+| `/api/auth/viewer` | `GET` | yes | n/a | n/a | n/a |
+| `/api/cart` | `GET`, `POST` | yes | yes | yes | yes (`409` version conflict) |
 | `/api/cart/merge` | `POST` | yes | yes | yes | n/a |
 | `/api/catalog/availability` | `GET` | yes | n/a | yes | n/a |
 

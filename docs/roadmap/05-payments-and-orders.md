@@ -4,6 +4,18 @@
 
 Implement customer identity flows and reliable checkout with cart continuity, order lifecycle, and payment event handling.
 
+## Phase status
+
+- Phase 1 (implemented):
+  - Identity lifecycle (email/password + OAuth flags), JWT + rotating refresh sessions.
+  - RBAC/session guard boundaries for admin.
+  - Guest/authenticated cart sync, merge summary, coalesced writes, stock reconciliation.
+- Phase 2 (next):
+  - Checkout session creation, provider adapters (card-first + optional methods), coupon totals in checkout pipeline.
+  - Orders persistence and status timeline wiring.
+- Phase 3 (next):
+  - Webhook idempotency, risk/review workflow, payments operations hardening and telemetry.
+
 ## Scope
 
 - Customer authentication:

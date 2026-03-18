@@ -28,6 +28,8 @@ The platform needs real authentication with role-based authorization so admin op
 - Auth.js (`next-auth`) uses Drizzle adapter + D1-backed tables.
 - Credentials provider validates password hash and verified-email state.
 - Session strategy is JWT-backed with rotating refresh sessions in D1.
+- Credential form routes (`register`, `forgot-password`, `reset-password`) use explicit `303` Post/Redirect/Get behavior.
+- Storefront UI role visibility uses `/api/auth/viewer` instead of forcing full-page dynamic rendering.
 - Admin route pages and server actions enforce permission checks from session role.
 - Admin write actions enforce recent-auth window (`8h`) and split-host origin/referrer checks.
 - Runtime env resolution gives precedence to process env overrides to keep local/E2E host routing deterministic.
@@ -52,6 +54,8 @@ The platform needs real authentication with role-based authorization so admin op
   - `user`, `account`, `authRefreshSession`, `verificationToken`, `passwordResetToken`
 - Session user contract:
   - `id`, `email`, `role`, `emailVerified`, `sid`, `authenticatedAt`
+- Viewer route contract:
+  - `GET /api/auth/viewer` -> `{ authenticated, email?, role?, isAdmin? }`
 - Role/permission model from `@base-ecommerce/domain`.
 
 ## Failure modes and edge cases

@@ -19,18 +19,23 @@ import {
   updateAdminProduct,
   updateAdminVariant,
 } from "@/server/admin/admin-service";
+import { logAdminAuditEvent } from "@/server/admin/audit-log";
 import { createAdminMutationError, mapAdminMutationError } from "@/server/admin/mutation-errors";
 import { ensurePermission } from "@/server/admin/role-guard";
 import type { AdminVariantStockMode } from "@/server/admin/stock-mode";
+import { getSessionUser } from "@/server/auth/session";
 import { setFlashToast } from "@/server/feedback/flash-toast";
 
 type MutationConfig = {
+  action: string;
   successMessage: string;
   redirectPath: string;
   run: () => void | Promise<void>;
 };
 
 async function runAdminMutation(config: MutationConfig) {
+  const actor = await getSessionUser().catch(() => null);
+
   try {
     await config.run();
     revalidateAdminAndStorefrontPaths();
@@ -39,10 +44,26 @@ async function runAdminMutation(config: MutationConfig) {
       code: "success",
       message: config.successMessage,
     });
+    logAdminAuditEvent({
+      action: config.action,
+      outcome: "success",
+      actorId: actor?.id ?? null,
+      actorRole: actor?.role ?? null,
+      code: "success",
+      message: config.successMessage,
+    });
   } catch (error) {
     const feedback = mapAdminMutationError(error);
     await setFlashToast({
       type: "error",
+      code: feedback.code,
+      message: feedback.message,
+    });
+    logAdminAuditEvent({
+      action: config.action,
+      outcome: "failure",
+      actorId: actor?.id ?? null,
+      actorRole: actor?.role ?? null,
       code: feedback.code,
       message: feedback.message,
     });
@@ -125,6 +146,7 @@ function revalidateAdminAndStorefrontPaths() {
 
 export async function createCategoryAction(formData: FormData) {
   return runAdminMutation({
+    action: "category.create",
     redirectPath: "/admin/categories",
     successMessage: "Category created.",
     run: async () => {
@@ -142,6 +164,7 @@ export async function createCategoryAction(formData: FormData) {
 
 export async function updateCategoryAction(formData: FormData) {
   return runAdminMutation({
+    action: "category.update",
     redirectPath: "/admin/categories",
     successMessage: "Category updated.",
     run: async () => {
@@ -159,6 +182,7 @@ export async function updateCategoryAction(formData: FormData) {
 
 export async function createProductAction(formData: FormData) {
   return runAdminMutation({
+    action: "product.create",
     redirectPath: "/admin/products",
     successMessage: "Product created.",
     run: async () => {
@@ -184,6 +208,7 @@ export async function createProductAction(formData: FormData) {
 
 export async function updateProductAction(formData: FormData) {
   return runAdminMutation({
+    action: "product.update",
     redirectPath: "/admin/products",
     successMessage: "Product updated.",
     run: async () => {
@@ -209,6 +234,7 @@ export async function updateProductAction(formData: FormData) {
 
 export async function createVariantAction(formData: FormData) {
   return runAdminMutation({
+    action: "variant.create",
     redirectPath: "/admin/products",
     successMessage: "Variant created.",
     run: async () => {
@@ -229,6 +255,7 @@ export async function createVariantAction(formData: FormData) {
 
 export async function updateVariantAction(formData: FormData) {
   return runAdminMutation({
+    action: "variant.update",
     redirectPath: "/admin/products",
     successMessage: "Variant updated.",
     run: async () => {
@@ -250,6 +277,7 @@ export async function updateVariantAction(formData: FormData) {
 
 export async function createNewsPostAction(formData: FormData) {
   return runAdminMutation({
+    action: "news.create",
     redirectPath: "/admin/content",
     successMessage: "News post created.",
     run: async () => {
@@ -266,6 +294,7 @@ export async function createNewsPostAction(formData: FormData) {
 
 export async function setNewsStatusAction(formData: FormData) {
   return runAdminMutation({
+    action: "news.status",
     redirectPath: "/admin/content",
     successMessage: "News status updated.",
     run: async () => {
@@ -280,6 +309,7 @@ export async function setNewsStatusAction(formData: FormData) {
 
 export async function createPromoBannerAction(formData: FormData) {
   return runAdminMutation({
+    action: "banner.create",
     redirectPath: "/admin/content",
     successMessage: "Promo banner created.",
     run: async () => {
@@ -302,6 +332,7 @@ export async function createPromoBannerAction(formData: FormData) {
 
 export async function setPromoBannerActiveAction(formData: FormData) {
   return runAdminMutation({
+    action: "banner.status",
     redirectPath: "/admin/content",
     successMessage: "Promo banner status updated.",
     run: async () => {
@@ -313,6 +344,7 @@ export async function setPromoBannerActiveAction(formData: FormData) {
 
 export async function createFeaturedSaleAction(formData: FormData) {
   return runAdminMutation({
+    action: "featured.create",
     redirectPath: "/admin/content",
     successMessage: "Featured sale created.",
     run: async () => {
@@ -338,6 +370,7 @@ export async function createFeaturedSaleAction(formData: FormData) {
 
 export async function setFeaturedSaleActiveAction(formData: FormData) {
   return runAdminMutation({
+    action: "featured.status",
     redirectPath: "/admin/content",
     successMessage: "Featured sale status updated.",
     run: async () => {
@@ -349,6 +382,7 @@ export async function setFeaturedSaleActiveAction(formData: FormData) {
 
 export async function createCouponAction(formData: FormData) {
   return runAdminMutation({
+    action: "coupon.create",
     redirectPath: "/admin/coupons",
     successMessage: "Coupon created.",
     run: async () => {
@@ -374,6 +408,7 @@ export async function createCouponAction(formData: FormData) {
 
 export async function setCouponActiveAction(formData: FormData) {
   return runAdminMutation({
+    action: "coupon.status",
     redirectPath: "/admin/coupons",
     successMessage: "Coupon status updated.",
     run: async () => {
@@ -384,13 +419,30 @@ export async function setCouponActiveAction(formData: FormData) {
 }
 
 export async function importCatalogCsvAction(csvText: string) {
+  const actor = await getSessionUser().catch(() => null);
   try {
     await ensurePermission("catalog:write");
     const result = importAdminCatalogFromCsv(csvText);
     revalidateAdminAndStorefrontPaths();
+    logAdminAuditEvent({
+      action: "catalog.import_csv",
+      outcome: "success",
+      actorId: actor?.id ?? null,
+      actorRole: actor?.role ?? null,
+      code: "success",
+      message: `Imported ${result.importedProducts} product(s) with ${result.errors.length} row error(s).`,
+    });
     return result;
   } catch (error) {
     const feedback = mapAdminMutationError(error);
+    logAdminAuditEvent({
+      action: "catalog.import_csv",
+      outcome: "failure",
+      actorId: actor?.id ?? null,
+      actorRole: actor?.role ?? null,
+      code: feedback.code,
+      message: feedback.message,
+    });
     throw new Error(feedback.message);
   }
 }

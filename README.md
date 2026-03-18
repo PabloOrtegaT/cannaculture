@@ -64,14 +64,14 @@ npm run test:e2e
 
 Unit coverage gate policy:
 
-- `npm run test` enforces `90%` global thresholds (`lines`, `branches`, `functions`, `statements`) for endpoint and mutation-boundary modules:
+- `npm run test` enforces `90%` thresholds (`lines`, `branches`, `functions`, `statements`) on gated endpoint and mutation-boundary modules:
   - `src/app/api/**/route.ts`
   - `src/app/(admin)/admin/actions.ts`
   - `src/server/admin/mutation-errors.ts`
   - `src/server/admin/role-guard.ts`
   - `src/server/admin/stock-mode.ts`
   - `src/server/config/host-policy.ts`
-- `npm run test:coverage:target` prints a non-blocking stretch report for the `100%` target.
+- `npm run test:coverage:target` prints a non-blocking stretch report for the `100%` gated-scope target.
 
 E2E defaults:
 
@@ -128,6 +128,11 @@ npm run cf:deploy
 ```
 
 If deploy fails with `code: 10027` (`Worker exceeded the size limit of 3 MiB`), this is a Cloudflare plan limit, not an application runtime error. This repo enables Wrangler minification (`apps/web/wrangler.jsonc`), but complex Next.js bundles can still exceed Free-tier size limits and require a paid Workers plan.
+
+Current platform note:
+
+- Next.js may warn that `middleware` convention is deprecated in favor of `proxy`.
+- For the current OpenNext + Cloudflare build path, this project keeps `src/middleware.ts` until `proxy` support is stable for this deployment target.
 
 If you are deploying only to `workers.dev` (no custom domain yet), set:
 

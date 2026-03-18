@@ -28,9 +28,9 @@ Prints a non-blocking global stretch report for 100% coverage after the main tes
 
 ## Coverage policy (D04b/D05)
 
-- Hard gate: `90%` global for `lines`, `branches`, `functions`, `statements`.
-- Stretch target: `100%` global (reporting-only, non-blocking).
-- Coverage scope for the gate:
+- Hard gate: `90%` on the gated-scope modules for `lines`, `branches`, `functions`, `statements`.
+- Stretch target: `100%` on the same gated scope (reporting-only, non-blocking).
+- Gated coverage scope:
   - `src/app/api/**/route.ts`
   - `src/app/(admin)/admin/actions.ts`
   - `src/server/admin/mutation-errors.ts`

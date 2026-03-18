@@ -15,3 +15,9 @@ Add docs for:
 
 - `auth-lifecycle-and-rbac-flow.md`
 - `guest-cart-merge-flow.md`
+
+## Pending for next phase
+
+- Checkout/payment provider lifecycle flow.
+- Webhook idempotency and order-status transition flow.
+- Risk/review operations flow.

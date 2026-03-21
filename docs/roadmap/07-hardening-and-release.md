@@ -46,7 +46,7 @@ Prepare the base project for stable reuse and forking into domain-specific store
 
 ## Exit artifacts
 
-- Release checklist.
-- Forking playbook.
-- Baseline SLO/SLA and alerting thresholds.
-- `docs/flows/07-hardening-release/` flow documents.
+- Release checklist: `docs/flows/07-hardening-release/release-checklist.md`.
+- Forking playbook: `docs/flows/07-hardening-release/forking-playbook.md`.
+- Baseline SLO/SLA and alerting thresholds: `docs/flows/07-hardening-release/slo-baseline.md`.
+- Operations and hardening flow: `docs/flows/07-hardening-release/README.md`.

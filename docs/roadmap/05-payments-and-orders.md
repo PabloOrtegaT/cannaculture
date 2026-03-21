@@ -14,8 +14,9 @@ Implement customer identity flows and reliable checkout with cart continuity, or
   - Checkout session creation, provider adapters (card-first + optional methods), coupon totals in checkout pipeline.
   - Orders persistence and status timeline wiring.
   - Webhook idempotency foundation with provider-event deduplication and deterministic order transitions.
-- Phase 3 (next):
-  - Risk/review workflow, payments operations hardening, and telemetry expansion.
+- Phase 3 (deferred to forks):
+  - Risk/review workflow (3DS, velocity checks, high-risk review queue), payments operations hardening, and telemetry expansion.
+  - These are provider-specific and business-specific. Add in the fork, not the base.
 
 ## Scope
 
@@ -155,7 +156,7 @@ Implement customer identity flows and reliable checkout with cart continuity, or
   - Successful payment decrements `inventoryStock.onHandQty` and `inventoryStock.availableQty`.
   - Inventory values clamp at zero rather than going negative.
   - No timed reservation/hold window is used in this phase.
-- Add risk controls:
+- Add risk controls (deferred to forks):
   - 3DS when available.
   - Velocity checks.
   - High-risk review queue.

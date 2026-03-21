@@ -25,6 +25,6 @@ Add docs for:
 - `POST /api/checkout/session` no longer returns hold metadata.
 - Webhooks stay idempotent and decrement inventory on successful payment only.
 
-## Pending for next phase
+## Deferred to forks
 
-- Risk/review operations flow.
+- Risk/review operations (3DS, velocity checks, high-risk review queue) — provider-specific and business-specific. Add in the fork, not the base.

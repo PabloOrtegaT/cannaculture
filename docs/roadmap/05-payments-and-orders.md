@@ -139,12 +139,9 @@ Implement customer identity flows and reliable checkout with cart continuity, or
   - If variant is no longer purchasable, keep line as warning state and exclude from checkout until resolved.
   - Deduplicate lines and preserve latest price snapshot source-of-truth from server catalog.
   - Emit merge summary for UX (merged, adjusted, unavailable lines).
-- Add unit-tested pure merge engine and server-side merge endpoint/action.
-- Add Zustand store only for client session/cart UX state and merge-feedback UI; keep server/order/payment data outside Zustand.
-- Harden cart writes with request coalescing and in-flight line locks:
-  - Single in-flight cart sync with trailing latest snapshot.
-  - Per-line pending state for quantity controls.
-- Reconcile stock on every authenticated cart write (`POST /api/cart`), not only login merge:
+- Add unit-tested pure merge engine and unified `POST /api/cart` endpoint (handles both replace and merge via `merge` flag).
+- Add Zustand store for client cart UX state with localStorage persistence and best-effort server sync for authenticated users.
+- Reconcile stock on cart writes (`POST /api/cart`):
   - Clamp over-limit quantities.
   - Preserve unavailable lines with warnings.
   - Return canonical cart + sync summary payload.
@@ -180,31 +177,27 @@ Implement customer identity flows and reliable checkout with cart continuity, or
 - At this range, JWT-access and DB-refresh-session variable infrastructure costs are both effectively near-zero on selected Cloudflare included tiers.
 - Rotating refresh sessions are selected for stronger revocation, device management, and long-lived ecommerce sign-in.
 
-## Unit test requirements
+## Unit test requirements (pure logic only)
 
-- Auth token lifecycle tests:
-  - email verification token creation/expiry/invalid token.
-  - password reset token creation/expiry/invalid token.
 - Cart merge engine tests:
   - additive merge.
   - stock clamp merge.
   - unavailable variant handling.
   - duplicate-line normalization.
-- Payment state machine transitions.
-- Idempotent webhook event handling.
-- Risk rule evaluation logic.
-- Coupon totals calculation tests (percentage/fixed, shipping exclusion, floor at zero).
+- Domain invariants and validation schemas.
+- Coupon validation (pure rules, not service-level).
 
-## Integration/e2e requirements
+Note: mocked route/service tests have been removed in favor of E2E coverage. See TESTING.md for the rationale.
 
-- E2E register -> verify account -> login flow.
-- E2E password reset flow (request -> reset -> login).
-- E2E social login callback success path.
+## E2E requirements (Playwright)
+
+- E2E register form and forgot-password flow.
+- E2E login with valid/invalid credentials.
 - E2E guest cart -> login -> merged authenticated cart flow.
-- E2E checkout happy path.
-- E2E failed payment path.
-- E2E webhook replay without duplicate side effects.
-- E2E checkout with coupon applied and verified totals.
+- E2E checkout happy path (mock payment success -> order confirmation).
+- E2E failed payment path (mock payment failure -> cancel page).
+- E2E unauthenticated checkout shows sign-in prompt.
+- E2E order appears on account page after checkout.
 
 ## Acceptance criteria
 

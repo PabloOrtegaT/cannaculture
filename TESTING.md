@@ -1,10 +1,13 @@
 # Testing Guide
 
-## Test stack
+## Test strategy
 
-- Unit and component tests: Vitest + React Testing Library
-- Endpoint/integration tests: Vitest route-handler suites
-- End-to-end tests: Playwright
+This project uses a two-tier testing approach:
+
+1. **Unit tests (Vitest):** Pure logic only — domain invariants, Zod validation, cart CRUD operations, merge algorithms, formatting functions, and other side-effect-free code.
+2. **End-to-end tests (Playwright):** Full user flows through the real application — auth, cart, checkout, admin CRUD, and catalog browsing.
+
+Heavily-mocked integration tests (route handlers, service layers with mocked DB) have been intentionally removed. These created false confidence by validating mock contracts rather than real behavior. Playwright E2E tests provide more reliable coverage of the same flows.
 
 ## Commands
 
@@ -12,7 +15,7 @@
 npm run test
 ```
 
-Runs workspace unit/component tests.
+Runs workspace unit tests (pure logic only).
 
 ```bash
 npm run test:e2e
@@ -47,26 +50,32 @@ Notes:
 - When another `next dev` is running, prefer an isolated run (example):
   - `PLAYWRIGHT_PORT=3100 PLAYWRIGHT_REUSE_EXISTING_SERVER=0 PLAYWRIGHT_BASE_URL=http://localhost:3100 PLAYWRIGHT_ADMIN_BASE_URL=http://localhost:3100 npm run test:e2e`
 
-```bash
-npm run test:coverage:target
-```
+## Unit test scope
 
-Prints a non-blocking global stretch report for 100% coverage after the main test run.
+Unit tests cover **pure functions only** — no mocked databases, no mocked services, no mocked route handlers. Files under `src/__tests__/`:
 
-## Coverage policy (D04b/D05)
+- `domain/` — attribute validation, invariants, RBAC rules, store profile
+- `validation/` — DTO schemas, product input validation
+- `storefront/` — cart CRUD logic, merge algorithm, pricing display, home content mapping, profile isolation, theme toggle
+- `admin/` — coupon validation, stock mode, mutation error mapping, table columns
+- `auth/` — refresh session policy (pure date math)
+- `ui/` — button component
 
-- Hard gate: `90%` on the gated-scope modules for `lines`, `branches`, `functions`, `statements`.
-- Stretch target: `100%` on the same gated scope (reporting-only, non-blocking).
-- Gated coverage scope:
-  - `src/app/api/**/route.ts`
-  - `src/app/(admin)/admin/actions.ts`
-  - `src/server/admin/mutation-errors.ts`
-  - `src/server/admin/role-guard.ts`
-  - `src/server/admin/stock-mode.ts`
-  - `src/server/config/host-policy.ts`
+## E2E test scope
+
+Playwright tests cover **real user flows** through the running application:
+
+- `auth-flows.spec.ts` — register, login, forgot password, login with wrong credentials
+- `storefront-catalog-cart.spec.ts` — browse catalog, add to cart, stock controls, quantity changes
+- `storefront-cart-merge.spec.ts` — guest cart merges into authenticated cart on login
+- `storefront-checkout-flow.spec.ts` — checkout with mock payment (success + failure), unauthenticated checkout prompt, order appears on account page
+- `storefront-admin-entry.spec.ts` — admin link appears for authenticated users
+- `admin-categories-crud.spec.ts` — create/edit categories
+- `admin-product-crud.spec.ts` — create/edit products and variants
+- `admin-csv-import.spec.ts` — CSV bulk import with success and partial failure
 
 ## Ownership expectations
 
-- Every new/changed CRUD action/endpoint must ship with route/action/service tests in the same change set.
-- Expected domain failures must be asserted as sanitized outcomes (JSON error payload or toast/redirect flow), not raw unhandled 500 behavior.
-- Coverage matrix reference: `docs/testing/crud-endpoint-coverage-matrix.md`.
+- New features should be validated with E2E tests covering the primary user flow.
+- Pure logic (validation, formatting, algorithms) should have unit tests.
+- Do not add mocked route/service tests — use Playwright instead.

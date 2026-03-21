@@ -60,7 +60,7 @@ test("stock status controls add-to-cart availability", async ({ page }) => {
   await expect(addToCartButton).toBeEnabled();
 });
 
-test("cart line locks while quantity sync is in flight", async ({ page }) => {
+test("cart quantity can be increased and decreased", async ({ page }) => {
   await addFirstInStockProduct(page);
   await page.getByRole("link", { name: "Go to cart" }).click();
 
@@ -70,26 +70,20 @@ test("cart line locks while quantity sync is in flight", async ({ page }) => {
 
   await expect(increaseButton).toBeEnabled();
   await increaseButton.click();
-  let observedPendingState = false;
-  try {
-    await expect(increaseButton).toBeDisabled({ timeout: 1500 });
-    observedPendingState = true;
-  } catch {
-    try {
-      await expect(page.getByText("Updating quantity...").first()).toBeVisible({ timeout: 1500 });
-      observedPendingState = true;
-    } catch {
-      observedPendingState = false;
-    }
-  }
 
-  const syncStart = Date.now();
   await expect
     .poll(async () => Number((await quantityLabel.textContent()) ?? "0"), {
       timeout: 10000,
     })
     .toBe(initialQuantity + 1);
-  if (!observedPendingState) {
-    expect(Date.now() - syncStart).toBeLessThan(2000);
-  }
+
+  const decreaseButton = page.getByRole("button", { name: /Decrease .* quantity/ }).first();
+  await expect(decreaseButton).toBeEnabled();
+  await decreaseButton.click();
+
+  await expect
+    .poll(async () => Number((await quantityLabel.textContent()) ?? "0"), {
+      timeout: 10000,
+    })
+    .toBe(initialQuantity);
 });

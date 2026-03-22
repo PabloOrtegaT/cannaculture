@@ -18,10 +18,16 @@ type ViewerResponse = {
 
 export function StorefrontAuthLinks() {
   const [viewer, setViewer] = useState<ViewerResponse | null>(null);
+  const [hydrated, setHydrated] = useState(false);
   const setCartAuthState = useCartStore((state) => state.setAuthState);
   const hydrateCart = useCartStore((state) => state.hydrateCart);
   const cartItems = useCartStore((state) => state.cart.items);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setting mounted flag after hydration is intentional; avoids server/client mismatch on cart badge
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -87,7 +93,7 @@ export function StorefrontAuthLinks() {
       <Button variant="ghost" size="icon" asChild className="relative">
         <Link href="/cart" aria-label="Cart">
           <ShoppingCart className="h-4 w-4" />
-          {totalItems > 0 && (
+          {hydrated && totalItems > 0 && (
             <Badge
               variant="default"
               className="absolute -top-1 -right-1 h-4 min-w-4 rounded-full px-1 text-[10px] leading-none flex items-center justify-center"

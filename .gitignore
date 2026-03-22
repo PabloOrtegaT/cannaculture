@@ -30,3 +30,7 @@ pnpm-debug.log*
 # system
 .DS_Store
 Thumbs.db
+
+# claude code
+.claude/settings.json
+.playwright-mcp/

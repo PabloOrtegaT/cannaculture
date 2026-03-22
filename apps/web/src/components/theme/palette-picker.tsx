@@ -23,13 +23,11 @@ const PALETTES: PaletteOption[] = [
 
 export function PalettePicker() {
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState("amber");
+  const [active, setActive] = useState(() => {
+    if (typeof window === "undefined") return "amber";
+    return localStorage.getItem(PALETTE_STORAGE_KEY) ?? "amber";
+  });
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(PALETTE_STORAGE_KEY) ?? "amber";
-    setActive(stored);
-  }, []);
 
   useEffect(() => {
     if (!open) return;

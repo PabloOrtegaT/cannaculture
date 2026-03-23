@@ -89,7 +89,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           <ProductCard
             key={entry.product.id}
             name={entry.product.name}
-            description={entry.product.description}
             categorySlug={category.slug}
             productSlug={entry.product.slug}
             currency={entry.product.currency}

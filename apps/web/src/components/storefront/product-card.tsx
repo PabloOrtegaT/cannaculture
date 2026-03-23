@@ -7,7 +7,6 @@ import { formatCurrencyFromCents, getPriceDisplay } from "@/features/catalog/pri
 
 type ProductCardProps = {
   name: string;
-  description?: string | undefined;
   categorySlug: string;
   categoryName: string;
   productSlug: string;

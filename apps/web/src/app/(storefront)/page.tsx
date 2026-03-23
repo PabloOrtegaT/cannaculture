@@ -105,7 +105,6 @@ export default async function HomePage() {
                 <ProductCard
                   key={featured.id}
                   name={featured.name}
-                  description={featured.description}
                   categorySlug={cardData.category.slug}
                   productSlug={featured.slug}
                   currency={featured.currency}

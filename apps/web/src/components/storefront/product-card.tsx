@@ -1,12 +1,15 @@
+// apps/web/src/components/storefront/product-card.tsx
 import Link from "next/link";
-import { ArrowUpRight, Package } from "lucide-react";
+import { Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { FavoriteButton } from "@/components/storefront/favorite-button";
 import { formatCurrencyFromCents, getPriceDisplay } from "@/features/catalog/pricing";
 
 type ProductCardProps = {
   name: string;
   description?: string | undefined;
   categorySlug: string;
+  categoryName: string;
   productSlug: string;
   currency: "MXN" | "USD";
   minPriceCents: number;
@@ -16,8 +19,8 @@ type ProductCardProps = {
 
 export function ProductCard({
   name,
-  description,
   categorySlug,
+  categoryName,
   productSlug,
   currency,
   minPriceCents,
@@ -32,11 +35,28 @@ export function ProductCard({
       href={href}
       className="group block rounded-lg border bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-primary/30"
     >
-      {/* Image area — warm muted placeholder, taller for editorial portrait feel */}
-      <div className="relative flex h-52 items-center justify-center bg-secondary/60">
-        <Package className="h-14 w-14 text-muted-foreground/20 transition-transform duration-300 group-hover:scale-110" />
+      {/* Image area */}
+      <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-secondary/40 to-secondary/70">
+        <Package className="h-12 w-12 text-muted-foreground/20 transition-transform duration-300 group-hover:scale-110" />
+
+        <FavoriteButton />
+
+        {pricing.hasDiscount && (
+          <div className="absolute top-2 left-2">
+            <Badge variant="destructive" className="rounded-full text-[10px] px-2 py-0.5">
+              −{pricing.discountPercent}%
+            </Badge>
+          </div>
+        )}
+
+        <div className="absolute bottom-2 left-2">
+          <span className="rounded-full border border-border/50 bg-background/90 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+            {categoryName}
+          </span>
+        </div>
+
         {!hasStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/70 backdrop-blur-sm">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/65 backdrop-blur-sm">
             <Badge variant="secondary" className="text-xs tracking-widest uppercase">
               Sold out
             </Badge>
@@ -45,31 +65,28 @@ export function ProductCard({
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="flex-1 font-sans text-xl font-semibold leading-7 tracking-normal text-foreground">{name}</h3>
-          <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground/40 transition-all duration-200 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      <div className="p-3">
+        <h3 className="font-semibold text-sm leading-snug text-foreground line-clamp-2 mb-1.5">
+          {name}
+        </h3>
+
+        {/* Star rating — visual placeholder */}
+        <div className="flex items-center gap-0.5 mb-2" aria-hidden="true">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <span key={star} className={`text-xs ${star <= 4 ? "text-amber-400" : "text-muted-foreground/30"}`}>
+              ★
+            </span>
+          ))}
         </div>
 
-        {description && (
-          <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-            {description}
-          </p>
-        )}
-
-        <div className="mt-3 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <span className="font-bold text-sm">
             {formatCurrencyFromCents(pricing.currentCents, currency)}
           </span>
           {pricing.hasDiscount && (
-            <>
-              <span className="text-xs text-muted-foreground line-through">
-                {formatCurrencyFromCents(pricing.compareAtCents ?? 0, currency)}
-              </span>
-              <Badge variant="default" className="text-[10px] px-1.5 py-0">
-                −{pricing.discountPercent}%
-              </Badge>
-            </>
+            <span className="text-xs text-muted-foreground line-through">
+              {formatCurrencyFromCents(pricing.compareAtCents ?? 0, currency)}
+            </span>
           )}
         </div>
       </div>

@@ -60,7 +60,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       {/* Product header */}
       <div className="space-y-3">
-        <h1 className="text-3xl font-bold tracking-tight">{result.product.name}</h1>
+        <h1 className="font-sans text-4xl font-semibold leading-tight tracking-normal">{result.product.name}</h1>
         {result.product.description && (
           <p className="text-muted-foreground max-w-2xl">{result.product.description}</p>
         )}

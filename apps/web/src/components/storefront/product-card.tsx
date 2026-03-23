@@ -47,7 +47,7 @@ export function ProductCard({
       {/* Content */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-semibold leading-snug truncate flex-1">{name}</h3>
+          <h3 className="flex-1 font-sans text-xl font-semibold leading-7 tracking-normal text-foreground">{name}</h3>
           <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground/40 transition-all duration-200 group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </div>
 

@@ -13,12 +13,12 @@ Used on both the home page (featured products) and catalog grid.
 
 ### Visual structure
 - **Image area:** 160px tall, subtle gradient placeholder (`#f7f7f7` → `#eeeeee`), centered Package icon
-- **Favorite button:** `♡` / `♥` toggle, circular, top-right overlay on image area. Client-side React state (not persisted yet)
+- **Favorite button:** `♡` / `♥` toggle, circular, top-right overlay on image area. Extracted as a `FavoriteButton` client component (`"use client"`, `useState`) so `ProductCard` itself stays a server component. Not persisted.
 - **Discount badge:** Red pill (`#e74c3c`), top-left overlay, only rendered when `compareAtPriceCents` exists
-- **Category pill:** Semi-transparent white pill, bottom-left overlay on image area, shows `category.name`
+- **Category pill:** Semi-transparent white pill, bottom-left overlay on image area, shows `categoryName`
 - **Sold-out overlay:** `rgba(255,255,255,0.65)` blur overlay with "SOLD OUT" badge — existing behavior, restyled
 - **Product name:** 13px bold, `#111`, 2-line clamp
-- **Star rating row:** Static visual placeholder (4 filled stars out of 5), review count alongside. Visual only — no real rating data
+- **Star rating row:** Static visual placeholder (4 filled stars out of 5). No review count number displayed — omit the count entirely since no real data exists. Visual only.
 - **Price:** 14px bold; if discounted, show strikethrough compare-at price alongside
 
 ### States
@@ -30,8 +30,16 @@ Used on both the home page (featured products) and catalog grid.
 ### Hover
 Existing `hover:-translate-y-1 hover:shadow-md hover:border-primary/30` — keep as-is.
 
-### File
-`apps/web/src/components/storefront/product-card.tsx` — full rewrite
+### Props change
+Add `categoryName: string` to `ProductCardProps`. Both call sites already have access to `category.name`:
+- `catalog/page.tsx`: `entry.category.name` — `entry.category` is `Category | null`; already guarded by `if (!entry.category) return null` before the `ProductCard` render, so `.name` is safe
+- `page.tsx` (home): `cardData.category.name` — guarded by `if (!cardData || !cardData.category) return null` before render, so `.name` is safe
+
+Both call sites must be updated to pass `categoryName`.
+
+### Files
+- `apps/web/src/components/storefront/product-card.tsx` — full rewrite
+- New: `apps/web/src/components/storefront/favorite-button.tsx` — small `"use client"` component for the ♡ toggle
 
 ---
 
@@ -50,13 +58,19 @@ Existing `hover:-translate-y-1 hover:shadow-md hover:border-primary/30` — keep
 Sticky left panel with `bg-muted/30` background, `border-r`.
 
 Sections (all submit via the existing form GET approach):
-1. **Price, $** — two `<input type="number">` fields for `priceMin` / `priceMax` URL params (new params, server reads them)
+1. **Price, $** — two `<input type="number">` fields for `priceMin` / `priceMax` URL params (new params)
 2. **Category** — checkbox list replacing the current pill links. Single-select behavior (checking one unchecks others). Maps to existing `category` URL param
 3. **Sort by** — radio button list replacing the current `<select>`. Maps to existing `sort` URL param
 4. **Apply filters** button — full-width, dark, submits the form
 
+#### Price filtering — server-side implementation
+- `CatalogPageProps.searchParams` extended to read `priceMin?: string` and `priceMax?: string`
+- Parsing in the page: `const priceMin = resolvedSearchParams?.priceMin ? Number(resolvedSearchParams.priceMin) : undefined` (same for `priceMax`). If `Number()` produces `NaN`, treat as `undefined` (no filter applied for that bound)
+- `listCatalogProducts()` in `storefront-service.ts` extended to accept `priceMin?: number` and `priceMax?: number` options
+- Filtering logic (inclusive bounds): `if (priceMin !== undefined && entry.minVariantPriceCents < priceMin * 100) skip` / `if (priceMax !== undefined && entry.minVariantPriceCents > priceMax * 100) skip`
+
 ### Mobile
-Sidebar hidden. A "Filters" button appears in the header row that opens a drawer (or simply shows the filter form inline below the header — can defer drawer to a follow-up iteration).
+Sidebar hidden on mobile (`md:flex` / `hidden`). A "Filters ▾" button appears in the page header row (mobile only). Clicking it toggles an inline filter panel below the header (above the grid). **Implementation:** extract a `MobileFilterToggle` client component (`"use client"`, `useState(false)`) that wraps the button and renders the filter form inline when open. The form fields are identical to the sidebar. This keeps the catalog page itself a server component.
 
 ### Product grid
 - 3-col `lg`, 2-col `md`, 1-col `sm`
@@ -121,15 +135,18 @@ Replaces the current single card layout with a structured grid.
 
 **Section 1: KPI cards row** (3-col grid)
 - **Revenue card:** Purple gradient (`#6c5ce7 → #a29bfe`), white text, large bold number, trend arrow + percentage
-  - Data: sum from `analytics.salesTrend`
+  - Data: `analytics.salesTrend.reduce((sum, p) => sum + p.totalCents, 0)` formatted via `formatCurrencyCents`
 - **Orders card:** White bg, border, total order count, green trend indicator
   - Data: `orders.length`
-- **Delivered card:** White bg, border, fulfilled order count, green trend indicator
-  - Data: `orders.filter(o => o.status === 'fulfilled').length` (or equivalent)
+- **Paid orders card:** White bg, border, count of orders with `status === 'paid'`, green trend indicator
+  - Data: `orders.filter(o => o.status === 'paid').length`
+  - Label: "Paid Orders" (not "Delivered" — `'fulfilled'` is not a valid status in this system)
 
 **Section 2: Chart + recent orders** (1.4fr / 1fr grid)
 - **Left — Sales trend chart:** Existing `LineChart` from recharts, restyled with area fill using a `<linearGradient>`. Wrapped in a white card with border-radius
-- **Right — Recent orders:** Top 4 orders from `listAdminOrdersReadModel()`, compact table with Order #, Customer, Total, Payment status badge (green = paid, amber = pending)
+- **Right — Recent orders:** Top 4 from `orders.slice(0, 4)`, compact table with Order #, Customer, Total, Payment status badge (green = paid, amber = pending/payment_failed)
+
+**Existing `<OrdersTable>` section:** Removed from the dashboard page. The `OrdersTable` import in `admin/page.tsx` must also be removed. The full orders table is accessible via `/admin/orders` (or the Orders nav link). The compact recent orders panel in Section 2 replaces it on the overview page.
 
 **Section 3: Store snapshot + quick links**
 - Existing snapshot counts (banners, news posts, featured sales) in 3 muted cards

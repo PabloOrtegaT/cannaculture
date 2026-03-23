@@ -9,6 +9,8 @@ export type CatalogSearchParams = {
   categorySlug?: string;
   query?: string;
   sort?: ProductSort;
+  priceMin?: number; // dollars (not cents)
+  priceMax?: number; // dollars (not cents)
 };
 
 export type ProductWithContext = {
@@ -107,6 +109,18 @@ export function listCatalogProducts(params: CatalogSearchParams = {}) {
     products = [...products].sort((a, b) => getVariantDisplayPrice(b, variantsByProductId) - getVariantDisplayPrice(a, variantsByProductId));
   } else {
     products = [...products].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  }
+
+  if (params.priceMin !== undefined) {
+    products = products.filter(
+      (product) => getVariantDisplayPrice(product, variantsByProductId) >= params.priceMin! * 100,
+    );
+  }
+
+  if (params.priceMax !== undefined) {
+    products = products.filter(
+      (product) => getVariantDisplayPrice(product, variantsByProductId) <= params.priceMax! * 100,
+    );
   }
 
   return products.map((product) => {

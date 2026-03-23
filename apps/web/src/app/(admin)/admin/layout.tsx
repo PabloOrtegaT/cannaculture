@@ -88,7 +88,7 @@ export default async function AdminLayout({
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 border-r bg-background md:flex md:flex-col">
+        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-48 shrink-0 border-r bg-background md:flex md:flex-col">
           <nav className="flex-1 overflow-y-auto p-3 space-y-1">
             {adminNavigation.map((item) => {
               const accessible = canAccessAdminRoute(role, item.route);

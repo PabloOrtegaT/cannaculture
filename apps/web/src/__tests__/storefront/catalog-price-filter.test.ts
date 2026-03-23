@@ -4,7 +4,7 @@ import { listCatalogProducts } from "@/server/data/storefront-service";
 describe("listCatalogProducts price filtering", () => {
   it("returns all products when no price bounds are set", () => {
     const all = listCatalogProducts();
-    const filtered = listCatalogProducts({ priceMin: undefined, priceMax: undefined });
+    const filtered = listCatalogProducts({});
     expect(filtered.length).toBe(all.length);
   });
 

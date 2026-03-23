@@ -17,6 +17,22 @@ const inventorySeedsByProfile = {
       variantId: "d4ac5f5e-c432-4667-937f-7f1356e7674a",
       onHandQty: 9,
     },
+    {
+      variantId: "7992624d-df54-4104-9f6f-3b8e6ea65ea2",
+      onHandQty: 12,
+    },
+    {
+      variantId: "ea2ce9e5-fb68-425f-8dc8-82ee4316d266",
+      onHandQty: 18,
+    },
+    {
+      variantId: "2287e8f3-cd4f-40cd-84eb-c2dc186ea9f6",
+      onHandQty: 24,
+    },
+    {
+      variantId: "7c6fffa5-8a14-4715-ad27-e6f6807f7d0f",
+      onHandQty: 15,
+    },
   ],
   "prints-3d": [
     {

@@ -1,0 +1,105 @@
+<h2>Design Review: Product Card</h2>
+<p class="subtitle">Used on Catalog grid and Home featured section. Click to approve or flag any changes.</p>
+
+<div style="max-width:860px; margin:0 auto;">
+
+  <!-- Card design showcase -->
+  <div style="display:grid; grid-template-columns: repeat(3, 220px); gap:16px; margin-bottom:28px; justify-content:center;">
+
+    <!-- Normal card -->
+    <div style="background:#fff; border:1px solid #e0e0e0; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06); font-family:system-ui,sans-serif;">
+      <div style="height:160px; background:linear-gradient(135deg,#f5f5f5,#ebebeb); position:relative; display:flex; align-items:center; justify-content:center;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <!-- Favorite button -->
+        <button style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#999;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1);">♡</button>
+        <!-- Category label -->
+        <div style="position:absolute;bottom:8px;left:10px;background:rgba(255,255,255,0.9);border-radius:20px;padding:2px 8px;font-size:10px;color:#666;font-weight:500;border:1px solid #e5e5e5;">Electronics</div>
+      </div>
+      <div style="padding:12px;">
+        <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px;line-height:1.3;">Organics Kids Gummy Vitamins</div>
+        <!-- Star rating row -->
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
+          <span style="color:#f4b942;font-size:11px;">★★★★</span><span style="color:#ddd;font-size:11px;">★</span>
+          <span style="font-size:10px;color:#999;">243</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;font-weight:800;color:#111;">$26.59</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card with discount -->
+    <div style="background:#fff; border:1px solid #e0e0e0; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06); font-family:system-ui,sans-serif;">
+      <div style="height:160px; background:linear-gradient(135deg,#f5f5f5,#ebebeb); position:relative; display:flex; align-items:center; justify-content:center;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <button style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#e74c3c;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1);">♥</button>
+        <!-- Discount badge -->
+        <div style="position:absolute;top:10px;left:10px;background:#e74c3c;color:#fff;border-radius:20px;padding:2px 7px;font-size:10px;font-weight:700;">−18%</div>
+        <div style="position:absolute;bottom:8px;left:10px;background:rgba(255,255,255,0.9);border-radius:20px;padding:2px 8px;font-size:10px;color:#666;font-weight:500;border:1px solid #e5e5e5;">Kitchen</div>
+      </div>
+      <div style="padding:12px;">
+        <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px;line-height:1.3;">Naked Nutrition Daily Multivitamin</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
+          <span style="color:#f4b942;font-size:11px;">★★★★★</span>
+          <span style="font-size:10px;color:#999;">98</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;font-weight:800;color:#111;">$86.13</span>
+          <span style="font-size:11px;color:#bbb;text-decoration:line-through;">$105.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Out of stock card -->
+    <div style="background:#fff; border:1px solid #e0e0e0; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.06); font-family:system-ui,sans-serif; opacity:0.8;">
+      <div style="height:160px; background:linear-gradient(135deg,#f5f5f5,#ebebeb); position:relative; display:flex; align-items:center; justify-content:center;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <button style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#999;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.1);">♡</button>
+        <!-- Sold out overlay -->
+        <div style="position:absolute;inset:0;background:rgba(255,255,255,0.65);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;">
+          <span style="background:#f5f5f5;border:1px solid #ddd;border-radius:20px;padding:4px 12px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#666;">Sold out</span>
+        </div>
+        <div style="position:absolute;bottom:8px;left:10px;background:rgba(255,255,255,0.9);border-radius:20px;padding:2px 8px;font-size:10px;color:#666;font-weight:500;border:1px solid #e5e5e5;">Fashion</div>
+      </div>
+      <div style="padding:12px;">
+        <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px;line-height:1.3;">Ancient Nutrition Multivitamin Women</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
+          <span style="color:#f4b942;font-size:11px;">★★</span><span style="color:#ddd;font-size:11px;">★★★</span>
+          <span style="font-size:10px;color:#999;">1,002</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;font-weight:800;color:#111;">$41.90</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Design spec notes -->
+  <div style="background:#f9f9f9; border:1px solid #e5e5e5; border-radius:8px; padding:16px; font-family:system-ui,sans-serif; font-size:12px; color:#444; line-height:1.7;">
+    <div style="font-weight:700; color:#111; margin-bottom:8px; font-size:13px;">Card spec</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 24px;">
+      <div>• <strong>Image area:</strong> 160px tall, gradient placeholder, Package icon center</div>
+      <div>• <strong>Favorite (♡):</strong> client-side toggle, top-right overlay button</div>
+      <div>• <strong>Category pill:</strong> bottom-left overlay on image</div>
+      <div>• <strong>Discount badge:</strong> top-left overlay (only when compareAt exists)</div>
+      <div>• <strong>Stars:</strong> visual placeholder (4.0 fixed), review count from data</div>
+      <div>• <strong>Sold out:</strong> blur overlay with badge (existing behavior)</div>
+      <div>• <strong>Hover:</strong> subtle lift + border highlight (existing behavior)</div>
+      <div>• <strong>Price:</strong> bold current + strikethrough compare-at</div>
+    </div>
+    <div style="margin-top:8px; padding-top:8px; border-top:1px solid #e5e5e5; color:#888; font-size:11px;">Note: Star rating will be a static visual placeholder (e.g. 4.0★) until a real ratings system exists. Favorite button uses local React state — not persisted yet.</div>
+  </div>
+
+  <div class="options" style="margin-top:20px;">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">✓</div>
+      <div class="content"><h3>Approve this card design</h3><p>Looks good, proceed to catalog layout section</p></div>
+    </div>
+    <div class="option" data-choice="change" onclick="toggleSelect(this)">
+      <div class="letter">✎</div>
+      <div class="content"><h3>Request changes</h3><p>I'll describe what to adjust in the terminal</p></div>
+    </div>
+  </div>
+
+</div>

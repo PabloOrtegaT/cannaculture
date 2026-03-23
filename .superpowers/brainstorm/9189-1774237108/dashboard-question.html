@@ -1,0 +1,196 @@
+<h2>Admin Dashboard: Layout approach</h2>
+<p class="subtitle">You provided two references: a Shopify-style orders focus and a Shoplytics analytics-heavy dashboard. Which direction for the main dashboard page?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="analytics-first" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px; background:#f8f8f8; font-size:11px;">
+      <div style="background:#fff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+        <!-- Sidebar + content -->
+        <div style="display:flex; height:180px;">
+          <!-- Sidebar -->
+          <div style="width:52px; background:#1a1a2e; display:flex; flex-direction:column; padding:8px 0; gap:2px; align-items:center;">
+            <div style="color:#8888ff; font-size:9px; font-weight:800; margin-bottom:6px;">📊</div>
+            ${["⊞","📦","👥","💳","📈","👤","⚙"].map((i,idx) => `<div style="color:${idx===0?'#fff':'#888'}; font-size:10px; padding:4px; width:32px; text-align:center; border-radius:4px; background:${idx===0?'rgba(108,142,245,0.3)':'transparent'};">${i}</div>`).join("")}
+          </div>
+          <!-- Main content -->
+          <div style="flex:1; padding:10px; overflow:hidden;">
+            <div style="font-size:12px; font-weight:700; color:#111; margin-bottom:8px;">Dashboard Overview</div>
+            <!-- KPI cards row -->
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:5px; margin-bottom:8px;">
+              <div style="background:#6c5ce7; border-radius:5px; padding:6px; color:#fff;">
+                <div style="font-size:8px; opacity:0.8; margin-bottom:2px;">Total Sales</div>
+                <div style="font-size:11px; font-weight:800;">$35,892</div>
+                <div style="font-size:7px; opacity:0.7; margin-top:1px;">+12.3% ↑</div>
+              </div>
+              <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:6px;">
+                <div style="font-size:8px; color:#888; margin-bottom:2px;">Customers</div>
+                <div style="font-size:11px; font-weight:800; color:#111;">82</div>
+                <div style="font-size:7px; color:#e17055; margin-top:1px;">-7% ↓</div>
+              </div>
+              <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:6px;">
+                <div style="font-size:8px; color:#888; margin-bottom:2px;">Orders Done</div>
+                <div style="font-size:11px; font-weight:800; color:#111;">165</div>
+                <div style="font-size:7px; color:#00b894; margin-top:1px;">+16.9% ↑</div>
+              </div>
+              <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:6px;">
+                <div style="font-size:8px; color:#888; margin-bottom:2px;">Cancelled</div>
+                <div style="font-size:11px; font-weight:800; color:#111;">3</div>
+                <div style="font-size:7px; color:#e17055; margin-top:1px;">-1.9% ↓</div>
+              </div>
+            </div>
+            <!-- Charts row -->
+            <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:5px; margin-bottom:6px;">
+              <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:6px;">
+                <div style="font-size:8px; font-weight:600; color:#333; margin-bottom:4px;">Total Revenue</div>
+                <div style="height:30px; background:linear-gradient(90deg,transparent,rgba(108,142,245,0.2)); border-radius:3px; position:relative; overflow:hidden;">
+                  <svg width="100%" height="30" viewBox="0 0 100 30" preserveAspectRatio="none">
+                    <polyline points="0,25 15,20 30,22 45,15 60,18 75,10 90,12 100,8" fill="none" stroke="#6c8ef5" stroke-width="1.5"/>
+                    <polygon points="0,25 15,20 30,22 45,15 60,18 75,10 90,12 100,8 100,30 0,30" fill="rgba(108,142,245,0.1)"/>
+                  </svg>
+                </div>
+              </div>
+              <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:6px;">
+                <div style="font-size:8px; font-weight:600; color:#333; margin-bottom:4px;">Top Products</div>
+                <div style="display:flex; gap:2px; align-items:flex-end; height:30px;">
+                  <div style="flex:1; background:#6c5ce7; border-radius:2px 2px 0 0; height:60%;"></div>
+                  <div style="flex:1; background:#e17055; border-radius:2px 2px 0 0; height:100%;"></div>
+                  <div style="flex:1; background:#fdcb6e; border-radius:2px 2px 0 0; height:70%;"></div>
+                  <div style="flex:1; background:#00b894; border-radius:2px 2px 0 0; height:85%;"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Mini table -->
+            <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:5px;">
+              <div style="font-size:8px; font-weight:600; color:#333; margin-bottom:4px;">Recent Transactions</div>
+              ${[["#2050","Guy Hawkins","$98.99","✅"],["#2049","Floyd Miles","$396","✅"],["#2048","Cody Fisher","$98.99","⏳"]].map(([id,name,amt,st])=>`
+              <div style="display:grid; grid-template-columns:1.5fr 2fr 1.5fr 1fr; gap:2px; font-size:7.5px; padding:2px 0; border-bottom:1px solid #f5f5f5; color:#555;">
+                <span style="color:#6c8ef5;">${id}</span><span>${name}</span><span style="font-weight:600;">${amt}</span><span>${st}</span>
+              </div>`).join("")}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Analytics-first (Shoplytics style)</h3>
+      <p>Prominent KPI stat cards at the top with trend indicators. Revenue line chart + top products bar chart side-by-side. Transaction history table below. High data density.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="orders-first" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px; background:#f8f8f8; font-size:11px;">
+      <div style="background:#fff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+        <div style="display:flex; height:180px;">
+          <!-- Sidebar -->
+          <div style="width:60px; background:#fff; border-right:1px solid #eee; display:flex; flex-direction:column; padding:8px 0; gap:1px;">
+            <div style="font-size:7px; font-weight:700; color:#999; text-transform:uppercase; padding:4px 8px; margin-bottom:2px;">Menu</div>
+            ${[["⊞","Dashboard"],["📦","Orders"],["👥","Customers"],["🎁","Products"],["📈","Reports"]].map(([icon,label],idx)=>`
+            <div style="display:flex; align-items:center; gap:4px; padding:4px 6px; background:${idx===0?'#f0f4ff':'transparent'}; border-radius:0 4px 4px 0; margin-right:4px;">
+              <span style="font-size:9px;">${icon}</span><span style="font-size:7.5px; color:${idx===0?'#3366ff':'#666'}; font-weight:${idx===0?700:400};">${label}</span>
+            </div>`).join("")}
+          </div>
+          <!-- Main -->
+          <div style="flex:1; padding:10px; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <div style="font-size:11px; font-weight:700; color:#111;">Orders: All branches</div>
+              <div style="background:#111; color:#fff; border-radius:3px; padding:2px 6px; font-size:8px;">+ New Order</div>
+            </div>
+            <!-- Stats bar -->
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-bottom:8px;">
+              ${[["1,271","Orders","45%"],["31","Items","29%"],["6","Returns","11%"],["22","Delivered","45%"]].map(([n,l,p])=>`
+              <div style="background:#f9f9f9; border:1px solid #eee; border-radius:4px; padding:5px;">
+                <div style="font-size:8px; color:#888;">${l}</div>
+                <div style="font-size:11px; font-weight:800; color:#111;">${n}</div>
+                <div style="font-size:7px; color:#00b894;">+${p} ↑</div>
+              </div>`).join("")}
+            </div>
+            <!-- Tab bar -->
+            <div style="display:flex; gap:6px; margin-bottom:6px; border-bottom:1px solid #eee; padding-bottom:4px;">
+              ${["All","Unprepared","Unpaid","Open","Closed"].map((t,i)=>`<span style="font-size:8px; color:${i===0?'#111':'#999'}; font-weight:${i===0?700:400}; padding-bottom:2px; border-bottom:${i===0?'2px solid #111':'none'};">${t}</span>`).join("")}
+            </div>
+            <!-- Orders table -->
+            <div style="font-size:7.5px;">
+              <div style="display:grid; grid-template-columns:1fr 1.5fr 2fr 1fr 1fr 1fr; gap:2px; color:#999; margin-bottom:3px; font-size:7px; text-transform:uppercase;">
+                <span>Order</span><span>Date</span><span>Customer</span><span>Total</span><span>Payment</span><span>Status</span>
+              </div>
+              ${[["#2050","Today 6:55","Guy Hawkins","$98.99","Paid","Not ready"],["#2049","Today 5:20","Floyd Miles","$396","Paid","Not ready"],["#2048","Today 5:11","Cody Fisher","$98.99","Pending","On hold"]].map(([id,date,name,amt,pay,st])=>`
+              <div style="display:grid; grid-template-columns:1fr 1.5fr 2fr 1fr 1fr 1fr; gap:2px; color:#444; padding:3px 0; border-bottom:1px solid #f5f5f5; align-items:center;">
+                <span style="color:#3366ff;">${id}</span><span>${date}</span><span>${name}</span><span>${amt}</span>
+                <span style="background:#e8f5e9; color:#2e7d32; border-radius:3px; padding:1px 4px;">${pay}</span>
+                <span style="background:#fff8e1; color:#f57f17; border-radius:3px; padding:1px 4px;">${st}</span>
+              </div>`).join("")}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Orders-first (Shopify style)</h3>
+      <p>Summary stat tiles at top. Tabbed orders table with payment/fulfillment status badges. Focus on day-to-day operations. Left sidebar navigation with labels.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="combined" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px; background:#f8f8f8; font-size:11px;">
+      <div style="background:#fff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+        <div style="display:flex; height:180px;">
+          <!-- Sidebar with labels -->
+          <div style="width:60px; background:#fff; border-right:1px solid #eee; display:flex; flex-direction:column; padding:8px 0; gap:1px;">
+            <div style="font-size:7px; font-weight:700; color:#999; text-transform:uppercase; padding:4px 8px; margin-bottom:2px;">Admin</div>
+            ${[["⊞","Dashboard"],["📦","Orders"],["🎁","Products"],["📄","Content"],["🎟","Coupons"]].map(([icon,label],idx)=>`
+            <div style="display:flex; align-items:center; gap:4px; padding:4px 6px; background:${idx===0?'#f0f4ff':'transparent'}; border-radius:0 4px 4px 0; margin-right:4px;">
+              <span style="font-size:9px;">${icon}</span><span style="font-size:7.5px; color:${idx===0?'#3366ff':'#666'}; font-weight:${idx===0?700:400};">${label}</span>
+            </div>`).join("")}
+          </div>
+          <!-- Main -->
+          <div style="flex:1; padding:8px; overflow:hidden;">
+            <div style="font-size:11px; font-weight:700; color:#111; margin-bottom:6px;">Operations Overview</div>
+            <!-- KPI row -->
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:4px; margin-bottom:6px;">
+              <div style="background:linear-gradient(135deg,#6c5ce7,#a29bfe); border-radius:5px; padding:5px; color:#fff;">
+                <div style="font-size:7px; opacity:0.8;">Revenue</div>
+                <div style="font-size:11px; font-weight:800;">$35,892</div>
+                <div style="font-size:7px; opacity:0.7;">+12% ↑</div>
+              </div>
+              <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:5px;">
+                <div style="font-size:7px; color:#888;">Orders</div>
+                <div style="font-size:11px; font-weight:800; color:#111;">1,271</div>
+                <div style="font-size:7px; color:#00b894;">+45% ↑</div>
+              </div>
+              <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:5px;">
+                <div style="font-size:7px; color:#888;">Delivered</div>
+                <div style="font-size:11px; font-weight:800; color:#111;">22</div>
+                <div style="font-size:7px; color:#00b894;">+45% ↑</div>
+              </div>
+            </div>
+            <!-- Chart + recent orders -->
+            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:5px;">
+              <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:5px;">
+                <div style="font-size:7.5px; font-weight:600; color:#333; margin-bottom:3px;">Sales trend</div>
+                <div style="height:28px; position:relative;">
+                  <svg width="100%" height="28" viewBox="0 0 100 28" preserveAspectRatio="none">
+                    <polyline points="0,22 20,18 40,20 60,12 80,10 100,6" fill="none" stroke="#6c8ef5" stroke-width="1.5"/>
+                    <polygon points="0,22 20,18 40,20 60,12 80,10 100,6 100,28 0,28" fill="rgba(108,142,245,0.1)"/>
+                  </svg>
+                </div>
+              </div>
+              <div style="background:#fff; border:1px solid #eee; border-radius:5px; padding:5px;">
+                <div style="font-size:7.5px; font-weight:600; color:#333; margin-bottom:3px;">Recent orders</div>
+                ${[["#2050","Hawkins","$98","✅"],["#2049","Miles","$396","✅"],["#2048","Fisher","$98","⏳"]].map(([id,n,a,s])=>`
+                <div style="display:grid; grid-template-columns:1fr 1.5fr 1fr 0.5fr; gap:2px; font-size:7px; padding:2px 0; border-bottom:1px solid #f8f8f8; color:#555;">
+                  <span style="color:#6c8ef5;">${id}</span><span>${n}</span><span>${a}</span><span>${s}</span>
+                </div>`).join("")}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Combined: KPIs + chart + recent orders</h3>
+      <p>3 KPI cards (revenue highlighted in purple), sales trend chart, and recent orders side-by-side. Sidebar with text labels. Best of both references.</p>
+    </div>
+  </div>
+
+</div>

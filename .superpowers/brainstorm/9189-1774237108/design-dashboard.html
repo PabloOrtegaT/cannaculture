@@ -1,0 +1,242 @@
+<h2>Design Review: Admin Dashboard</h2>
+<p class="subtitle">KPI cards + sales chart + recent orders side-by-side. Approve or flag changes.</p>
+
+<div style="max-width:900px; margin:0 auto; font-family:system-ui,sans-serif;">
+
+  <div style="border:1px solid #e0e0e0; border-radius:10px; overflow:hidden; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+
+    <!-- Top bar -->
+    <div style="background:#fff; border-bottom:1px solid #eee; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:48px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c8ef5" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span style="font-weight:700; font-size:14px;">Admin</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span style="font-size:12px; background:#f0f0f0; border-radius:20px; padding:2px 10px; color:#555;">owner</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; font-size:12px; color:#888;">
+        <span>&#8592; Storefront</span>
+        <div style="width:28px; height:16px; background:#f0f0f0; border-radius:8px; position:relative;"><div style="width:12px; height:12px; background:#fff; border:1px solid #ddd; border-radius:50%; position:absolute; top:2px; right:2px; box-shadow:0 1px 2px rgba(0,0,0,0.1);"></div></div>
+      </div>
+    </div>
+
+    <div style="display:flex;">
+
+      <!-- Sidebar -->
+      <aside style="width:180px; flex-shrink:0; border-right:1px solid #f0f0f0; padding:12px 0; background:#fafafa; min-height:480px;">
+
+        <div style="padding:0 12px; margin-bottom:8px;">
+          <div style="font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#bbb;">Main Menu</div>
+        </div>
+
+        <!-- Dashboard (active) -->
+        <div style="display:flex; align-items:center; gap:9px; padding:9px 14px; background:#eff2ff; border-right:3px solid #6c8ef5; margin-right:0;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6c8ef5" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <span style="font-size:12px; font-weight:700; color:#6c8ef5;">Dashboard</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:9px; padding:9px 14px; color:#666;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span style="font-size:12px;">Orders</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:9px; padding:9px 14px; color:#666;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          <span style="font-size:12px;">Categories</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:9px; padding:9px 14px; color:#666;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <span style="font-size:12px;">Products</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:9px; padding:9px 14px; color:#666;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span style="font-size:12px;">Content</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:9px; padding:9px 14px; color:#666;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/></svg>
+          <span style="font-size:12px;">Coupons</span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:9px; padding:9px 14px; color:#666;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <span style="font-size:12px;">Import</span>
+        </div>
+
+        <div style="border-top:1px solid #eee; margin-top:8px; padding-top:8px;">
+          <div style="display:flex; align-items:center; gap:9px; padding:9px 14px; color:#999;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span style="font-size:12px;">Sign out</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <main style="flex:1; padding:20px; background:#f8f9fb; min-height:480px;">
+
+        <div style="font-size:18px; font-weight:800; color:#111; margin-bottom:16px;">Operations overview</div>
+
+        <!-- KPI cards row -->
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:16px;">
+
+          <!-- Revenue (highlighted) -->
+          <div style="background:linear-gradient(135deg,#6c5ce7,#a29bfe); border-radius:10px; padding:16px; color:#fff; box-shadow:0 4px 12px rgba(108,92,231,0.3);">
+            <div style="font-size:10px; opacity:0.8; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Total Revenue</div>
+            <div style="font-size:24px; font-weight:900; margin-bottom:4px;">$35,892</div>
+            <div style="display:flex; align-items:center; gap:4px; font-size:11px; opacity:0.85;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              +12.3% vs last month
+            </div>
+          </div>
+
+          <!-- Orders -->
+          <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="font-size:10px; color:#999; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Total Orders</div>
+            <div style="font-size:24px; font-weight:900; color:#111; margin-bottom:4px;">1,271</div>
+            <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:#00b894;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              +45% vs last month
+            </div>
+          </div>
+
+          <!-- Delivered -->
+          <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="font-size:10px; color:#999; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Delivered</div>
+            <div style="font-size:24px; font-weight:900; color:#111; margin-bottom:4px;">22</div>
+            <div style="display:flex; align-items:center; gap:4px; font-size:11px; color:#00b894;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              +45% vs last month
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Chart + recent orders row -->
+        <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:12px; margin-bottom:16px;">
+
+          <!-- Sales trend chart -->
+          <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+              <div style="font-size:13px; font-weight:700; color:#111;">Sales Trend</div>
+              <div style="font-size:10px; color:#aaa; background:#f5f5f5; border-radius:4px; padding:2px 8px;">This year &#9662;</div>
+            </div>
+            <div style="height:100px; position:relative;">
+              <svg width="100%" height="100" viewBox="0 0 300 100" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#6c8ef5" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="#6c8ef5" stop-opacity="0.01"/>
+                  </linearGradient>
+                </defs>
+                <polygon points="0,80 30,70 60,75 90,55 120,60 150,40 180,45 210,30 240,35 270,20 300,25 300,100 0,100" fill="url(#areaGrad)"/>
+                <polyline points="0,80 30,70 60,75 90,55 120,60 150,40 180,45 210,30 240,35 270,20 300,25" fill="none" stroke="#6c8ef5" stroke-width="2"/>
+                <!-- Tooltip dot -->
+                <circle cx="150" cy="40" r="4" fill="#6c8ef5"/>
+                <rect x="110" y="18" width="62" height="18" rx="4" fill="#1a1a2e"/>
+                <text x="141" y="30" text-anchor="middle" font-size="9" fill="#fff">$28,450</text>
+              </svg>
+              <!-- X axis labels -->
+              <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:9px; color:#bbb;">
+                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent orders -->
+          <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+            <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:12px;">Recent Orders</div>
+            <div style="display:flex; flex-direction:column; gap:0;">
+
+              <div style="display:grid; grid-template-columns:1fr 1.8fr 1fr 1fr; gap:4px; font-size:9px; text-transform:uppercase; letter-spacing:0.5px; color:#bbb; padding-bottom:6px; border-bottom:1px solid #f5f5f5; margin-bottom:4px;">
+                <span>Order</span><span>Customer</span><span>Total</span><span>Status</span>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1.8fr 1fr 1fr; gap:4px; font-size:11px; color:#444; padding:6px 0; border-bottom:1px solid #f9f9f9; align-items:center;">
+                <span style="color:#6c8ef5; font-weight:600;">#2050</span>
+                <span>Guy Hawkins</span>
+                <span style="font-weight:600;">$98.99</span>
+                <span style="background:#e8f5e9; color:#2e7d32; border-radius:4px; padding:2px 5px; font-size:9px; text-align:center;">Paid</span>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1.8fr 1fr 1fr; gap:4px; font-size:11px; color:#444; padding:6px 0; border-bottom:1px solid #f9f9f9; align-items:center;">
+                <span style="color:#6c8ef5; font-weight:600;">#2049</span>
+                <span>Floyd Miles</span>
+                <span style="font-weight:600;">$396.84</span>
+                <span style="background:#e8f5e9; color:#2e7d32; border-radius:4px; padding:2px 5px; font-size:9px; text-align:center;">Paid</span>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1.8fr 1fr 1fr; gap:4px; font-size:11px; color:#444; padding:6px 0; border-bottom:1px solid #f9f9f9; align-items:center;">
+                <span style="color:#6c8ef5; font-weight:600;">#2048</span>
+                <span>Cody Fisher</span>
+                <span style="font-weight:600;">$98.99</span>
+                <span style="background:#fff8e1; color:#f57f17; border-radius:4px; padding:2px 5px; font-size:9px; text-align:center;">Pending</span>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1.8fr 1fr 1fr; gap:4px; font-size:11px; color:#444; padding:6px 0; align-items:center;">
+                <span style="color:#6c8ef5; font-weight:600;">#2047</span>
+                <span>Ralph Edwards</span>
+                <span style="font-weight:600;">$396.84</span>
+                <span style="background:#e8f5e9; color:#2e7d32; border-radius:4px; padding:2px 5px; font-size:9px; text-align:center;">Paid</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Content snapshot + quick links -->
+        <div style="background:#fff; border:1px solid #eee; border-radius:10px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+          <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:12px;">Store snapshot &amp; quick links</div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px;">
+            <div style="background:#f8f9fb; border:1px solid #eee; border-radius:6px; padding:10px;">
+              <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.8px; color:#aaa; margin-bottom:4px;">Active banners</div>
+              <div style="font-size:20px; font-weight:800; color:#111;">2</div>
+            </div>
+            <div style="background:#f8f9fb; border:1px solid #eee; border-radius:6px; padding:10px;">
+              <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.8px; color:#aaa; margin-bottom:4px;">News posts</div>
+              <div style="font-size:20px; font-weight:800; color:#111;">5</div>
+            </div>
+            <div style="background:#f8f9fb; border:1px solid #eee; border-radius:6px; padding:10px;">
+              <div style="font-size:9px; text-transform:uppercase; letter-spacing:0.8px; color:#aaa; margin-bottom:4px;">Featured sales</div>
+              <div style="font-size:20px; font-weight:800; color:#111;">3</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <a href="#" style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 12px; font-size:11px; color:#555; text-decoration:none; background:#fff;">Manage categories</a>
+            <a href="#" style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 12px; font-size:11px; color:#555; text-decoration:none; background:#fff;">Manage products</a>
+            <a href="#" style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 12px; font-size:11px; color:#555; text-decoration:none; background:#fff;">Manage content</a>
+            <a href="#" style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 12px; font-size:11px; color:#555; text-decoration:none; background:#fff;">Manage coupons</a>
+            <a href="#" style="border:1px solid #e0e0e0; border-radius:6px; padding:5px 12px; font-size:11px; color:#555; text-decoration:none; background:#fff;">Run CSV import</a>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Spec notes -->
+  <div style="background:#f9f9f9; border:1px solid #e5e5e5; border-radius:8px; padding:14px 16px; margin-top:16px; font-size:12px; color:#444; line-height:1.8;">
+    <div style="font-weight:700; color:#111; margin-bottom:6px;">Dashboard spec</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px 24px;">
+      <div>&#8226; <strong>KPI cards:</strong> Revenue (purple gradient), Orders, Delivered — data from existing analytics service</div>
+      <div>&#8226; <strong>Sales chart:</strong> Existing LineChart (recharts) restyled, area fill added</div>
+      <div>&#8226; <strong>Recent orders:</strong> Top 4 from existing OrdersTable data, compact row layout</div>
+      <div>&#8226; <strong>Sidebar:</strong> Wider (180px), text labels always visible, active state highlight</div>
+      <div>&#8226; <strong>Snapshot cards:</strong> Banners / News / Featured counts — existing snapshot data</div>
+      <div>&#8226; <strong>Quick links:</strong> Same nav links, restyled as pill buttons</div>
+    </div>
+  </div>
+
+  <div class="options" style="margin-top:16px;">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">&#10003;</div>
+      <div class="content"><h3>Approve dashboard design</h3><p>All 4 sections approved &#8212; ready to write the spec doc</p></div>
+    </div>
+    <div class="option" data-choice="change" onclick="toggleSelect(this)">
+      <div class="letter">&#9998;</div>
+      <div class="content"><h3>Request changes</h3><p>I'll describe what to adjust in the terminal</p></div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,117 @@
+<h2>Home Page: Hero section approach</h2>
+<p class="subtitle">The reference (home.webp) shows a two-column hero with product visuals. How should we structure it for a no-real-images codebase?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="split-hero" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px; background:#f8f8f8; font-size:11px;">
+      <!-- Split hero mockup -->
+      <div style="background:#fff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+        <!-- Nav -->
+        <div style="background:#fff; border-bottom:1px solid #eee; padding:8px 12px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-weight:800; font-size:12px;">BaseCommerce</span>
+          <div style="flex:1; max-width:140px; margin:0 12px; background:#f3f3f3; border:1px solid #ddd; border-radius:4px; height:18px;"></div>
+          <div style="display:flex; gap:8px; font-size:10px; color:#666;">Cart  Sign In</div>
+        </div>
+        <!-- Hero split -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; min-height:90px;">
+          <div style="padding:14px; background:linear-gradient(135deg,#f9f9f9,#f0f0f0);">
+            <div style="font-size:9px; color:#888; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">New arrivals</div>
+            <div style="font-size:16px; font-weight:800; color:#111; line-height:1.2; margin-bottom:6px;">Upgrade Your<br/>Kitchen Essentials</div>
+            <div style="font-size:9px; color:#888; margin-bottom:8px;">Browse our curated catalog.</div>
+            <div style="display:inline-block; background:#111; color:#fff; border-radius:4px; padding:4px 10px; font-size:9px; font-weight:600;">Shop Now →</div>
+          </div>
+          <div style="display:grid; grid-template-rows:1fr 1fr; gap:0;">
+            <div style="background:#e8e8e8; display:flex; align-items:center; justify-content:center; font-size:10px; color:#aaa; border-bottom:1px solid #ddd; padding:8px;">
+              <div style="text-align:center;"><div style="font-weight:600; color:#555; font-size:10px;">Top Tech. Better Prices</div><div style="font-size:9px; color:#888;">Explore electronics</div><div style="margin-top:4px; background:#f4a836; color:#fff; border-radius:3px; padding:2px 8px; display:inline-block; font-size:8px;">Shop Now</div></div>
+            </div>
+            <div style="background:#efefef; display:flex; align-items:center; justify-content:center; padding:8px;">
+              <div style="text-align:center;"><div style="font-weight:600; color:#555; font-size:10px;">Fix It With Confidence</div><div style="font-size:9px; color:#888;">Genuine parts</div><div style="margin-top:4px; background:#f4a836; color:#fff; border-radius:3px; padding:2px 8px; display:inline-block; font-size:8px;">Shop Now</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Category row -->
+        <div style="display:flex; gap:6px; padding:8px 12px; border-top:1px solid #eee; overflow:hidden;">
+          ${["Kitchen","Electronics","Home Supplies","Lighting","Parts"].map(c => `<div style="background:#f5f5f5; border-radius:6px; padding:6px; text-align:center; font-size:8px; color:#555; flex:1;"><div style="height:20px; background:#e0e0e0; border-radius:3px; margin-bottom:3px;"></div>${c}</div>`).join("")}
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Split hero (Reference style)</h3>
+      <p>Large left hero with headline + CTA. Right side has 2 stacked promotional tiles. Category visual cards row below. Closest to home.webp (Glomara).</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="full-banner" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px; background:#f8f8f8; font-size:11px;">
+      <div style="background:#fff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+        <!-- Nav -->
+        <div style="background:#fff; border-bottom:1px solid #eee; padding:8px 12px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-weight:800; font-size:12px;">BaseCommerce</span>
+          <div style="flex:1; max-width:140px; margin:0 12px; background:#f3f3f3; border:1px solid #ddd; border-radius:4px; height:18px;"></div>
+          <div style="display:flex; gap:8px; font-size:10px; color:#666;">Cart  Sign In</div>
+        </div>
+        <!-- Full-width banner -->
+        <div style="background:linear-gradient(135deg, #1a1a2e, #16213e); padding:20px 16px; position:relative; overflow:hidden;">
+          <div style="position:absolute; right:16px; top:50%; transform:translateY(-50%); width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);"></div>
+          <div style="font-size:9px; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Welcome</div>
+          <div style="font-size:18px; font-weight:800; color:#fff; line-height:1.2; margin-bottom:4px;">Quality products,<br/><span style="font-style:italic; color:#6c8ef5;">delivered fast.</span></div>
+          <div style="font-size:9px; color:#888; margin-bottom:8px;">Fast shipping, easy returns.</div>
+          <div style="display:inline-block; background:#6c8ef5; color:#fff; border-radius:4px; padding:4px 12px; font-size:9px; font-weight:600;">Explore catalog →</div>
+        </div>
+        <!-- Category pills -->
+        <div style="display:flex; gap:4px; padding:8px 12px; flex-wrap:wrap;">
+          ${["All","Electronics","Kitchen","Fashion","Books"].map((c,i) => `<span style="border:1px solid ${i===0?'#111':'#ddd'}; background:${i===0?'#111':'transparent'}; color:${i===0?'#fff':'#666'}; border-radius:20px; padding:2px 8px; font-size:9px;">${c}</span>`).join("")}
+        </div>
+        <!-- Products -->
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:8px 12px 12px;">
+          ${[1,2,3].map(() => `<div style="background:#f9f9f9; border:1px solid #eee; border-radius:6px; overflow:hidden;"><div style="height:40px; background:#f0f0f0;"></div><div style="padding:5px;"><div style="font-size:9px; font-weight:600;">Product</div><div style="font-size:9px; color:#888;">$29.99</div></div></div>`).join("")}
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Full-width dark banner (evolved current)</h3>
+      <p>Wide hero banner spanning the full content width. Category pills below, then product grid. Keeps the current structure but with better visual impact.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="editorial" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px; background:#f8f8f8; font-size:11px;">
+      <div style="background:#fff; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;">
+        <!-- Nav -->
+        <div style="background:#fff; border-bottom:1px solid #eee; padding:8px 12px; display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-weight:800; font-size:12px;">BaseCommerce</span>
+          <div style="display:flex; gap:8px; font-size:10px; color:#666;">Best Sellers  New  Books  Electronics</div>
+        </div>
+        <!-- Hero row: text left, featured product card right -->
+        <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px; padding:14px 12px 10px;">
+          <div>
+            <div style="font-size:9px; color:#888; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px;">Sale</div>
+            <div style="font-size:18px; font-weight:800; color:#111; line-height:1.15; margin-bottom:5px;">Quality products,<br/><span style="font-style:italic; color:var(--primary,#6c8ef5);">delivered fast.</span></div>
+            <div style="font-size:9px; color:#888; margin-bottom:8px;">Fast shipping, easy returns.</div>
+            <div style="display:inline-block; background:#111; color:#fff; border-radius:4px; padding:4px 12px; font-size:9px; font-weight:600;">Explore catalog →</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:5px;">
+            <div style="background:#f3f3f3; border:1px solid #e5e5e5; border-radius:6px; overflow:hidden; flex:1; display:flex; flex-direction:column;">
+              <div style="height:40px; background:#e8e8e8; display:flex; align-items:center; justify-content:center; font-size:8px; color:#aaa;">Featured Product</div>
+              <div style="padding:5px;"><div style="font-size:9px; font-weight:600;">Top Product Name</div><div style="font-size:9px; font-weight:700; color:#111;">$89.99</div></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+              <div style="background:#f3f3f3; border:1px solid #e5e5e5; border-radius:5px; height:32px; display:flex; align-items:center; justify-content:center; font-size:8px; color:#aaa;">Product 2</div>
+              <div style="background:#f3f3f3; border:1px solid #e5e5e5; border-radius:5px; height:32px; display:flex; align-items:center; justify-content:center; font-size:8px; color:#aaa;">Product 3</div>
+            </div>
+          </div>
+        </div>
+        <!-- Nav categories row -->
+        <div style="display:flex; gap:6px; padding:0 12px 10px; overflow:hidden;">
+          ${["Kitchen","Electronics","Home","Lighting","Parts"].map(c => `<div style="background:#f5f5f5; border-radius:5px; padding:5px; text-align:center; font-size:8px; color:#555; flex:1;"><div style="height:18px; background:#e0e0e0; border-radius:3px; margin-bottom:3px;"></div>${c}</div>`).join("")}
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Editorial: hero + featured products side-by-side</h3>
+      <p>Left column headline/CTA, right column shows featured product cards stacked. Below: category visual tiles. More content-driven, highlights actual products.</p>
+    </div>
+  </div>
+
+</div>

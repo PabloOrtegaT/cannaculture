@@ -1,0 +1,215 @@
+<h2>Design Review: Home Page</h2>
+<p class="subtitle">Split hero + category tiles + featured products. Approve or flag changes.</p>
+
+<div style="max-width:900px; margin:0 auto; font-family:system-ui,sans-serif;">
+
+  <div style="border:1px solid #e0e0e0; border-radius:10px; overflow:hidden; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+
+    <!-- Split Hero -->
+    <div style="display:grid; grid-template-columns:1.1fr 1fr; min-height:220px;">
+
+      <!-- Left: headline + CTA -->
+      <div style="padding:32px 28px; background:linear-gradient(135deg,#f9f9f9,#f2f2f2); display:flex; flex-direction:column; justify-content:center; gap:12px;">
+        <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#888;">Welcome</div>
+        <div style="font-size:32px; font-weight:900; color:#111; line-height:1.1;">
+          Quality products,<br/>
+          <span style="font-weight:400; font-style:italic; color:#6c8ef5;">delivered fast.</span>
+        </div>
+        <div style="font-size:13px; color:#888; line-height:1.6; max-width:280px;">Browse our curated catalog. Fast shipping, easy returns.</div>
+        <div>
+          <a href="#" style="display:inline-flex; align-items:center; gap:6px; background:#111; color:#fff; border-radius:6px; padding:10px 18px; font-size:13px; font-weight:600; text-decoration:none;">
+            Explore catalog
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: 2 stacked promo tiles -->
+      <div style="display:grid; grid-template-rows:1fr 1fr; border-left:1px solid #eee;">
+
+        <!-- Promo tile 1 -->
+        <div style="padding:20px 22px; background:#1a1a2e; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div>
+            <div style="font-size:16px; font-weight:800; color:#fff; margin-bottom:4px;">Top Tech. Better Prices.</div>
+            <div style="font-size:11px; color:#aaa; margin-bottom:10px;">Explore electronics</div>
+            <a href="#" style="display:inline-block; background:#6c8ef5; color:#fff; border-radius:5px; padding:6px 14px; font-size:11px; font-weight:600; text-decoration:none;">Shop Now</a>
+          </div>
+          <div style="width:52px; height:52px; border-radius:50%; background:rgba(108,142,245,0.15); border:1px solid rgba(108,142,245,0.3); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6c8ef5" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+        </div>
+
+        <!-- Promo tile 2 -->
+        <div style="padding:20px 22px; background:#f7f3ee; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <div style="font-size:16px; font-weight:800; color:#2d2d2d; margin-bottom:4px;">Fix It With Confidence.</div>
+            <div style="font-size:11px; color:#888; margin-bottom:10px;">Explore genuine parts</div>
+            <a href="#" style="display:inline-block; background:#e8825a; color:#fff; border-radius:5px; padding:6px 14px; font-size:11px; font-weight:600; text-decoration:none;">Shop Now</a>
+          </div>
+          <div style="width:52px; height:52px; border-radius:50%; background:rgba(232,130,90,0.12); border:1px solid rgba(232,130,90,0.3); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8825a" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Category visual tiles row -->
+    <div style="padding:20px; border-top:1px solid #f0f0f0; background:#fafafa;">
+      <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#888; margin-bottom:12px;">Browse by category</div>
+      <div style="display:flex; gap:10px; overflow:hidden;">
+
+        <div style="flex:1; border-radius:8px; overflow:hidden; border:1px solid #e5e5e5; background:#fff; text-align:center; padding-bottom:8px;">
+          <div style="height:52px; background:linear-gradient(135deg,#e8f5e9,#c8e6c9); display:flex; align-items:center; justify-content:center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div style="font-size:10px; font-weight:600; color:#333; margin-top:6px;">Kitchen</div>
+        </div>
+
+        <div style="flex:1; border-radius:8px; overflow:hidden; border:1px solid #e5e5e5; background:#fff; text-align:center; padding-bottom:8px;">
+          <div style="height:52px; background:linear-gradient(135deg,#e3f2fd,#bbdefb); display:flex; align-items:center; justify-content:center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2196f3" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div style="font-size:10px; font-weight:600; color:#333; margin-top:6px;">Electronics</div>
+        </div>
+
+        <div style="flex:1; border-radius:8px; overflow:hidden; border:1px solid #e5e5e5; background:#fff; text-align:center; padding-bottom:8px;">
+          <div style="height:52px; background:linear-gradient(135deg,#fce4ec,#f8bbd0); display:flex; align-items:center; justify-content:center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e91e63" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div style="font-size:10px; font-weight:600; color:#333; margin-top:6px;">Fashion</div>
+        </div>
+
+        <div style="flex:1; border-radius:8px; overflow:hidden; border:1px solid #e5e5e5; background:#fff; text-align:center; padding-bottom:8px;">
+          <div style="height:52px; background:linear-gradient(135deg,#fff8e1,#ffecb3); display:flex; align-items:center; justify-content:center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <div style="font-size:10px; font-weight:600; color:#333; margin-top:6px;">Books</div>
+        </div>
+
+        <div style="flex:1; border-radius:8px; overflow:hidden; border:1px solid #e5e5e5; background:#fff; text-align:center; padding-bottom:8px;">
+          <div style="height:52px; background:linear-gradient(135deg,#e8eaf6,#c5cae9); display:flex; align-items:center; justify-content:center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3f51b5" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div style="font-size:10px; font-weight:600; color:#333; margin-top:6px;">Health</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Featured products section -->
+    <div style="padding:20px; border-top:1px solid #f0f0f0;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+        <div>
+          <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#888; margin-bottom:2px;">Handpicked</div>
+          <div style="font-size:20px; font-weight:800; color:#111;">Featured products</div>
+        </div>
+        <a href="#" style="font-size:12px; color:#6c8ef5; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:4px;">
+          View all
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;">
+
+        <!-- Featured card 1 -->
+        <div style="background:#fff; border:1px solid #e8e8e8; border-radius:8px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+          <div style="height:120px; background:linear-gradient(135deg,#f7f7f7,#eeeeee); position:relative; display:flex; align-items:center; justify-content:center;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d0d0d0" stroke-width="1.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            <button style="position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#999;">&#9825;</button>
+            <div style="position:absolute;bottom:7px;left:8px;background:rgba(255,255,255,0.9);border-radius:20px;padding:1px 7px;font-size:9px;color:#666;border:1px solid #eee;">Electronics</div>
+          </div>
+          <div style="padding:10px;">
+            <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:3px;">Organics Kids Gummy</div>
+            <div style="display:flex;align-items:center;gap:3px;margin-bottom:5px;">
+              <span style="color:#f4b942;font-size:10px;">&#9733;&#9733;&#9733;&#9733;</span><span style="color:#ddd;font-size:10px;">&#9733;</span>
+              <span style="font-size:9px;color:#aaa;">243</span>
+            </div>
+            <div style="font-size:13px;font-weight:800;color:#111;">$26.59</div>
+          </div>
+        </div>
+
+        <!-- Featured card 2: discount -->
+        <div style="background:#fff; border:1px solid #e8e8e8; border-radius:8px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+          <div style="height:120px; background:linear-gradient(135deg,#f7f7f7,#eeeeee); position:relative; display:flex; align-items:center; justify-content:center;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d0d0d0" stroke-width="1.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            <button style="position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#e74c3c;">&#9829;</button>
+            <div style="position:absolute;top:8px;left:8px;background:#e74c3c;color:#fff;border-radius:20px;padding:1px 6px;font-size:9px;font-weight:700;">&#8722;18%</div>
+            <div style="position:absolute;bottom:7px;left:8px;background:rgba(255,255,255,0.9);border-radius:20px;padding:1px 7px;font-size:9px;color:#666;border:1px solid #eee;">Kitchen</div>
+          </div>
+          <div style="padding:10px;">
+            <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:3px;">Naked Nutrition Multi</div>
+            <div style="display:flex;align-items:center;gap:3px;margin-bottom:5px;">
+              <span style="color:#f4b942;font-size:10px;">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+              <span style="font-size:9px;color:#aaa;">98</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:13px;font-weight:800;color:#111;">$86.13</span>
+              <span style="font-size:11px;color:#bbb;text-decoration:line-through;">$105.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Featured card 3 -->
+        <div style="background:#fff; border:1px solid #e8e8e8; border-radius:8px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05);">
+          <div style="height:120px; background:linear-gradient(135deg,#f7f7f7,#eeeeee); position:relative; display:flex; align-items:center; justify-content:center;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d0d0d0" stroke-width="1.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            <button style="position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#999;">&#9825;</button>
+            <div style="position:absolute;bottom:7px;left:8px;background:rgba(255,255,255,0.9);border-radius:20px;padding:1px 7px;font-size:9px;color:#666;border:1px solid #eee;">Health</div>
+          </div>
+          <div style="padding:10px;">
+            <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:3px;">Amazon Elements Vit C</div>
+            <div style="display:flex;align-items:center;gap:3px;margin-bottom:5px;">
+              <span style="color:#f4b942;font-size:10px;">&#9733;&#9733;&#9733;&#9733;</span><span style="color:#ddd;font-size:10px;">&#9733;</span>
+              <span style="font-size:9px;color:#aaa;">512</span>
+            </div>
+            <div style="font-size:13px;font-weight:800;color:#111;">$12.99</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Latest news section -->
+    <div style="padding:20px; border-top:1px solid #f0f0f0; background:#fafafa;">
+      <div style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:#888; margin-bottom:2px;">Updates</div>
+      <div style="font-size:20px; font-weight:800; color:#111; margin-bottom:14px;">Latest news</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div style="background:#fff; border:1px solid #e5e5e5; border-radius:8px; padding:14px;">
+          <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px; line-height:1.4;">New summer collection now available</div>
+          <div style="font-size:11px; color:#888; line-height:1.6;">Explore the latest arrivals with exclusive deals for the season. Free shipping on orders over $50.</div>
+        </div>
+        <div style="background:#fff; border:1px solid #e5e5e5; border-radius:8px; padding:14px;">
+          <div style="font-size:13px; font-weight:700; color:#111; margin-bottom:6px; line-height:1.4;">Flash sale ends this weekend</div>
+          <div style="font-size:11px; color:#888; line-height:1.6;">Up to 30% off on selected electronics and kitchen appliances. Limited time, limited stock.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Spec notes -->
+  <div style="background:#f9f9f9; border:1px solid #e5e5e5; border-radius:8px; padding:14px 16px; margin-top:16px; font-size:12px; color:#444; line-height:1.8;">
+    <div style="font-weight:700; color:#111; margin-bottom:6px;">Home page spec</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2px 24px;">
+      <div>&#8226; <strong>Hero:</strong> 2-col grid (1.1fr / 1fr), stacks to 1-col on mobile</div>
+      <div>&#8226; <strong>Promo tiles:</strong> Dark tile + warm tile, link to /catalog?category=X</div>
+      <div>&#8226; <strong>Category tiles:</strong> One per category, color-coded icon + label</div>
+      <div>&#8226; <strong>Featured products:</strong> Same ProductCard component, 3-col grid</div>
+      <div>&#8226; <strong>News:</strong> Kept as-is, 2-col card grid, bg #fafafa</div>
+      <div>&#8226; <strong>Banner data:</strong> Uses existing activeBanner / home content</div>
+    </div>
+  </div>
+
+  <div class="options" style="margin-top:16px;">
+    <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+      <div class="letter">&#10003;</div>
+      <div class="content"><h3>Approve home page design</h3><p>Proceed to dashboard section</p></div>
+    </div>
+    <div class="option" data-choice="change" onclick="toggleSelect(this)">
+      <div class="letter">&#9998;</div>
+      <div class="content"><h3>Request changes</h3><p>I'll describe what to adjust in the terminal</p></div>
+    </div>
+  </div>
+
+</div>

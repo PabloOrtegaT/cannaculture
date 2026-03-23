@@ -19,12 +19,13 @@ function getBrowserThemePreference(): Theme {
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") {
-      return DEFAULT_THEME;
-    }
-    return getBrowserThemePreference();
-  });
+  // Always start with DEFAULT_THEME to match server render; sync from browser after hydration
+  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading theme preference from browser after hydration is intentional; init script handles visual before React loads
+    setTheme(getBrowserThemePreference());
+  }, []);
 
   useEffect(() => {
     applyThemeToDocument(theme);

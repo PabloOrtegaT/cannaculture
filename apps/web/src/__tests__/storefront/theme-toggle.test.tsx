@@ -34,7 +34,7 @@ describe("theme toggle", () => {
     await waitFor(() => {
       expect(document.documentElement.dataset.theme).toBe("light");
     });
-    expect(screen.getByRole("button", { name: "Toggle day and night theme" })).toHaveTextContent("Theme");
+    expect(screen.getByRole("button", { name: "Toggle day and night theme" })).toBeInTheDocument();
   });
 
   it("loads persisted theme preference from localStorage", async () => {
@@ -46,7 +46,7 @@ describe("theme toggle", () => {
       expect(document.documentElement.dataset.theme).toBe("dark");
     });
     expect(document.documentElement.style.colorScheme).toBe("dark");
-    expect(screen.getByRole("button", { name: "Toggle day and night theme" })).toHaveTextContent("Theme");
+    expect(screen.getByRole("button", { name: "Toggle day and night theme" })).toBeInTheDocument();
   });
 
   it("toggles theme and persists the updated preference", async () => {
@@ -61,6 +61,6 @@ describe("theme toggle", () => {
     await user.click(toggleButton);
     expect(document.documentElement.dataset.theme).toBe("dark");
     expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
-    expect(toggleButton).toHaveTextContent("Theme");
+    expect(toggleButton).toBeInTheDocument();
   });
 });

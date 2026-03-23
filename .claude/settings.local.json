@@ -10,7 +10,11 @@
       "Bash(find /c/Users/Public/Desktop/prog/base-ecommerce/apps/web/src/__tests__/api -type f -name *.test.ts)",
       "Bash(find /c/Users/Public/Desktop/prog/base-ecommerce/docs -type f -name *payment* -o -name *checkout* -o -name *order*)",
       "Bash(find /c/Users/Public/Desktop/prog/base-ecommerce/apps/web/src/app -path */checkout* -o -path */payments*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(cat \"C:/Users/Public/Desktop/prog/base-ecommerce/apps/web/src/app/\\(storefront\\)/catalog/page.tsx\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(ls \"C:/Users/Public/Desktop/prog/base-ecommerce/apps/web/src/app/\\(storefront\\)/\")"
     ]
   }
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans, Geist_Mono } from "next/font/google";
 import { FlashToastHost } from "@/components/feedback/flash-toast-host";
 import { themeInitializationScript } from "@/features/theme/theme-script";
+import { paletteInitializationScript } from "@/features/theme/palette-script";
 import { popFlashToast } from "@/server/feedback/flash-toast";
 import { getSiteBaseUrl } from "@/server/seo/metadata";
 import "./globals.css";
@@ -53,6 +54,7 @@ export default async function RootLayout({
       <head>
         <meta name="color-scheme" content="light dark" />
         <script dangerouslySetInnerHTML={{ __html: themeInitializationScript }} />
+        <script dangerouslySetInnerHTML={{ __html: paletteInitializationScript }} />
       </head>
       <body className={`${playfairDisplay.variable} ${dmSans.variable} ${geistMono.variable} antialiased`}>
         <FlashToastHost initialToast={flashToast} />

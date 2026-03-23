@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { canAccessAdminRoute, type AdminRouteKey, assertAdminHostAccess, isAdminRole } from "@/server/admin/role-guard";
 import { getSessionUser } from "@/server/auth/session";
+import { getHostRuntimeConfig } from "@/server/config/runtime-env";
+import { buildAbsoluteUrl, resolveHostPolicy } from "@/server/config/host-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +48,12 @@ export default async function AdminLayout({
 }>) {
   await assertAdminHostAccess();
   const user = await getSessionUser();
+  const hostConfig = getHostRuntimeConfig();
+  const policy = resolveHostPolicy(hostConfig);
+  const storefrontHref =
+    !policy.appHost || policy.appHost === policy.adminHost
+      ? "/"
+      : buildAbsoluteUrl(policy.appBaseUrl, "/");
   if (!user) {
     redirect("/login?next=/admin");
   }
@@ -69,7 +77,7 @@ export default async function AdminLayout({
             <Badge variant={roleColors[role] ?? "secondary"}>{role}</Badge>
           </div>
           <div className="flex items-center gap-2">
-            <a href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a href={storefrontHref} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               ← Storefront
             </a>
             <ThemeToggle />

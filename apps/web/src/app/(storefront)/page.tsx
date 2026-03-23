@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Tag } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { HomeAuthActions } from "@/components/auth/home-auth-actions";
-import { JsonLdScript } from "@/components/seo/json-ld-script";
 import { ProductCard } from "@/components/storefront/product-card";
-import { getHomeContent, listCatalogProducts } from "@/server/data/storefront-service";
+import { JsonLdScript } from "@/components/seo/json-ld-script";
+import {
+  getHomeContent,
+  listCatalogProducts,
+  listCategories,
+} from "@/server/data/storefront-service";
 import { createPageMetadata } from "@/server/seo/metadata";
 import { buildArticleJsonLd } from "@/server/seo/structured-data";
 
@@ -21,60 +24,62 @@ export const revalidate = 60;
 export default async function HomePage() {
   const home = getHomeContent();
   const catalogProducts = listCatalogProducts();
+  const categories = listCategories();
 
   return (
     <div className="space-y-10">
 
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      {/* Mirrors the catalog page-header pattern:               */}
-      {/* amber label → heading row → border-b                  */}
-      <div className="border-b pb-8">
-
-
-        <div className="flex flex-wrap items-start justify-between gap-x-12 gap-y-6">
-          {/* Left: editorial headline + CTA */}
-          <div
-            className="space-y-4 animate-fade-in-up"
-            style={{ animationDelay: "60ms" }}
-          >
+      {/* ── Promotional Banner ──────────────────────────────── */}
+      <div className="rounded-lg border border-primary/20 bg-primary/8 p-8 md:p-10">
+        <div className="flex flex-wrap items-center justify-between gap-8">
+          <div className="space-y-4 max-w-md">
+            <p className="text-xs font-medium uppercase tracking-widest text-primary">
+              {home.activeBanner ? "Sale" : "Welcome"}
+            </p>
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.05]">
-              Quality products,
-              <br />
-              <span className="font-normal italic text-primary">delivered fast.</span>
+              {home.activeBanner ? (
+                home.activeBanner.title
+              ) : (
+                <>
+                  Quality products,
+                  <br />
+                  <span className="font-normal italic text-primary">delivered fast.</span>
+                </>
+              )}
             </h1>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Browse our curated catalog. Fast shipping, easy returns.
             </p>
             <Button asChild>
-              <Link href="/catalog">
-                Explore catalog <ArrowRight className="h-4 w-4" />
+              <Link href={home.activeBanner?.ctaHref ?? "/catalog"}>
+                {home.activeBanner ? (home.activeBanner.ctaLabel ?? "Shop the sale") : "Explore catalog"}
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
-
-          {/* Right: sale chip + account quick-access           */}
-          {/* Aligns to the right the same way the catalog     */}
-          {/* pushes its product count to the right.           */}
           <div
-            className="flex flex-col items-start gap-3 animate-fade-in-up"
-            style={{ animationDelay: "120ms" }}
-          >
-            {home.activeBanner && (
-              <Link
-                href={home.activeBanner.ctaHref ?? "/catalog"}
-                className="flex items-center gap-2 rounded-full border border-primary/40 bg-primary/8 px-4 py-2 text-xs font-medium transition-colors hover:border-primary"
-              >
-                <Tag className="h-3 w-3 text-primary shrink-0" />
-                <span>{home.activeBanner.title}</span>
-                <ArrowUpRight className="h-3 w-3 text-muted-foreground shrink-0" />
-              </Link>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <HomeAuthActions />
-            </div>
-          </div>
+            className="hidden md:block w-48 h-48 rounded-full bg-primary/20 blur-3xl pointer-events-none shrink-0"
+            aria-hidden="true"
+          />
         </div>
       </div>
+
+      {/* ── Category quick-access ────────────────────────────── */}
+      {categories.length > 0 && (
+        <div className="overflow-x-auto -mx-6 px-6">
+          <div className="flex gap-3 pb-1 w-max min-w-full">
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/catalog?category=${category.slug}`}
+                className="rounded-full border px-4 py-1.5 text-sm font-medium whitespace-nowrap transition-colors text-muted-foreground border-border hover:border-foreground hover:text-foreground"
+              >
+                {category.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Featured products ─────────────────────────────────── */}
       {home.featuredProducts.length > 0 && (
@@ -92,7 +97,6 @@ export default async function HomePage() {
               </Button>
             </div>
           </div>
-
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {home.featuredProducts.map((featured) => {
               const cardData = catalogProducts.find((e) => e.product.id === featured.id);
@@ -124,7 +128,6 @@ export default async function HomePage() {
             </p>
             <h2 className="text-3xl font-bold tracking-tight">Latest news</h2>
           </div>
-
           <div className="grid gap-4 sm:grid-cols-2">
             {home.news.map((news) => (
               <article
@@ -140,16 +143,17 @@ export default async function HomePage() {
         </section>
       )}
 
-      {home.news.map((news) => (
-        <JsonLdScript
-          key={`article-jsonld-${news.id}`}
-          value={buildArticleJsonLd({
-            headline: news.title,
-            description: news.summary,
-            pathname: `/#news-${news.id}`,
-          })}
-        />
-      ))}
+      {home.news.length > 0 &&
+        home.news.map((news) => (
+          <JsonLdScript
+            key={`article-jsonld-${news.id}`}
+            value={buildArticleJsonLd({
+              headline: news.title,
+              description: news.summary,
+              pathname: `/#news-${news.id}`,
+            })}
+          />
+        ))}
     </div>
   );
 }

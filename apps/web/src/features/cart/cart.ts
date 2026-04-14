@@ -27,12 +27,15 @@ export function addCartItem(
   item: Omit<CartItem, "quantity">,
   quantityToAdd: number,
 ): CartState {
-  if (item.stockOnHand <= 0 || quantityToAdd <= 0) {
+  if (!Number.isFinite(quantityToAdd) || !Number.isInteger(quantityToAdd) || quantityToAdd <= 0) {
     return cart;
   }
 
   const existingIndex = cart.items.findIndex((line) => line.variantId === item.variantId);
   if (existingIndex === -1) {
+    if (item.stockOnHand <= 0) {
+      return cart;
+    }
     const quantity = clampQuantity(quantityToAdd, item.stockOnHand);
     if (quantity <= 0) {
       return cart;
@@ -45,15 +48,22 @@ export function addCartItem(
     return cart;
   }
   const updatedQuantity = clampQuantity(existing.quantity + quantityToAdd, item.stockOnHand);
+  if (updatedQuantity <= 0) {
+    return { items: cart.items.filter((line) => line.variantId !== item.variantId) };
+  }
   const nextItems = [...cart.items];
   nextItems[existingIndex] = { ...existing, ...item, quantity: updatedQuantity };
 
   return { items: nextItems };
 }
 
-export function updateCartItemQuantity(cart: CartState, variantId: string, quantity: number): CartState {
+export function updateCartItemQuantity(
+  cart: CartState,
+  variantId: string,
+  quantity: number,
+): CartState {
   const current = cart.items.find((line) => line.variantId === variantId);
-  if (!current) {
+  if (!current || !Number.isFinite(quantity) || !Number.isInteger(quantity)) {
     return cart;
   }
 
@@ -65,7 +75,9 @@ export function updateCartItemQuantity(cart: CartState, variantId: string, quant
   }
 
   return {
-    items: cart.items.map((line) => (line.variantId === variantId ? { ...line, quantity: nextQuantity } : line)),
+    items: cart.items.map((line) =>
+      line.variantId === variantId ? { ...line, quantity: nextQuantity } : line,
+    ),
   };
 }
 

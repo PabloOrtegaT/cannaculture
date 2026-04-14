@@ -1,18 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ShoppingCart, ArrowRight, Minus, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { showClientToast } from "@/components/feedback/client-toast";
 import { calculateCartTotals } from "@/features/cart/cart";
 import { useCartStore } from "@/features/cart/cart-store";
 import { formatCurrencyFromCents, getPriceDisplay } from "@/features/catalog/pricing";
-import { runSingleFlight } from "@/lib/single-flight";
 
 type VariantItem = {
   id: string;
@@ -30,6 +36,7 @@ type ProductPurchasePanelProps = {
   productSlug: string;
   currency: "MXN" | "USD";
   variants: VariantItem[];
+  defaultVariantId?: string | undefined;
 };
 
 type VariantAvailability = {
@@ -46,13 +53,19 @@ export function ProductPurchasePanel({
   productSlug,
   currency,
   variants,
+  defaultVariantId,
 }: ProductPurchasePanelProps) {
   const addItem = useCartStore((state) => state.addItem);
-  const [selectedVariantId, setSelectedVariantId] = useState(variants[0]?.id ?? "");
-  const [quantity, setQuantity] = useState(1);
+  const initialVariantId = defaultVariantId ?? variants[0]?.id ?? "";
+  const initialStock = variants.find((v) => v.id === initialVariantId)?.stockOnHand ?? 0;
+  const [selectedVariantId, setSelectedVariantId] = useState(initialVariantId);
+  const [quantity, setQuantity] = useState(initialStock > 0 ? 1 : 0);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [availability, setAvailability] = useState<VariantAvailability | null>(null);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const variantSelectId = useId();
+  const quantityLabelId = useId();
+  const prevResolvedStockRef = useRef<number | null>(null);
 
   const selectedVariant = useMemo(
     () => variants.find((v) => v.id === selectedVariantId) ?? variants[0] ?? null,
@@ -60,32 +73,71 @@ export function ProductPurchasePanel({
   );
 
   useEffect(() => {
-    if (!selectedVariant) return;
+    const stillValid = variants.some((v) => v.id === selectedVariantId);
+    if (!stillValid) {
+      const fallbackId = variants[0]?.id ?? "";
+      if (fallbackId !== selectedVariantId) {
+        setSelectedVariantId(fallbackId);
+        const fallbackStock = variants[0]?.stockOnHand ?? 0;
+        setQuantity(fallbackStock > 0 ? 1 : 0);
+        setAvailability(null);
+        setFeedback(null);
+      }
+    }
+  }, [variants, selectedVariantId]);
+
+  useEffect(() => {
+    if (!selectedVariantId) {
+      setIsCheckingAvailability(false);
+      return;
+    }
     let active = true;
+    const controller = new AbortController();
     const run = async () => {
       setIsCheckingAvailability(true);
       try {
-        const payload = await runSingleFlight<VariantAvailability | null>(
-          `catalog-availability:${selectedVariant.id}`,
-          async () => {
-            const url = new URL("/api/catalog/availability", window.location.origin);
-            url.searchParams.set("variantId", selectedVariant.id);
-            const response = await fetch(url, { method: "GET", cache: "no-store" });
-            if (!response.ok) return null;
-            return (await response.json()) as VariantAvailability;
-          },
-        );
-        if (!active) return;
-        setAvailability(payload);
-      } catch {
+        const url = new URL("/api/catalog/availability", window.location.origin);
+        url.searchParams.set("variantId", selectedVariantId);
+        const response = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          if (active) setAvailability(null);
+          return;
+        }
+        const raw = await response.json();
+        if (
+          raw &&
+          typeof raw === "object" &&
+          typeof raw.variantId === "string" &&
+          typeof raw.stockOnHand === "number" &&
+          Number.isFinite(raw.stockOnHand) &&
+          typeof raw.isPurchasable === "boolean" &&
+          (raw.reason === undefined || typeof raw.reason === "string")
+        ) {
+          if (active) {
+            setAvailability(raw as VariantAvailability);
+          }
+        } else {
+          if (active) setAvailability(null);
+        }
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
         if (active) setAvailability(null);
       } finally {
         if (active) setIsCheckingAvailability(false);
       }
     };
     void run();
-    return () => { active = false; };
-  }, [selectedVariant]);
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [selectedVariantId]);
 
   useEffect(() => {
     if (!selectedVariant) return;
@@ -93,7 +145,13 @@ export function ProductPurchasePanel({
       availability && availability.variantId === selectedVariant.id
         ? availability.stockOnHand
         : selectedVariant.stockOnHand;
-    setQuantity((current) => Math.max(1, Math.min(current, Math.max(1, resolvedStock))));
+    if (prevResolvedStockRef.current === resolvedStock) return;
+    prevResolvedStockRef.current = resolvedStock;
+    setQuantity((current) => {
+      const max = Math.max(0, resolvedStock);
+      if (max <= 0) return 0;
+      return Math.max(1, Math.min(current, max));
+    });
   }, [availability, selectedVariant]);
 
   if (!selectedVariant) {
@@ -107,10 +165,14 @@ export function ProductPurchasePanel({
   }
 
   const price = getPriceDisplay(selectedVariant.priceCents, selectedVariant.compareAtPriceCents);
-  const resolvedAvailability =
+  const resolvedAvailability: VariantAvailability =
     availability && availability.variantId === selectedVariant.id
       ? availability
-      : { variantId: selectedVariant.id, stockOnHand: selectedVariant.stockOnHand, isPurchasable: selectedVariant.stockOnHand > 0 };
+      : {
+          variantId: selectedVariant.id,
+          stockOnHand: selectedVariant.stockOnHand,
+          isPurchasable: selectedVariant.stockOnHand > 0,
+        };
   const resolvedStock = resolvedAvailability.stockOnHand;
   const isOutOfStock = !resolvedAvailability.isPurchasable || resolvedStock <= 0;
   const canAddToCart = !isOutOfStock && !isCheckingAvailability && quantity <= resolvedStock;
@@ -136,7 +198,8 @@ export function ProductPurchasePanel({
       quantity,
     );
     const totals = calculateCartTotals(useCartStore.getState().cart);
-    setFeedback(`Added! You now have ${totals.itemCount} item(s) in your cart.`);
+    const itemWord = totals.itemCount === 1 ? "item" : "items";
+    setFeedback(`Added! You now have ${totals.itemCount} ${itemWord} in your cart.`);
   };
 
   return (
@@ -159,9 +222,17 @@ export function ProductPurchasePanel({
           </div>
           <div className="flex items-center gap-2">
             {isCheckingAvailability ? (
-              <Badge variant="secondary">Checking stock...</Badge>
+              <Badge variant="secondary" data-testid="stock-status">
+                Checking stock...
+              </Badge>
             ) : isOutOfStock ? (
-              <Badge variant="destructive">Out of stock</Badge>
+              <Badge variant="destructive" data-testid="stock-status">
+                Out of stock
+              </Badge>
+            ) : resolvedStock <= 5 ? (
+              <Badge variant="warning" data-testid="stock-status">
+                Only {resolvedStock} left
+              </Badge>
             ) : (
               <Badge variant="success" data-testid="stock-status">
                 {resolvedStock} in stock
@@ -178,57 +249,68 @@ export function ProductPurchasePanel({
         {/* Variant selection */}
         {variants.length > 1 && (
           <div className="space-y-1.5">
-            <Label htmlFor="variant-select">Variant</Label>
-            <select
-              id="variant-select"
+            <Label htmlFor={variantSelectId}>Variant</Label>
+            <Select
               value={selectedVariant.id}
-              onChange={(event) => {
-                setSelectedVariantId(event.target.value);
-                setQuantity(1);
+              onValueChange={(value) => {
+                setSelectedVariantId(value);
+                const nextStock = variants.find((v) => v.id === value)?.stockOnHand ?? 0;
+                setQuantity(nextStock > 0 ? 1 : 0);
+                setAvailability(null);
                 setFeedback(null);
               }}
-              className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              aria-label="Select variant"
             >
-              {variants.map((v) => (
-                <option key={v.id} value={v.id}>{v.name}</option>
-              ))}
-            </select>
+              <SelectTrigger id={variantSelectId} className="w-full">
+                <SelectValue placeholder="Choose a variant" />
+              </SelectTrigger>
+              <SelectContent>
+                {variants.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>
+                    {v.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
 
         {/* Quantity */}
         <div className="space-y-1.5">
-          <Label>Quantity</Label>
-          <div className="flex items-center gap-1 w-fit rounded-lg border bg-background">
+          <div id={quantityLabelId} className="text-sm font-medium">
+            Quantity
+          </div>
+          <div
+            className="flex items-center gap-1 w-fit rounded-lg border bg-background"
+            aria-labelledby={quantityLabelId}
+          >
             <Button
               variant="ghost"
               size="icon"
               className="h-9 w-9 rounded-r-none"
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              disabled={quantity <= 1 || isOutOfStock}
+              onClick={() => setQuantity((q) => Math.max(0, q - 1))}
+              disabled={quantity <= 0 || isOutOfStock}
               aria-label="Decrease quantity"
             >
               <Minus className="h-3 w-3" />
             </Button>
-            <span className="w-10 text-center text-sm font-medium tabular-nums">{quantity}</span>
+            <span
+              className="w-10 text-center text-sm font-medium tabular-nums"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {quantity}
+            </span>
             <Button
               variant="ghost"
               size="icon"
               className="h-9 w-9 rounded-l-none"
-              onClick={() => setQuantity((q) => Math.min(q + 1, Math.max(1, resolvedStock)))}
+              onClick={() => setQuantity((q) => Math.min(q + 1, Math.max(0, resolvedStock)))}
               disabled={quantity >= resolvedStock || isOutOfStock}
               aria-label="Increase quantity"
             >
               <Plus className="h-3 w-3" />
             </Button>
           </div>
-          <input
-            id="qty"
-            type="hidden"
-            value={quantity}
-            data-testid="add-to-cart"
-          />
         </div>
 
         {/* Actions */}
@@ -238,7 +320,6 @@ export function ProductPurchasePanel({
             size="lg"
             onClick={onAddToCart}
             disabled={!canAddToCart}
-            aria-disabled={!canAddToCart}
             data-testid="add-to-cart"
           >
             <ShoppingCart className="h-4 w-4" />
@@ -251,9 +332,14 @@ export function ProductPurchasePanel({
           </Button>
         </div>
 
-        {feedback && (
-          <p className="text-sm text-muted-foreground text-center">{feedback}</p>
-        )}
+        <p
+          className={`text-sm text-muted-foreground text-center min-h-[1.25rem] ${
+            feedback ? "" : "invisible"
+          }`}
+          aria-live="polite"
+        >
+          {feedback ?? " "}
+        </p>
       </CardContent>
     </Card>
   );

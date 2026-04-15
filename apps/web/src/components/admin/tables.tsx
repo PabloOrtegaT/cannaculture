@@ -7,7 +7,6 @@ import {
   categoryColumns,
   contentColumns,
   couponColumns,
-  csvErrorColumns,
   orderColumns,
   productColumns,
   variantColumns,
@@ -19,7 +18,6 @@ import type {
   AdminOrderRow,
   AdminProductRow,
   AdminVariantRow,
-  CsvImportRowError,
 } from "@/features/admin/types";
 import { DataTable } from "./data-table";
 
@@ -91,8 +89,4 @@ export function ContentTable({ rows }: { rows: AdminContentRow[] }) {
   return (
     <DataTable columns={contentColumns} data={rows} emptyLabel="No content entries available." />
   );
-}
-
-export function CsvErrorsTable({ rows }: { rows: CsvImportRowError[] }) {
-  return <DataTable columns={csvErrorColumns} data={rows} emptyLabel="No row errors." />;
 }

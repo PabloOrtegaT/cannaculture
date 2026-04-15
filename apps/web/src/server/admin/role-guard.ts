@@ -14,7 +14,6 @@ export const adminRouteKeys = [
   "products",
   "content",
   "coupons",
-  "import",
 ] as const;
 export type AdminRouteKey = (typeof adminRouteKeys)[number];
 
@@ -26,7 +25,6 @@ const routePermissions: Record<AdminRouteKey, Permission> = {
   products: "catalog:read",
   content: "content:read",
   coupons: "orders:write",
-  import: "catalog:write",
 };
 
 const adminRoles = new Set<Role>(["owner", "manager", "catalog"]);

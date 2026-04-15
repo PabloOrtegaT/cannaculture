@@ -106,15 +106,3 @@ export type OrderStatusPoint = {
   status: AdminOrderStatus;
   count: number;
 };
-
-export type CsvImportRowError = {
-  rowNumber: number;
-  reason: string;
-  rowValues: Record<string, string> | null;
-};
-
-export type CsvImportResult = {
-  importedProducts: number;
-  importedVariants: number;
-  errors: CsvImportRowError[];
-};

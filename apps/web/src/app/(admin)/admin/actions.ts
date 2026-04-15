@@ -19,7 +19,6 @@ import {
   createAdminPromoBanner,
   createAdminVariant,
   getAdminProductTemplateKey,
-  importAdminCatalogFromCsv,
   listAdminVariants,
   setAdminCouponActive,
   setAdminFeaturedSaleActive,
@@ -37,7 +36,6 @@ import type { AdminVariantStockMode } from "@/server/admin/stock-mode";
 import { getSessionUser } from "@/server/auth/session";
 import { setFlashToast } from "@/server/feedback/flash-toast";
 import {
-  syncInventoryFromRuntimeCatalog,
   syncInventoryFromRuntimeCatalogForProduct,
   syncInventoryFromRuntimeCatalogForVariant,
 } from "@/server/inventory/service";
@@ -183,7 +181,6 @@ function revalidateAdminAndStorefrontPaths() {
   revalidatePath("/admin/products");
   revalidatePath("/admin/content");
   revalidatePath("/admin/coupons");
-  revalidatePath("/admin/import");
   revalidatePath("/");
   revalidatePath("/catalog");
 }
@@ -515,37 +512,4 @@ export async function setCouponActiveAction(formData: FormData) {
       );
     },
   });
-}
-
-export async function importCatalogCsvAction(csvText: string) {
-  const actor = await getSessionUser().catch(() => null);
-  try {
-    await ensurePermission("catalog:write");
-    if (csvText.length > 5_000_000) {
-      throw createAdminMutationError("validation", "CSV file exceeds maximum size of 5MB.");
-    }
-    const result = importAdminCatalogFromCsv(csvText);
-    await syncInventoryFromRuntimeCatalog();
-    revalidateAdminAndStorefrontPaths();
-    logAdminAuditEvent({
-      action: "catalog.import_csv",
-      outcome: "success",
-      actorId: actor?.id ?? null,
-      actorRole: actor?.role ?? null,
-      code: "success",
-      message: `Imported ${result.importedProducts} product(s) with ${result.errors.length} row error(s).`,
-    });
-    return result;
-  } catch (error) {
-    const feedback = mapAdminMutationError(error);
-    logAdminAuditEvent({
-      action: "catalog.import_csv",
-      outcome: "failure",
-      actorId: actor?.id ?? null,
-      actorRole: actor?.role ?? null,
-      code: feedback.code,
-      message: feedback.message,
-    });
-    throw new Error(feedback.message);
-  }
 }

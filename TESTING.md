@@ -72,7 +72,6 @@ Playwright tests cover **real user flows** through the running application:
 - `storefront-admin-entry.spec.ts` — admin link appears for authenticated users
 - `admin-categories-crud.spec.ts` — create/edit categories
 - `admin-product-crud.spec.ts` — create/edit products and variants
-- `admin-csv-import.spec.ts` — CSV bulk import with success and partial failure
 
 ## Ownership expectations
 

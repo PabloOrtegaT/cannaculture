@@ -12,25 +12,26 @@
 
 ## File Map
 
-| Action | File | Responsibility |
-|--------|------|----------------|
-| Create | `apps/web/src/components/storefront/favorite-button.tsx` | Client-side ♡/♥ toggle, `"use client"` |
-| Create | `apps/web/src/components/storefront/mobile-filter-toggle.tsx` | Mobile filter panel toggle, `"use client"` |
-| Rewrite | `apps/web/src/components/storefront/product-card.tsx` | Rich card: image area, category pill, discount badge, stars, price |
-| Modify | `apps/web/src/server/data/storefront-service.ts` | Add `priceMin`/`priceMax` to `CatalogSearchParams` + filter logic |
-| Modify | `apps/web/src/app/(storefront)/catalog/page.tsx` | Sidebar layout, parse new price params, pass `categoryName` to card |
-| Modify | `apps/web/src/app/(storefront)/page.tsx` | Split hero, category tiles, pass `categoryName` to card |
-| Modify | `apps/web/src/app/(admin)/admin/layout.tsx` | Sidebar active highlight |
-| Modify | `apps/web/src/app/(admin)/admin/page.tsx` | KPI cards, compact recent orders, snapshot + links |
-| Create | `apps/web/src/components/admin/dashboard-sales-chart.tsx` | Sales trend AreaChart client component for dashboard left column |
-| Create | `apps/web/src/__tests__/storefront/catalog-price-filter.test.ts` | Unit tests for price filter logic |
-| Create | `apps/web/e2e/storefront-layout.spec.ts` | E2E: catalog sidebar, home hero, dashboard KPIs |
+| Action  | File                                                             | Responsibility                                                      |
+| ------- | ---------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Create  | `apps/web/src/components/storefront/favorite-button.tsx`         | Client-side ♡/♥ toggle, `"use client"`                              |
+| Create  | `apps/web/src/components/storefront/mobile-filter-toggle.tsx`    | Mobile filter panel toggle, `"use client"`                          |
+| Rewrite | `apps/web/src/components/storefront/product-card.tsx`            | Rich card: image area, category pill, discount badge, stars, price  |
+| Modify  | `apps/web/src/server/data/storefront-service.ts`                 | Add `priceMin`/`priceMax` to `CatalogSearchParams` + filter logic   |
+| Modify  | `apps/web/src/app/(storefront)/catalog/page.tsx`                 | Sidebar layout, parse new price params, pass `categoryName` to card |
+| Modify  | `apps/web/src/app/(storefront)/page.tsx`                         | Split hero, category tiles, pass `categoryName` to card             |
+| Modify  | `apps/web/src/app/(admin)/admin/layout.tsx`                      | Sidebar active highlight                                            |
+| Modify  | `apps/web/src/app/(admin)/admin/page.tsx`                        | KPI cards, compact recent orders, snapshot + links                  |
+| Create  | `apps/web/src/components/admin/dashboard-sales-chart.tsx`        | Sales trend AreaChart client component for dashboard left column    |
+| Create  | `apps/web/src/__tests__/storefront/catalog-price-filter.test.ts` | Unit tests for price filter logic                                   |
+| Create  | `apps/web/e2e/storefront-layout.spec.ts`                         | E2E: catalog sidebar, home hero, dashboard KPIs                     |
 
 ---
 
 ## Task 1: FavoriteButton client component
 
 **Files:**
+
 - Create: `apps/web/src/components/storefront/favorite-button.tsx`
 
 - [ ] **Step 1: Create the component**
@@ -70,6 +71,7 @@ export function FavoriteButton() {
 ```bash
 cd apps/web && npx tsc --noEmit
 ```
+
 Expected: no errors for this file.
 
 - [ ] **Step 3: Commit**
@@ -84,6 +86,7 @@ git commit -m "feat(storefront): add FavoriteButton client component"
 ## Task 2: ProductCard rewrite
 
 **Files:**
+
 - Modify: `apps/web/src/components/storefront/product-card.tsx`
 
 - [ ] **Step 1: Rewrite the component**
@@ -166,7 +169,10 @@ export function ProductCard({
         {/* Star rating — visual placeholder */}
         <div className="flex items-center gap-0.5 mb-2" aria-hidden="true">
           {[1, 2, 3, 4, 5].map((star) => (
-            <span key={star} className={`text-xs ${star <= 4 ? "text-amber-400" : "text-muted-foreground/30"}`}>
+            <span
+              key={star}
+              className={`text-xs ${star <= 4 ? "text-amber-400" : "text-muted-foreground/30"}`}
+            >
               ★
             </span>
           ))}
@@ -193,6 +199,7 @@ export function ProductCard({
 ```bash
 cd apps/web && npx tsc --noEmit
 ```
+
 Expected: errors about missing `categoryName` prop at call sites in `catalog/page.tsx` and `page.tsx` — this is expected and will be fixed in Tasks 4 and 5.
 
 - [ ] **Step 3: Commit**
@@ -207,6 +214,7 @@ git commit -m "feat(storefront): rewrite ProductCard with image area, stars, cat
 ## Task 3: Price filter logic in storefront-service
 
 **Files:**
+
 - Modify: `apps/web/src/server/data/storefront-service.ts`
 - Create: `apps/web/src/__tests__/storefront/catalog-price-filter.test.ts`
 
@@ -250,6 +258,7 @@ describe("listCatalogProducts price filtering", () => {
 ```bash
 cd apps/web && npx vitest run src/__tests__/storefront/catalog-price-filter.test.ts
 ```
+
 Expected: FAIL — `priceMin`/`priceMax` are not valid params yet.
 
 - [ ] **Step 3: Extend `CatalogSearchParams` and filter logic**
@@ -270,17 +279,17 @@ export type CatalogSearchParams = {
 Then inside `listCatalogProducts`, add the price filter block after the query filter (around line 98, after the `normalizedQuery` block):
 
 ```ts
-  if (params.priceMin !== undefined) {
-    products = products.filter(
-      (product) => getVariantDisplayPrice(product, variantsByProductId) >= params.priceMin! * 100,
-    );
-  }
+if (params.priceMin !== undefined) {
+  products = products.filter(
+    (product) => getVariantDisplayPrice(product, variantsByProductId) >= params.priceMin! * 100,
+  );
+}
 
-  if (params.priceMax !== undefined) {
-    products = products.filter(
-      (product) => getVariantDisplayPrice(product, variantsByProductId) <= params.priceMax! * 100,
-    );
-  }
+if (params.priceMax !== undefined) {
+  products = products.filter(
+    (product) => getVariantDisplayPrice(product, variantsByProductId) <= params.priceMax! * 100,
+  );
+}
 ```
 
 - [ ] **Step 4: Run the tests — verify they pass**
@@ -288,6 +297,7 @@ Then inside `listCatalogProducts`, add the price filter block after the query fi
 ```bash
 cd apps/web && npx vitest run src/__tests__/storefront/catalog-price-filter.test.ts
 ```
+
 Expected: all 4 tests PASS.
 
 - [ ] **Step 5: Run full unit test suite to catch regressions**
@@ -295,6 +305,7 @@ Expected: all 4 tests PASS.
 ```bash
 cd apps/web && npm test
 ```
+
 Expected: all tests pass.
 
 - [ ] **Step 6: Commit**
@@ -310,6 +321,7 @@ git commit -m "feat(catalog): add priceMin/priceMax filter to listCatalogProduct
 ## Task 4: MobileFilterToggle client component
 
 **Files:**
+
 - Create: `apps/web/src/components/storefront/mobile-filter-toggle.tsx`
 
 - [ ] **Step 1: Create the component**
@@ -342,11 +354,7 @@ export function MobileFilterToggle({ children }: MobileFilterToggleProps) {
         {open ? "Close" : "Filters"}
       </Button>
 
-      {open && (
-        <div className="mt-3 rounded-lg border bg-muted/30 p-4">
-          {children}
-        </div>
-      )}
+      {open && <div className="mt-3 rounded-lg border bg-muted/30 p-4">{children}</div>}
     </div>
   );
 }
@@ -357,6 +365,7 @@ export function MobileFilterToggle({ children }: MobileFilterToggleProps) {
 ```bash
 cd apps/web && npx tsc --noEmit
 ```
+
 Expected: no new errors.
 
 - [ ] **Step 3: Commit**
@@ -371,6 +380,7 @@ git commit -m "feat(catalog): add MobileFilterToggle client component"
 ## Task 5: Catalog page — sidebar layout
 
 **Files:**
+
 - Modify: `apps/web/src/app/(storefront)/catalog/page.tsx`
 
 - [ ] **Step 1: Rewrite the catalog page**
@@ -385,7 +395,11 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/storefront/product-card";
 import { MobileFilterToggle } from "@/components/storefront/mobile-filter-toggle";
-import { listCatalogProducts, listCategories, type ProductSort } from "@/server/data/storefront-service";
+import {
+  listCatalogProducts,
+  listCategories,
+  type ProductSort,
+} from "@/server/data/storefront-service";
 import { createPageMetadata } from "@/server/seo/metadata";
 import { cn } from "@/lib/utils";
 
@@ -442,7 +456,9 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
     <>
       {/* Price range */}
       <div className="mb-5">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Price, $</p>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Price, $
+        </p>
         <div className="flex gap-2">
           <input
             type="number"
@@ -465,7 +481,9 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
       {/* Category */}
       <div className="mb-5">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Category</p>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Category
+        </p>
         <div className="flex flex-col gap-1.5">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -475,7 +493,12 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
               defaultChecked={!categorySlug}
               className="h-3.5 w-3.5 accent-foreground"
             />
-            <span className={cn("text-xs", !categorySlug ? "font-semibold text-foreground" : "text-muted-foreground")}>
+            <span
+              className={cn(
+                "text-xs",
+                !categorySlug ? "font-semibold text-foreground" : "text-muted-foreground",
+              )}
+            >
               All products
             </span>
           </label>
@@ -488,7 +511,14 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 defaultChecked={categorySlug === cat.slug}
                 className="h-3.5 w-3.5 accent-foreground"
               />
-              <span className={cn("text-xs", categorySlug === cat.slug ? "font-semibold text-foreground" : "text-muted-foreground")}>
+              <span
+                className={cn(
+                  "text-xs",
+                  categorySlug === cat.slug
+                    ? "font-semibold text-foreground"
+                    : "text-muted-foreground",
+                )}
+              >
                 {cat.name}
               </span>
             </label>
@@ -498,7 +528,9 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
       {/* Sort */}
       <div className="mb-5">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Sort by</p>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Sort by
+        </p>
         <div className="flex flex-col gap-1.5">
           {allowedSorts.map((s) => (
             <label key={s} className="flex items-center gap-2 cursor-pointer">
@@ -509,7 +541,12 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 defaultChecked={sort === s}
                 className="h-3.5 w-3.5 accent-foreground"
               />
-              <span className={cn("text-xs", sort === s ? "font-semibold text-foreground" : "text-muted-foreground")}>
+              <span
+                className={cn(
+                  "text-xs",
+                  sort === s ? "font-semibold text-foreground" : "text-muted-foreground",
+                )}
+              >
                 {sortLabels[s]}
               </span>
             </label>
@@ -560,9 +597,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
       {/* Mobile filter toggle — client component */}
       <form method="GET" action="/catalog">
-        <MobileFilterToggle>
-          {filterForm}
-        </MobileFilterToggle>
+        <MobileFilterToggle>{filterForm}</MobileFilterToggle>
       </form>
 
       {/* Body: sidebar + grid */}
@@ -615,6 +650,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 ```bash
 cd apps/web && npx tsc --noEmit
 ```
+
 Expected: no errors for `catalog/page.tsx`.
 
 - [ ] **Step 3: Run unit tests to confirm no regressions**
@@ -622,6 +658,7 @@ Expected: no errors for `catalog/page.tsx`.
 ```bash
 cd apps/web && npm test
 ```
+
 Expected: all pass.
 
 - [ ] **Step 4: Commit**
@@ -636,6 +673,7 @@ git commit -m "feat(catalog): sidebar layout with price/category/sort filters"
 ## Task 6: Home page — split hero, category tiles, updated featured grid
 
 **Files:**
+
 - Modify: `apps/web/src/app/(storefront)/page.tsx`
 
 - [ ] **Step 1: Rewrite the home page**
@@ -685,10 +723,8 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-10">
-
       {/* ── Split Hero ────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] overflow-hidden rounded-xl border">
-
         {/* Left: headline + CTA */}
         <div className="flex flex-col justify-center gap-4 bg-gradient-to-br from-muted/60 to-muted p-8 md:p-10">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -711,7 +747,9 @@ export default async function HomePage() {
           <div>
             <Button asChild size="lg">
               <Link href={home.activeBanner?.ctaHref ?? "/catalog"}>
-                {home.activeBanner ? (home.activeBanner.ctaLabel ?? "Shop the sale") : "Explore catalog"}
+                {home.activeBanner
+                  ? (home.activeBanner.ctaLabel ?? "Shop the sale")
+                  : "Explore catalog"}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
@@ -722,7 +760,9 @@ export default async function HomePage() {
         <div className="hidden md:grid grid-rows-2 divide-y border-l">
           <div className="flex items-center justify-between gap-4 bg-[#1a1a2e] px-8 py-6">
             <div>
-              <p className="text-base font-bold text-white leading-snug mb-1">Top Tech. Better Prices.</p>
+              <p className="text-base font-bold text-white leading-snug mb-1">
+                Top Tech. Better Prices.
+              </p>
               <p className="text-xs text-white/50 mb-3">Explore electronics</p>
               <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
                 <Link href="/catalog">Shop Now</Link>
@@ -734,7 +774,9 @@ export default async function HomePage() {
           </div>
           <div className="flex items-center justify-between gap-4 bg-[#f7f3ee] px-8 py-6">
             <div>
-              <p className="text-base font-bold text-foreground leading-snug mb-1">Fix It With Confidence.</p>
+              <p className="text-base font-bold text-foreground leading-snug mb-1">
+                Fix It With Confidence.
+              </p>
               <p className="text-xs text-muted-foreground mb-3">Explore genuine parts</p>
               <Button asChild size="sm" variant="outline">
                 <Link href="/catalog">Shop Now</Link>
@@ -750,7 +792,9 @@ export default async function HomePage() {
       {/* ── Category visual tiles ─────────────────────────────── */}
       {categories.length > 0 && (
         <section>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Browse by category</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
+            Browse by category
+          </p>
           <div className="overflow-x-auto -mx-6 px-6">
             <div className="flex gap-3 pb-1 w-max min-w-full">
               {categories.map((category, i) => {
@@ -762,7 +806,9 @@ export default async function HomePage() {
                     href={`/catalog?category=${category.slug}`}
                     className="flex flex-col items-center gap-1.5 rounded-lg border bg-card p-3 min-w-[80px] text-center transition-all hover:-translate-y-0.5 hover:shadow-sm"
                   >
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${style.bg}`}>
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${style.bg}`}
+                    >
                       <Icon className={`h-5 w-5 ${style.iconColor}`} />
                     </div>
                     <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
@@ -780,11 +826,15 @@ export default async function HomePage() {
       {home.featuredProducts.length > 0 && (
         <section className="space-y-5">
           <div className="border-b pb-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Handpicked</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">
+              Handpicked
+            </p>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <h2 className="text-2xl font-bold tracking-tight">Featured products</h2>
               <Button variant="ghost" asChild className="shrink-0">
-                <Link href="/catalog">View all <ArrowRight className="h-4 w-4" /></Link>
+                <Link href="/catalog">
+                  View all <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>
@@ -814,7 +864,9 @@ export default async function HomePage() {
       {home.news.length > 0 && (
         <section className="space-y-5">
           <div className="border-b pb-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Updates</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+              Updates
+            </p>
             <h2 className="text-2xl font-bold tracking-tight">Latest news</h2>
           </div>
           <div className="rounded-lg bg-muted/30 p-4 grid gap-4 sm:grid-cols-2">
@@ -853,6 +905,7 @@ export default async function HomePage() {
 ```bash
 cd apps/web && npx tsc --noEmit
 ```
+
 Expected: no errors.
 
 - [ ] **Step 3: Run unit tests**
@@ -860,6 +913,7 @@ Expected: no errors.
 ```bash
 cd apps/web && npm test
 ```
+
 Expected: all pass.
 
 - [ ] **Step 4: Commit**
@@ -874,6 +928,7 @@ git commit -m "feat(home): split hero, category tiles, updated featured grid"
 ## Task 7: Admin layout — sidebar active highlight
 
 **Files:**
+
 - Modify: `apps/web/src/app/(admin)/admin/layout.tsx`
 
 - [ ] **Step 1: Add active route detection and highlight**
@@ -924,6 +979,7 @@ export function ActiveNavLink({ href, icon, label }: ActiveNavLinkProps) {
 In `apps/web/src/app/(admin)/admin/layout.tsx`:
 
 a) Add the import at the top:
+
 ```tsx
 import { ActiveNavLink } from "@/components/admin/active-nav-link";
 ```
@@ -931,28 +987,23 @@ import { ActiveNavLink } from "@/components/admin/active-nav-link";
 b) In the desktop sidebar `<nav>`, replace the `adminNavigation.map(...)` block so accessible items use `<ActiveNavLink>` instead of `<Link>`:
 
 ```tsx
-{adminNavigation.map((item) => {
-  const accessible = canAccessAdminRoute(role, item.route);
-  if (!accessible) {
-    return (
-      <div
-        key={item.href}
-        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground/40 cursor-not-allowed"
-      >
-        <span className="shrink-0">{item.icon}</span>
-        <span>{item.label}</span>
-      </div>
-    );
-  }
-  return (
-    <ActiveNavLink
-      key={item.href}
-      href={item.href}
-      icon={item.icon}
-      label={item.label}
-    />
-  );
-})}
+{
+  adminNavigation.map((item) => {
+    const accessible = canAccessAdminRoute(role, item.route);
+    if (!accessible) {
+      return (
+        <div
+          key={item.href}
+          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground/40 cursor-not-allowed"
+        >
+          <span className="shrink-0">{item.icon}</span>
+          <span>{item.label}</span>
+        </div>
+      );
+    }
+    return <ActiveNavLink key={item.href} href={item.href} icon={item.icon} label={item.label} />;
+  });
+}
 ```
 
 - [ ] **Step 3: Type check**
@@ -960,6 +1011,7 @@ b) In the desktop sidebar `<nav>`, replace the `adminNavigation.map(...)` block 
 ```bash
 cd apps/web && npx tsc --noEmit
 ```
+
 Expected: no errors.
 
 - [ ] **Step 4: Commit**
@@ -975,6 +1027,7 @@ git commit -m "feat(admin): sidebar active route highlight via ActiveNavLink"
 ## Task 8: Admin dashboard — KPI cards, sales trend chart, recent orders
 
 **Files:**
+
 - Create: `apps/web/src/components/admin/dashboard-sales-chart.tsx`
 - Modify: `apps/web/src/app/(admin)/admin/page.tsx`
 
@@ -987,7 +1040,15 @@ git commit -m "feat(admin): sidebar active route highlight via ActiveNavLink"
 "use client";
 
 import * as React from "react";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import type { SalesTrendPoint } from "@/features/admin/types";
 import { formatCurrencyCents } from "@/features/admin/format";
 import type { Currency } from "@base-ecommerce/domain";
@@ -1004,7 +1065,9 @@ function tooltipFormatter(value: unknown, currency: Currency) {
 
 export function DashboardSalesTrendChart({ salesTrend, currency }: DashboardSalesTrendChartProps) {
   const [hasMounted, setHasMounted] = React.useState(false);
-  React.useEffect(() => { setHasMounted(true); }, []);
+  React.useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   return (
     <div className="rounded-xl border bg-card p-5 shadow-sm">
@@ -1053,7 +1116,10 @@ import Link from "next/link";
 import { TrendingUp } from "lucide-react";
 import { AccessDenied } from "@/components/admin/access-denied";
 import { DashboardSalesTrendChart } from "@/components/admin/dashboard-sales-chart";
-import { listAdminDashboardAnalyticsReadModel, listAdminOrdersReadModel } from "@/server/admin/admin-service";
+import {
+  listAdminDashboardAnalyticsReadModel,
+  listAdminOrdersReadModel,
+} from "@/server/admin/admin-service";
 import { getRouteAccess } from "@/server/admin/role-guard";
 import { getAdminContentSnapshot } from "@/server/data/storefront-service";
 import { formatCurrencyCents } from "@/features/admin/format";
@@ -1076,23 +1142,26 @@ export default async function AdminPage() {
 
   return (
     <main className="space-y-6">
-
       {/* Page heading */}
       <div>
         <p className="text-sm text-muted-foreground">Admin Dashboard</p>
         <h1 className="text-2xl font-bold tracking-tight">Operations overview</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Active store profile: <span className="font-semibold text-foreground">{snapshot.profile}</span>
+          Active store profile:{" "}
+          <span className="font-semibold text-foreground">{snapshot.profile}</span>
         </p>
       </div>
 
       {/* KPI cards */}
       <div className="grid gap-4 md:grid-cols-3">
-
         {/* Revenue — highlighted */}
         <div className="rounded-xl p-5 text-white shadow-md bg-gradient-to-br from-[#6c5ce7] to-[#a29bfe]">
-          <p className="text-xs font-semibold uppercase tracking-widest opacity-80 mb-2">Total Revenue</p>
-          <p className="text-3xl font-black mb-1">{formatCurrencyCents(totalRevenueCents, "MXN")}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest opacity-80 mb-2">
+            Total Revenue
+          </p>
+          <p className="text-3xl font-black mb-1">
+            {formatCurrencyCents(totalRevenueCents, "MXN")}
+          </p>
           <div className="flex items-center gap-1 text-xs opacity-85">
             <TrendingUp className="h-3.5 w-3.5" />
             <span>All-time total</span>
@@ -1101,23 +1170,25 @@ export default async function AdminPage() {
 
         {/* Total orders */}
         <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Total Orders</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+            Total Orders
+          </p>
           <p className="text-3xl font-black text-foreground mb-1">{orders.length}</p>
           <p className="text-xs text-muted-foreground">All statuses</p>
         </div>
 
         {/* Paid orders */}
         <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">Paid Orders</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+            Paid Orders
+          </p>
           <p className="text-3xl font-black text-foreground mb-1">{paidOrderCount}</p>
           <p className="text-xs text-emerald-600 font-medium">Payment confirmed</p>
         </div>
-
       </div>
 
       {/* Sales trend chart + recent orders */}
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-
         <DashboardSalesTrendChart salesTrend={analytics.salesTrend} currency="MXN" />
 
         {/* Recent orders compact table */}
@@ -1132,19 +1203,25 @@ export default async function AdminPage() {
             </div>
             {recentOrders.map((order) => (
               <div key={order.id} className="contents text-xs">
-                <span className="py-2.5 border-b last:border-0 font-semibold text-primary">{order.orderNumber}</span>
-                <span className="py-2.5 border-b last:border-0 text-muted-foreground truncate">{order.productLabel}</span>
+                <span className="py-2.5 border-b last:border-0 font-semibold text-primary">
+                  {order.orderNumber}
+                </span>
+                <span className="py-2.5 border-b last:border-0 text-muted-foreground truncate">
+                  {order.productLabel}
+                </span>
                 <span className="py-2.5 border-b last:border-0 font-semibold whitespace-nowrap">
                   {formatCurrencyCents(order.totalCents, order.currency)}
                 </span>
                 <span className="py-2.5 border-b last:border-0">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    order.status === "paid"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : order.status === "cancelled"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-amber-100 text-amber-700"
-                  }`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                      order.status === "paid"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : order.status === "cancelled"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
                     {order.status}
                   </span>
                 </span>
@@ -1152,7 +1229,6 @@ export default async function AdminPage() {
             ))}
           </div>
         </div>
-
       </div>
 
       {/* Store snapshot + quick links */}
@@ -1160,15 +1236,21 @@ export default async function AdminPage() {
         <h2 className="text-sm font-semibold mb-4">Store snapshot</h2>
         <div className="grid gap-3 md:grid-cols-3 mb-5">
           <div className="rounded-lg border bg-muted/40 p-3">
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Active banners</p>
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+              Active banners
+            </p>
             <p className="text-2xl font-bold">{snapshot.banners}</p>
           </div>
           <div className="rounded-lg border bg-muted/40 p-3">
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">News posts</p>
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+              News posts
+            </p>
             <p className="text-2xl font-bold">{snapshot.newsPosts}</p>
           </div>
           <div className="rounded-lg border bg-muted/40 p-3">
-            <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Featured sales</p>
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+              Featured sales
+            </p>
             <p className="text-2xl font-bold">{snapshot.featuredSales}</p>
           </div>
         </div>
@@ -1178,7 +1260,6 @@ export default async function AdminPage() {
             { href: "/admin/products", label: "Manage products" },
             { href: "/admin/content", label: "Manage content" },
             { href: "/admin/coupons", label: "Manage coupons" },
-            { href: "/admin/import", label: "Run CSV import" },
           ].map((link) => (
             <Link
               key={link.href}
@@ -1190,7 +1271,6 @@ export default async function AdminPage() {
           ))}
         </div>
       </section>
-
     </main>
   );
 }
@@ -1199,6 +1279,7 @@ export default async function AdminPage() {
 - [ ] **Step 3: Also update the File Map at the top of this plan**
 
 Replace the `analytics-charts.tsx` modify entry with:
+
 - Create: `apps/web/src/components/admin/dashboard-sales-chart.tsx`
 
 - [ ] **Step 4: Type check**
@@ -1206,6 +1287,7 @@ Replace the `analytics-charts.tsx` modify entry with:
 ```bash
 cd apps/web && npx tsc --noEmit
 ```
+
 Expected: no errors.
 
 - [ ] **Step 5: Run unit tests**
@@ -1213,6 +1295,7 @@ Expected: no errors.
 ```bash
 cd apps/web && npm test
 ```
+
 Expected: all pass.
 
 - [ ] **Step 6: Commit**
@@ -1228,6 +1311,7 @@ git commit -m "feat(admin): KPI cards, sales trend chart, recent orders panel, s
 ## Task 9: E2E smoke tests for new layouts
 
 **Files:**
+
 - Create: `apps/web/e2e/storefront-layout.spec.ts`
 
 - [ ] **Step 1: Write E2E tests**
@@ -1303,6 +1387,7 @@ test.describe("Admin dashboard layout", () => {
 ```bash
 cd apps/web && npx playwright test e2e/storefront-layout.spec.ts --reporter=list
 ```
+
 Expected: home and catalog tests pass. Admin test is skipped.
 
 - [ ] **Step 3: Run existing E2E suite to check for regressions**
@@ -1310,6 +1395,7 @@ Expected: home and catalog tests pass. Admin test is skipped.
 ```bash
 cd apps/web && npx playwright test e2e/storefront-catalog-cart.spec.ts --reporter=list
 ```
+
 Expected: all 3 existing catalog tests still pass (the `getByRole("link", { name: "View product" })` selector targets product detail links which are unchanged).
 
 - [ ] **Step 4: Commit**
@@ -1328,6 +1414,7 @@ git commit -m "test(e2e): add layout smoke tests for home, catalog, and admin"
 ```bash
 cd apps/web && npm test
 ```
+
 Expected: all pass.
 
 - [ ] **Step 2: Full type check**
@@ -1335,6 +1422,7 @@ Expected: all pass.
 ```bash
 cd apps/web && npx tsc --noEmit
 ```
+
 Expected: no errors.
 
 - [ ] **Step 3: Build check**
@@ -1342,6 +1430,7 @@ Expected: no errors.
 ```bash
 cd apps/web && npx next build 2>&1 | tail -20
 ```
+
 Expected: build completes without errors.
 
 - [ ] **Step 4: Run the dev server and visually verify**
@@ -1349,7 +1438,9 @@ Expected: build completes without errors.
 ```bash
 cd apps/web && npx next dev
 ```
+
 Open:
+
 - `http://localhost:3000/` — split hero, category tiles, featured grid
 - `http://localhost:3000/catalog` — sidebar with filters, rich product cards
 - `http://localhost:3000/admin` — KPI cards, area chart, recent orders (requires login)

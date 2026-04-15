@@ -15,7 +15,7 @@ Admin routes must enforce role boundaries so non-authorized roles cannot access 
 
 1. Register and verify an account, then sign in.
 2. Ensure the authenticated user has one of the allowed admin roles (`owner`, `manager`).
-3. Open `/admin` routes (`/admin/categories`, `/admin/products`, `/admin/content`, `/admin/coupons`, `/admin/import`).
+3. Open `/admin` routes (`/admin/categories`, `/admin/products`, `/admin/content`, `/admin/coupons`).
 4. Navigation displays only routes allowed for the session role.
 5. If an authenticated non-admin user opens `/admin`, the app returns HTTP 403 (`forbidden` screen).
 

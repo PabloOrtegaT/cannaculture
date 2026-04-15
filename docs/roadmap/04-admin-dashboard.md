@@ -14,7 +14,6 @@ Provide an operational dashboard for managing products, content, and catalog upd
 - Home content management.
 - Coupon management (percentage and fixed amount).
 - Admin shell theme parity (day/night) using shared theme system.
-- Bulk CSV import.
 - Analytics widgets foundation.
 
 ## Implementation checklist
@@ -34,17 +33,15 @@ Provide an operational dashboard for managing products, content, and catalog upd
   - Percentage coupon (applies to products subtotal only, shipping excluded).
   - Fixed amount coupon.
   - Validity windows, usage limits, and active/inactive state.
-- Implement CSV import with row-level error reporting.
 - Add Recharts for core dashboard charts:
   - Sales trend
   - Top products
   - Order status distribution
-- Create admin flow docs in `docs/flows/04-admin/` for CRUD, import, roles, and analytics panels.
+- Create admin flow docs in `docs/flows/04-admin/` for CRUD, roles, coupons, and analytics panels.
 
 ## Unit test requirements
 
 - Table column definition tests (formatters and sorting logic).
-- CSV parser/mapper tests (valid, partial invalid, invalid header).
 - Role-based route guards tests.
 - Coupon validation tests (type rules, date windows, limits, active state).
 
@@ -52,7 +49,6 @@ Provide an operational dashboard for managing products, content, and catalog upd
 
 - E2E for admin product create/edit flow.
 - E2E for admin category create/edit flow.
-- E2E for CSV import success and partial-failure path.
 
 ## Acceptance criteria
 
@@ -66,10 +62,9 @@ Provide an operational dashboard for managing products, content, and catalog upd
 ## Exit artifacts
 
 - Admin route set.
-- CRUD and bulk import workflows.
+- CRUD workflows.
 - Coupon admin module.
 - Dashboard table/chart components using selected libraries.
 - `docs/flows/04-admin/admin-role-guard-flow.md`.
 - `docs/flows/04-admin/admin-crud-flow.md`.
 - `docs/flows/04-admin/admin-coupon-management-flow.md`.
-- `docs/flows/04-admin/admin-import-and-analytics-flow.md`.

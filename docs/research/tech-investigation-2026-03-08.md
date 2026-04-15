@@ -25,7 +25,7 @@ Use Zod as the canonical runtime validation layer across:
 1. API inputs and outputs.
 2. Form data in admin/storefront.
 3. Environment/config validation.
-4. CSV import row validation.
+4. Admin and storefront form validation.
 
 ## Why
 
@@ -100,7 +100,7 @@ No framework can guarantee first-page ranking by itself. The base project should
    - Products list
    - Orders list
    - Users/roles list
-   - CSV import result tables
+   - Admin error/state tables
 2. Recharts:
    - Sales over time
    - Order status distribution

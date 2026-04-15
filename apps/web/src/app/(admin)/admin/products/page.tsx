@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Upload } from "lucide-react";
+import { Plus } from "lucide-react";
 import { AccessDenied } from "@/components/admin/access-denied";
 import { ProductsTable, VariantsTable } from "@/components/admin/tables";
 import { Button } from "@/components/ui/button";
@@ -30,12 +30,6 @@ export default async function AdminProductsPage() {
               <Link href="/admin/products/new">
                 <Plus className="h-4 w-4" />
                 New product
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/admin/import">
-                <Upload className="h-4 w-4" />
-                Import CSV
               </Link>
             </Button>
           </div>

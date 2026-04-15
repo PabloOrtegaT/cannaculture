@@ -7,7 +7,6 @@ import type {
   AdminOrderRow,
   AdminProductRow,
   AdminVariantRow,
-  CsvImportRowError,
 } from "./types";
 
 function numberColumnSort<TData>(rowA: Row<TData>, rowB: Row<TData>, columnId: string) {
@@ -171,7 +170,10 @@ export const couponColumns: ColumnDef<AdminCouponRow>[] = [
     accessorKey: "isActive",
     header: "Active",
     sortingFn: (rowA, rowB, columnId) =>
-      numericSort(Number(rowA.getValue<boolean>(columnId)), Number(rowB.getValue<boolean>(columnId))),
+      numericSort(
+        Number(rowA.getValue<boolean>(columnId)),
+        Number(rowB.getValue<boolean>(columnId)),
+      ),
     cell: ({ getValue }) => (getValue<boolean>() ? "Yes" : "No"),
   },
   {
@@ -203,24 +205,5 @@ export const contentColumns: ColumnDef<AdminContentRow>[] = [
     header: "Updated",
     sortingFn: textColumnSort,
     cell: ({ getValue }) => formatDateTimeLabel(getValue<string>()),
-  },
-];
-
-export const csvErrorColumns: ColumnDef<CsvImportRowError>[] = [
-  {
-    accessorKey: "rowNumber",
-    header: "Row",
-    sortingFn: numberColumnSort,
-  },
-  {
-    accessorKey: "reason",
-    header: "Error",
-    sortingFn: textColumnSort,
-  },
-  {
-    accessorFn: (entry) => (entry.rowValues ? Object.entries(entry.rowValues).map(([key, value]) => `${key}=${value}`).join(", ") : "N/A"),
-    id: "rowValues",
-    header: "Raw values",
-    sortingFn: textColumnSort,
   },
 ];

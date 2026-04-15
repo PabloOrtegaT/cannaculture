@@ -224,7 +224,6 @@ export default async function AdminPage() {
             { href: "/admin/products", label: "Manage products" },
             { href: "/admin/content", label: "Manage content" },
             { href: "/admin/coupons", label: "Manage coupons" },
-            { href: "/admin/import", label: "Run CSV import" },
           ].map((link) => (
             <Link
               key={link.href}

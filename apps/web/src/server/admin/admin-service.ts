@@ -8,7 +8,6 @@ import {
   productVariantSchema,
   promoBannerSchema,
   featuredSaleSchema,
-  type Category,
   type Currency,
   type ProductStatus,
 } from "@base-ecommerce/domain";
@@ -31,14 +30,12 @@ import type {
   AdminOrderRow,
   AdminProductRow,
   AdminVariantRow,
-  CsvImportResult,
   OrderStatusPoint,
   SalesTrendPoint,
   TopProductPoint,
 } from "@/features/admin/types";
 import { formatCurrencyCents } from "@/features/admin/format";
 import { getActiveStoreProfile } from "@/server/config/store-profile";
-import { parseProductCsv } from "./csv-import";
 import { getProfileRuntimeStore } from "@/server/data/runtime-store";
 import { createAdminMutationError } from "./mutation-errors";
 import { resolveVariantStockOnHand, type AdminVariantStockMode } from "./stock-mode";
@@ -888,138 +885,6 @@ export function setAdminCouponActive(couponId: string, isActive: boolean) {
   });
   store.coupons[index] = updatedCoupon;
   return updatedCoupon;
-}
-
-function createProductFromCsvRow(input: {
-  name: string;
-  slug: string;
-  baseSku: string;
-  category: Category;
-  status: ProductStatus;
-  currency: Currency;
-  priceCents: number;
-  stockOnHand: number;
-}) {
-  const { store } = getActiveProfileContext();
-  const now = nowIso();
-  const product = productSchema.parse({
-    id: crypto.randomUUID(),
-    categoryId: input.category.id,
-    name: input.name,
-    slug: input.slug,
-    description: undefined,
-    baseSku: input.baseSku,
-    status: input.status,
-    currency: input.currency,
-    priceCents: input.priceCents,
-    compareAtPriceCents: undefined,
-    tags: [],
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  const variant = productVariantSchema.parse({
-    id: crypto.randomUUID(),
-    productId: product.id,
-    sku: `${input.baseSku}_DEFAULT`,
-    name: "Default",
-    priceCents: input.priceCents,
-    compareAtPriceCents: undefined,
-    stockOnHand: input.stockOnHand,
-    isDefault: true,
-    attributeValues: {},
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  store.products.push(product);
-  store.variants.push(variant);
-}
-
-function toRowValueStrings(row: {
-  name: string;
-  slug: string;
-  baseSku: string;
-  categorySlug: string;
-  status: string;
-  currency: string;
-  priceCents: number;
-  stockOnHand: number;
-}) {
-  return {
-    name: row.name,
-    slug: row.slug,
-    baseSku: row.baseSku,
-    categorySlug: row.categorySlug,
-    status: row.status,
-    currency: row.currency,
-    priceCents: String(row.priceCents),
-    stockOnHand: String(row.stockOnHand),
-  };
-}
-
-export function importAdminCatalogFromCsv(csvText: string): CsvImportResult {
-  const { store } = getActiveProfileContext();
-  const parsed = parseProductCsv(csvText);
-  const errors = [...parsed.errors];
-  let importedProducts = 0;
-  let importedVariants = 0;
-
-  const existingSlugs = new Set(store.products.map((product) => product.slug));
-  const existingSkus = new Set(store.products.map((product) => product.baseSku));
-
-  parsed.rows.forEach((row, index) => {
-    const rowNumber = index + 2;
-    const category = store.categories.find((entry) => entry.slug === row.categorySlug);
-    if (!category) {
-      errors.push({
-        rowNumber,
-        reason: `Unknown categorySlug "${row.categorySlug}" for active profile.`,
-        rowValues: toRowValueStrings(row),
-      });
-      return;
-    }
-
-    if (existingSlugs.has(row.slug)) {
-      errors.push({
-        rowNumber,
-        reason: `Duplicate slug "${row.slug}".`,
-        rowValues: toRowValueStrings(row),
-      });
-      return;
-    }
-
-    if (existingSkus.has(row.baseSku)) {
-      errors.push({
-        rowNumber,
-        reason: `Duplicate baseSku "${row.baseSku}".`,
-        rowValues: toRowValueStrings(row),
-      });
-      return;
-    }
-
-    createProductFromCsvRow({
-      name: row.name,
-      slug: row.slug,
-      baseSku: row.baseSku,
-      category,
-      status: row.status,
-      currency: row.currency,
-      priceCents: row.priceCents,
-      stockOnHand: row.stockOnHand,
-    });
-
-    existingSlugs.add(row.slug);
-    existingSkus.add(row.baseSku);
-    importedProducts += 1;
-    importedVariants += 1;
-  });
-
-  return {
-    importedProducts,
-    importedVariants,
-    errors,
-  };
 }
 
 function toAdminOrderStatus(status: string): AdminOrderRow["status"] {

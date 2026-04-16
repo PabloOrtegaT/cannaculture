@@ -41,6 +41,14 @@ export class CheckoutStockConflictError extends Error {
   }
 }
 
+export class CheckoutCouponError extends Error {
+  readonly code = "invalid_coupon";
+
+  constructor(message = "Coupon code is invalid or not applicable.") {
+    super(message);
+  }
+}
+
 function normalizeCouponCode(rawCouponCode?: string) {
   const value = rawCouponCode?.trim().toUpperCase();
   if (!value) {
@@ -102,6 +110,9 @@ function resolveTotalsForCheckout(cart: CartState, couponCode?: string) {
   }
   const currency = cart.items[0]?.currency ?? "MXN";
   const coupon = resolveCouponForCheckout(couponCode, currency);
+  if (couponCode && !coupon) {
+    throw new CheckoutCouponError();
+  }
   const discountCents = coupon ? calculateCouponDiscountCents(coupon, baseTotals.subtotalCents) : 0;
   const shippingCents = 0;
   const totalCents = Math.max(0, baseTotals.subtotalCents - discountCents + shippingCents);

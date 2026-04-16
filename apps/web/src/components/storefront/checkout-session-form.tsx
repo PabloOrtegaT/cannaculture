@@ -26,7 +26,12 @@ type CheckoutSessionFormProps = {
 
 const fallbackOptions: CheckoutProviderOption[] = [
   { method: "card", label: "Card", activeProvider: "mock-card", mode: "mock" },
-  { method: "mercadopago", label: "Mercado Pago", activeProvider: "mock-mercadopago", mode: "mock" },
+  {
+    method: "mercadopago",
+    label: "Mercado Pago",
+    activeProvider: "mock-mercadopago",
+    mode: "mock",
+  },
   { method: "paypal", label: "PayPal", activeProvider: "mock-paypal", mode: "mock" },
 ];
 
@@ -44,7 +49,10 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
         const payload = await runSingleFlight<{ providers: CheckoutProviderOption[] } | null>(
           "checkout-provider-options",
           async () => {
-            const response = await fetch("/api/checkout/session", { method: "GET", cache: "no-store" });
+            const response = await fetch("/api/checkout/session", {
+              method: "GET",
+              cache: "no-store",
+            });
             if (!response.ok) return null;
             return (await response.json()) as { providers: CheckoutProviderOption[] };
           },
@@ -58,7 +66,9 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
       }
     };
     void run();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, []);
 
   const selectedProvider = useMemo(
@@ -85,15 +95,25 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
         const payload = (await response.json().catch(() => null)) as {
           error?: string;
           code?: string;
-          lines?: Array<{ variantId: string; requestedQty: number; availableQty: number; reason: string }>;
+          lines?: Array<{
+            variantId: string;
+            requestedQty: number;
+            availableQty: number;
+            reason: string;
+          }>;
         } | null;
         if (response.status === 409 && payload?.code === "insufficient_stock") {
           const lineCount = payload.lines?.length ?? 0;
-          const message = lineCount > 0
-            ? `Stock changed for ${lineCount} item(s). Please review your cart and try again.`
-            : "Stock changed. Please review your cart and try again.";
+          const message =
+            lineCount > 0
+              ? `Stock changed for ${lineCount} item(s). Please review your cart and try again.`
+              : "Stock changed. Please review your cart and try again.";
           setError(message);
           showClientToast({ type: "error", code: "insufficient_stock", message });
+          return;
+        }
+        if (response.status === 400 && payload?.code === "invalid_coupon") {
+          setError(payload.error ?? "Coupon code is invalid or not applicable.");
           return;
         }
         setError(payload?.error ?? "Could not create checkout session.");
@@ -113,9 +133,7 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
     return (
       <div className="space-y-3">
         <Separator />
-        <p className="text-sm text-muted-foreground">
-          You need to be signed in to checkout.
-        </p>
+        <p className="text-sm text-muted-foreground">You need to be signed in to checkout.</p>
         <Button asChild className="w-full">
           <Link href="/login?next=/cart">Sign in to continue</Link>
         </Button>
@@ -145,7 +163,10 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
         </select>
         {selectedProvider && (
           <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Badge variant={selectedProvider.mode === "live" ? "success" : "secondary"} className="text-[10px]">
+            <Badge
+              variant={selectedProvider.mode === "live" ? "success" : "secondary"}
+              className="text-[10px]"
+            >
               {selectedProvider.mode}
             </Badge>
             {selectedProvider.activeProvider}

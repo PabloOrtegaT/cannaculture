@@ -2,7 +2,11 @@ import { and, eq } from "drizzle-orm";
 import { getDb } from "@/server/db/client";
 import { paymentAttemptsTable, paymentWebhookEventsTable } from "@/server/db/schema";
 import { decrementInventoryForPaidOrder } from "@/server/inventory/service";
-import { getOrderById, getOrderByPaymentSessionId, updateOrderPaymentState } from "@/server/orders/service";
+import {
+  getOrderById,
+  getOrderByPaymentSessionId,
+  updateOrderPaymentState,
+} from "@/server/orders/service";
 import type { PaymentWebhookEvent } from "@/server/orders/types";
 
 type ProcessWebhookResult =
@@ -50,7 +54,9 @@ function mapOrderStateFromWebhookOutcome(outcome: PaymentWebhookEvent["outcome"]
   };
 }
 
-export async function processPaymentWebhookEvent(event: PaymentWebhookEvent): Promise<ProcessWebhookResult> {
+export async function processPaymentWebhookEvent(
+  event: PaymentWebhookEvent,
+): Promise<ProcessWebhookResult> {
   const db = getDb();
   const receivedAt = nowDate();
 
@@ -87,7 +93,14 @@ export async function processPaymentWebhookEvent(event: PaymentWebhookEvent): Pr
 
   if (order) {
     const mapped = mapOrderStateFromWebhookOutcome(event.outcome);
-    if (event.outcome === "succeeded") {
+    const isAlreadyPaid = order.status === "paid" && order.paymentStatus === "succeeded";
+    const shouldIgnoreDowngrade =
+      isAlreadyPaid &&
+      (event.outcome === "failed" || event.outcome === "cancelled" || event.outcome === "pending");
+
+    if (shouldIgnoreDowngrade) {
+      // Keep the paid order immutable for late/out-of-order webhooks.
+    } else if (event.outcome === "succeeded") {
       if (!(order.status === "paid" && order.paymentStatus === "succeeded")) {
         await decrementInventoryForPaidOrder(order.id);
       }
@@ -98,7 +111,7 @@ export async function processPaymentWebhookEvent(event: PaymentWebhookEvent): Pr
         ...(event.paymentReference ? { paymentReference: event.paymentReference } : {}),
         note: mapped.note,
         actorType: "provider",
-          actorId: event.providerId,
+        actorId: event.providerId,
       });
     } else if (event.outcome === "failed" || event.outcome === "cancelled") {
       await updateOrderPaymentState({

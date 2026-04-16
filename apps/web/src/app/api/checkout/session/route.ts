@@ -2,6 +2,7 @@ import { ZodError } from "zod";
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/server/auth/session";
 import {
+  CheckoutCouponError,
   CheckoutStockConflictError,
   createCheckoutSessionForUser,
   parseCheckoutRequest,
@@ -89,6 +90,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid checkout payload." }, { status: 400 });
     }
     if (error instanceof Error) {
+      if (error instanceof CheckoutCouponError) {
+        return NextResponse.json(
+          {
+            error: error.message,
+            code: error.code,
+          },
+          { status: 400 },
+        );
+      }
       if (error instanceof CheckoutStockConflictError) {
         return NextResponse.json(
           {

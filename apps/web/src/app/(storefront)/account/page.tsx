@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getSessionUser } from "@/server/auth/session";
 import { listOrdersForUser } from "@/server/orders/service";
+import { formatCurrencyFromCents } from "@/features/catalog/pricing";
 import { createPageMetadata } from "@/server/seo/metadata";
 
 export const metadata: Metadata = createPageMetadata({
@@ -17,7 +18,10 @@ export const metadata: Metadata = createPageMetadata({
   noIndex: true,
 });
 
-const statusVariants: Record<string, "default" | "secondary" | "success" | "destructive" | "warning" | "outline"> = {
+const statusVariants: Record<
+  string,
+  "default" | "secondary" | "success" | "destructive" | "warning" | "outline"
+> = {
   pending_payment: "warning",
   processing: "secondary",
   paid: "success",
@@ -75,7 +79,9 @@ export default async function AccountPage() {
               </div>
               <div>
                 <p className="font-medium">No orders yet</p>
-                <p className="text-sm text-muted-foreground mt-1">Your completed orders will appear here</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Your completed orders will appear here
+                </p>
               </div>
               <Button asChild variant="outline" size="sm">
                 <Link href="/catalog">Start shopping</Link>
@@ -91,10 +97,16 @@ export default async function AccountPage() {
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-mono font-semibold text-sm">{entry.order.orderNumber}</p>
-                        <Badge variant={statusVariants[entry.order.status] ?? "secondary"} className="text-xs">
+                        <Badge
+                          variant={statusVariants[entry.order.status] ?? "secondary"}
+                          className="text-xs"
+                        >
                           {entry.order.status.replace(/_/g, " ")}
                         </Badge>
-                        <Badge variant={statusVariants[entry.order.paymentStatus] ?? "secondary"} className="text-xs">
+                        <Badge
+                          variant={statusVariants[entry.order.paymentStatus] ?? "secondary"}
+                          className="text-xs"
+                        >
                           {entry.order.paymentStatus.replace(/_/g, " ")}
                         </Badge>
                       </div>
@@ -106,7 +118,10 @@ export default async function AccountPage() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-semibold text-sm">
-                        {(entry.order.totalCents / 100).toFixed(2)} {entry.order.currency}
+                        {formatCurrencyFromCents(
+                          entry.order.totalCents,
+                          entry.order.currency as "MXN" | "USD",
+                        )}
                       </p>
                     </div>
                   </div>

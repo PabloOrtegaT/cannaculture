@@ -39,10 +39,8 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-10">
-
       {/* ── Split Hero ────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] overflow-hidden rounded-xl border">
-
         {/* Left: headline + CTA */}
         <div className="flex flex-col justify-center gap-4 bg-gradient-to-br from-muted/60 to-muted p-8 md:p-10">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -53,19 +51,21 @@ export default async function HomePage() {
               home.activeBanner.title
             ) : (
               <>
-                Quality products,
+                From seed
                 <br />
-                <span className="font-normal italic text-primary">delivered fast.</span>
+                <span className="font-normal italic text-primary">to harvest.</span>
               </>
             )}
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-            Browse our curated catalog. Fast shipping, easy returns.
+            Seeds, lights, nutrients, and tools for every indoor garden.
           </p>
           <div>
             <Button asChild size="lg">
               <Link href={home.activeBanner?.ctaHref ?? "/catalog"}>
-                {home.activeBanner ? (home.activeBanner.ctaLabel ?? "Shop the sale") : "Explore catalog"}
+                {home.activeBanner
+                  ? (home.activeBanner.ctaLabel ?? "Shop the sale")
+                  : "Explore catalog"}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
@@ -74,10 +74,12 @@ export default async function HomePage() {
 
         {/* Right: two stacked promo tiles */}
         <div className="hidden md:grid grid-rows-2 divide-y border-l">
-          <div className="flex items-center justify-between gap-4 bg-[#1a1a2e] px-8 py-6">
+          <div className="flex items-center justify-between gap-4 bg-[#1a2e1a] px-8 py-6">
             <div>
-              <p className="text-base font-bold text-white leading-snug mb-1">Top Tech. Better Prices.</p>
-              <p className="text-xs text-white/50 mb-3">Explore electronics</p>
+              <p className="text-base font-bold text-white leading-snug mb-1">
+                Grow Indoors, All Year.
+              </p>
+              <p className="text-xs text-white/60 mb-3">Explore lights and substrates</p>
               <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
                 <Link href="/catalog">Shop Now</Link>
               </Button>
@@ -86,16 +88,18 @@ export default async function HomePage() {
               <Monitor className="h-5 w-5 text-primary" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-4 bg-[#f7f3ee] px-8 py-6">
+          <div className="flex items-center justify-between gap-4 bg-[#f3f7ee] px-8 py-6">
             <div>
-              <p className="text-base font-bold text-foreground leading-snug mb-1">Fix It With Confidence.</p>
-              <p className="text-xs text-muted-foreground mb-3">Explore genuine parts</p>
+              <p className="text-base font-bold text-foreground leading-snug mb-1">
+                Seeds, Pots & Tools.
+              </p>
+              <p className="text-xs text-muted-foreground mb-3">Everything to start planting</p>
               <Button asChild size="sm" variant="outline">
                 <Link href="/catalog">Shop Now</Link>
               </Button>
             </div>
-            <div className="h-12 w-12 shrink-0 rounded-full border border-orange-200 bg-orange-50 flex items-center justify-center">
-              <Wrench className="h-5 w-5 text-orange-500" />
+            <div className="h-12 w-12 shrink-0 rounded-full border border-emerald-200 bg-emerald-50 flex items-center justify-center">
+              <Wrench className="h-5 w-5 text-emerald-600" />
             </div>
           </div>
         </div>
@@ -104,11 +108,13 @@ export default async function HomePage() {
       {/* ── Category visual tiles ─────────────────────────────── */}
       {categories.length > 0 && (
         <section>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Browse by category</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
+            Browse by category
+          </p>
           <div className="overflow-x-auto -mx-6 px-6">
             <div className="flex gap-3 pb-1 w-max min-w-full">
               {categories.map((category, i) => {
-                const style = CATEGORY_STYLES[i % CATEGORY_STYLES.length] ?? CATEGORY_STYLES[0]!;
+                const style = CATEGORY_STYLES[i % CATEGORY_STYLES.length]!;
                 const Icon = style.icon;
                 return (
                   <Link
@@ -116,7 +122,9 @@ export default async function HomePage() {
                     href={`/catalog?category=${category.slug}`}
                     className="flex flex-col items-center gap-1.5 rounded-lg border bg-card p-3 min-w-[80px] text-center transition-all hover:-translate-y-0.5 hover:shadow-sm"
                   >
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${style.bg}`}>
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br ${style.bg}`}
+                    >
                       <Icon className={`h-5 w-5 ${style.iconColor}`} />
                     </div>
                     <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
@@ -134,11 +142,15 @@ export default async function HomePage() {
       {home.featuredProducts.length > 0 && (
         <section className="space-y-5">
           <div className="border-b pb-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Handpicked</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">
+              Handpicked
+            </p>
             <div className="flex flex-wrap items-end justify-between gap-3">
               <h2 className="text-2xl font-bold tracking-tight">Featured products</h2>
               <Button variant="ghost" asChild className="shrink-0">
-                <Link href="/catalog">View all <ArrowRight className="h-4 w-4" /></Link>
+                <Link href="/catalog">
+                  View all <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>
@@ -157,6 +169,8 @@ export default async function HomePage() {
                   minPriceCents={cardData.minVariantPriceCents}
                   compareAtPriceCents={featured.compareAtPriceCents}
                   hasStock={cardData.hasStock}
+                  templateKey={cardData.category.templateKey}
+                  attributeValues={cardData.variants[0]?.attributeValues ?? {}}
                 />
               );
             })}
@@ -168,7 +182,9 @@ export default async function HomePage() {
       {home.news.length > 0 && (
         <section className="space-y-5">
           <div className="border-b pb-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Updates</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
+              Updates
+            </p>
             <h2 className="text-2xl font-bold tracking-tight">Latest news</h2>
           </div>
           <div className="rounded-lg bg-muted/30 p-4 grid gap-4 sm:grid-cols-2">

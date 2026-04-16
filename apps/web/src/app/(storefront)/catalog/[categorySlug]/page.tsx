@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { JsonLdScript } from "@/components/seo/json-ld-script";
 import { ProductCard } from "@/components/storefront/product-card";
-import { getCategoryBySlug, listCatalogProducts, type ProductSort } from "@/server/data/storefront-service";
+import {
+  getCategoryBySlug,
+  listCatalogProducts,
+  type ProductSort,
+} from "@/server/data/storefront-service";
 import { createPageMetadata } from "@/server/seo/metadata";
 import { buildBreadcrumbJsonLd } from "@/server/seo/structured-data";
 
@@ -62,7 +66,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     <main className="space-y-6">
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">{category.name}</h1>
-        {category.description && <p className="text-sm text-muted-foreground">{category.description}</p>}
+        {category.description && (
+          <p className="text-sm text-muted-foreground">{category.description}</p>
+        )}
       </header>
 
       <section className="rounded-lg border bg-card p-4 text-card-foreground">
@@ -74,7 +80,11 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             placeholder={`Search in ${category.name}`}
             className="rounded-md border bg-background px-3 py-2 text-sm"
           />
-          <select name="sort" defaultValue={sort} className="rounded-md border bg-background px-3 py-2 text-sm">
+          <select
+            name="sort"
+            defaultValue={sort}
+            className="rounded-md border bg-background px-3 py-2 text-sm"
+          >
             <option value="featured">Featured</option>
             <option value="name-asc">Name A-Z</option>
             <option value="price-asc">Price low to high</option>
@@ -96,6 +106,8 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
             minPriceCents={entry.minVariantPriceCents}
             compareAtPriceCents={entry.product.compareAtPriceCents}
             hasStock={entry.hasStock}
+            templateKey={category.templateKey}
+            attributeValues={entry.variants[0]?.attributeValues ?? {}}
           />
         ))}
       </section>

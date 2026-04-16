@@ -1,8 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useSyncExternalStore } from "react";
-import { ShoppingBag, Minus, Plus, Trash2, AlertTriangle, CheckCircle2, ArrowRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ShoppingBag,
+  Minus,
+  Plus,
+  Trash2,
+  AlertTriangle,
+  CheckCircle2,
+  ArrowRight,
+} from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,11 +27,10 @@ type CartViewProps = {
 };
 
 export function CartView({ authenticated }: CartViewProps) {
-  const hydrated = useSyncExternalStore(
-    () => () => undefined,
-    () => true,
-    () => false,
-  );
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    queueMicrotask(() => setHydrated(true));
+  }, []);
   const cart = useCartStore((state) => state.cart);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -56,7 +63,9 @@ export function CartView({ authenticated }: CartViewProps) {
     };
 
     void loadServerCart();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [authenticated, hydrateCart, hydrated]);
 
   const totals = useMemo(() => calculateCartTotals(cart), [cart]);
@@ -100,7 +109,9 @@ export function CartView({ authenticated }: CartViewProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Your cart</h1>
-        <Badge variant="secondary">{totals.itemCount} {totals.itemCount === 1 ? "item" : "items"}</Badge>
+        <Badge variant="secondary">
+          {totals.itemCount} {totals.itemCount === 1 ? "item" : "items"}
+        </Badge>
       </div>
 
       {/* Alerts */}
@@ -121,7 +132,12 @@ export function CartView({ authenticated }: CartViewProps) {
                 <li key={message}>{message}</li>
               ))}
             </ul>
-            <Button variant="link" size="sm" className="mt-2 h-auto p-0" onClick={clearMergeSummary}>
+            <Button
+              variant="link"
+              size="sm"
+              className="mt-2 h-auto p-0"
+              onClick={clearMergeSummary}
+            >
               Dismiss
             </Button>
           </AlertDescription>
@@ -136,7 +152,8 @@ export function CartView({ authenticated }: CartViewProps) {
             <ul className="mt-1 list-disc pl-4 space-y-0.5">
               {unavailableItems.map((item) => (
                 <li key={item.variantId}>
-                  <span className="font-medium">{item.name}</span> ({item.variantName}): {item.unavailableReason}
+                  <span className="font-medium">{item.name}</span> ({item.variantName}):{" "}
+                  {item.unavailableReason}
                 </li>
               ))}
             </ul>

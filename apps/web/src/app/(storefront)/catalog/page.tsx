@@ -4,7 +4,11 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/storefront/product-card";
 import { MobileFilterToggle } from "@/components/storefront/mobile-filter-toggle";
-import { listCatalogProducts, listCategories, type ProductSort } from "@/server/data/storefront-service";
+import {
+  listCatalogProducts,
+  listCategories,
+  type ProductSort,
+} from "@/server/data/storefront-service";
 import { createPageMetadata } from "@/server/seo/metadata";
 import { cn } from "@/lib/utils";
 
@@ -61,7 +65,9 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
     <>
       {/* Price range */}
       <div className="mb-5">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Price, $</p>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Price, $
+        </p>
         <div className="flex gap-2">
           <input
             type="number"
@@ -84,7 +90,9 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
       {/* Category */}
       <div className="mb-5">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Category</p>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Category
+        </p>
         <div className="flex flex-col gap-1.5">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -94,7 +102,12 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
               defaultChecked={!categorySlug}
               className="h-3.5 w-3.5 accent-foreground"
             />
-            <span className={cn("text-xs", !categorySlug ? "font-semibold text-foreground" : "text-muted-foreground")}>
+            <span
+              className={cn(
+                "text-xs",
+                !categorySlug ? "font-semibold text-foreground" : "text-muted-foreground",
+              )}
+            >
               All products
             </span>
           </label>
@@ -107,7 +120,14 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 defaultChecked={categorySlug === cat.slug}
                 className="h-3.5 w-3.5 accent-foreground"
               />
-              <span className={cn("text-xs", categorySlug === cat.slug ? "font-semibold text-foreground" : "text-muted-foreground")}>
+              <span
+                className={cn(
+                  "text-xs",
+                  categorySlug === cat.slug
+                    ? "font-semibold text-foreground"
+                    : "text-muted-foreground",
+                )}
+              >
                 {cat.name}
               </span>
             </label>
@@ -117,7 +137,9 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
       {/* Sort */}
       <div className="mb-5">
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Sort by</p>
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+          Sort by
+        </p>
         <div className="flex flex-col gap-1.5">
           {allowedSorts.map((s) => (
             <label key={s} className="flex items-center gap-2 cursor-pointer">
@@ -128,7 +150,12 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 defaultChecked={sort === s}
                 className="h-3.5 w-3.5 accent-foreground"
               />
-              <span className={cn("text-xs", sort === s ? "font-semibold text-foreground" : "text-muted-foreground")}>
+              <span
+                className={cn(
+                  "text-xs",
+                  sort === s ? "font-semibold text-foreground" : "text-muted-foreground",
+                )}
+              >
                 {sortLabels[s]}
               </span>
             </label>
@@ -172,8 +199,12 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 className="h-9 w-52 rounded-md border border-input bg-background pl-8 pr-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
               {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
-              {priceMin !== undefined && !Number.isNaN(priceMin) && <input type="hidden" name="priceMin" value={priceMin} />}
-              {priceMax !== undefined && !Number.isNaN(priceMax) && <input type="hidden" name="priceMax" value={priceMax} />}
+              {priceMin !== undefined && !Number.isNaN(priceMin) && (
+                <input type="hidden" name="priceMin" value={priceMin} />
+              )}
+              {priceMax !== undefined && !Number.isNaN(priceMax) && (
+                <input type="hidden" name="priceMax" value={priceMax} />
+              )}
             </div>
           </form>
         </div>
@@ -181,9 +212,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
       {/* Mobile filter toggle — client component */}
       <form method="GET" action="/catalog">
-        <MobileFilterToggle>
-          {filterForm}
-        </MobileFilterToggle>
+        <MobileFilterToggle>{filterForm}</MobileFilterToggle>
       </form>
 
       {/* Body: sidebar + grid */}
@@ -219,6 +248,8 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                     minPriceCents={entry.minVariantPriceCents}
                     compareAtPriceCents={entry.product.compareAtPriceCents}
                     hasStock={entry.hasStock}
+                    templateKey={entry.category.templateKey}
+                    attributeValues={entry.variants[0]?.attributeValues ?? {}}
                   />
                 );
               })}

@@ -3,16 +3,19 @@ import { loginAsSeedOwner } from "./helpers/auth";
 
 test("guest cart merges into authenticated cart after login", async ({ page }) => {
   await page.goto("/catalog");
-  const productLinks = page.getByRole("link", { name: "View product" });
+  const productLinks = page.locator("a[href^='/catalog/']");
   const linkCount = await productLinks.count();
   let added = false;
   let selectedProductName = "";
 
   for (let index = 0; index < linkCount; index += 1) {
     await productLinks.nth(index).click();
-    selectedProductName = ((await page.getByRole("heading", { level: 1 }).textContent()) ?? "").trim();
     const addToCartButton = page.getByTestId("add-to-cart");
-    const stockStatusText = ((await page.getByTestId("stock-status").textContent()) ?? "").toLowerCase();
+    await expect(addToCartButton).toBeVisible();
+
+    const stockStatusText = (
+      (await page.getByTestId("stock-status").textContent()) ?? ""
+    ).toLowerCase();
     if (stockStatusText.includes("out of stock")) {
       await page.goto("/catalog");
       continue;
@@ -21,6 +24,9 @@ test("guest cart merges into authenticated cart after login", async ({ page }) =
     try {
       await expect(addToCartButton).toBeEnabled({ timeout: 10000 });
       await addToCartButton.click();
+      selectedProductName = (
+        (await page.getByRole("heading", { level: 1 }).textContent()) ?? ""
+      ).trim();
       added = true;
       break;
     } catch {

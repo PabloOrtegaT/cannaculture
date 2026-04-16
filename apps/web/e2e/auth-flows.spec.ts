@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("register page renders and accepts input", async ({ page }) => {
   await page.goto("/register");
-  await expect(page.getByRole("heading", { name: "Create account" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Create an account" })).toBeVisible();
 
   await page.getByLabel("Full name").fill("Test User");
   await page.getByLabel("Email").fill(`test-${Date.now()}@example.local`);
@@ -36,7 +36,7 @@ test("register form submits and shows verification prompt or redirects", async (
     await expect(page.getByText("verification")).toBeVisible();
   } else if (currentPath.startsWith("/login")) {
     // Redirected to login after successful registration
-    await expect(page.getByRole("heading")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
   }
   // If still on /register, there may be an error — that's also a valid test outcome
 });
@@ -49,14 +49,11 @@ test("forgot password page renders and accepts submission", async ({ page }) => 
   await page.getByRole("button", { name: "Send reset email" }).click();
 
   // After submission, should show "sent" confirmation or stay on page
-  await page.waitForURL(
-    (url) => url.pathname.startsWith("/forgot-password"),
-    { timeout: 15000 },
-  );
+  await page.waitForURL((url) => url.pathname.startsWith("/forgot-password"), { timeout: 15000 });
 
   // The page should show the success message
   await expect(
-    page.getByText("reset link has been sent").or(page.getByText("Could not process"))
+    page.getByText("reset link has been sent").or(page.getByText("Could not process")),
   ).toBeVisible({ timeout: 5000 });
 });
 

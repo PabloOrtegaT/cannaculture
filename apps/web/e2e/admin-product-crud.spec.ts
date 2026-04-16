@@ -4,7 +4,7 @@ import { loginAsSeedOwner } from "./helpers/auth";
 test("admin product create and edit flow", async ({ page }) => {
   await loginAsSeedOwner(page, { nextPath: "/admin" });
   await page.goto("/admin/products");
-  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Products", exact: true })).toBeVisible();
   await page.getByRole("link", { name: "New product" }).click();
   await expect(page.getByRole("heading", { name: "Create product" })).toBeVisible();
 
@@ -69,15 +69,15 @@ test("admin product create and edit flow", async ({ page }) => {
   await expect(page.getByText("Current stock: 4")).toBeVisible();
 
   await page.getByRole("link", { name: "Back to product" }).click();
-  await expect(page.getByRole("heading", { name: "Edit product" })).toBeVisible();
+  await expect(page.getByText("Edit product details and manage variants.")).toBeVisible();
 
   const variantSuffix = Date.now().toString(36);
   const newVariantName = `New Variant ${variantSuffix}`;
   const newVariantSku = `E2E_VAR_${variantSuffix.toUpperCase()}`;
-  await page.getByLabel("Variant name").fill(newVariantName);
-  await page.getByLabel("SKU").fill(newVariantSku);
+  await page.getByLabel("Variant name").last().fill(newVariantName);
+  await page.getByLabel("SKU").last().fill(newVariantSku);
   await page.getByLabel("Price (cents)").last().fill("39900");
-  await page.getByLabel("Initial stock").fill("12");
+  await page.getByLabel("Initial stock").last().fill("12");
   await page.getByLabel("Species*").last().fill("Lavandula angustifolia");
   await page.getByRole("combobox", { name: "Sunlight*" }).last().click();
   await page.getByRole("option", { name: "full-sun" }).click();

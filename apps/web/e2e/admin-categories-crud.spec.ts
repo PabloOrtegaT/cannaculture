@@ -12,6 +12,8 @@ test("admin category create and edit flow", async ({ page }) => {
   const createForm = page.getByTestId("create-category-form");
   await createForm.getByLabel("Name").fill(categoryName);
   await createForm.getByLabel("Slug").fill(categorySlug);
+  await createForm.getByRole("combobox", { name: "Template" }).click();
+  await page.getByRole("option", { name: "seed-packet" }).click();
   await createForm.getByRole("button", { name: "Add category" }).click();
 
   const row = page.locator("tr", { hasText: categoryName }).first();
@@ -26,7 +28,11 @@ test("admin category create and edit flow", async ({ page }) => {
   await expect(page.locator("tr", { hasText: updatedName }).first()).toBeVisible();
   await expect(page.getByTestId("flash-toast")).toContainText("Category updated");
 
-  await page.locator("tr", { hasText: updatedName }).first().getByRole("link", { name: "Edit" }).click();
+  await page
+    .locator("tr", { hasText: updatedName })
+    .first()
+    .getByRole("link", { name: "Edit" })
+    .click();
   await editForm.getByLabel("Slug").fill("--");
   await editForm.getByRole("button", { name: "Save category changes" }).click();
   await expect(page.getByTestId("flash-toast")).toContainText("slug");

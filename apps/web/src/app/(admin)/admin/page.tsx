@@ -1,7 +1,7 @@
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { TrendingUp, Package, ClipboardList, DollarSign } from "lucide-react";
 import { AccessDenied } from "@/components/admin/access-denied";
+import { DashboardSalesTrendChart } from "@/components/admin/dashboard-sales-chart";
 import { formatCurrencyCents } from "@/features/admin/format";
 import {
   listAdminDashboardAnalyticsReadModel,
@@ -10,11 +10,6 @@ import {
 } from "@/server/admin/admin-service";
 import { getRouteAccess } from "@/server/admin/role-guard";
 import { getAdminContentSnapshot } from "@/server/data/storefront-service";
-
-const DashboardSalesTrendChart = dynamic(
-  () => import("@/components/admin/dashboard-sales-chart").then((m) => m.DashboardSalesTrendChart),
-  { ssr: false },
-);
 
 const LOW_STOCK_THRESHOLD = 5;
 

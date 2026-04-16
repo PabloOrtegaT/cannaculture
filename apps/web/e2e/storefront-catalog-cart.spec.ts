@@ -10,7 +10,9 @@ async function addFirstInStockProduct(page: Page) {
     const addToCartButton = page.locator('button[data-testid="add-to-cart"]');
     await expect(addToCartButton).toBeVisible();
 
-    const stockStatusText = ((await page.getByTestId("stock-status").textContent()) ?? "").toLowerCase();
+    const stockStatusText = (
+      (await page.getByTestId("stock-status").textContent()) ?? ""
+    ).toLowerCase();
     if (stockStatusText.includes("out of stock")) {
       await page.goto("/catalog");
       continue;
@@ -47,6 +49,9 @@ test("stock status controls add-to-cart availability", async ({ page }) => {
   await page.locator("a[href^='/catalog/']").first().click();
   const stockStatus = page.getByTestId("stock-status");
   await expect(stockStatus).toBeVisible();
+
+  // Wait for availability check to settle before asserting button state
+  await expect(stockStatus).not.toContainText("Checking stock", { timeout: 10000 });
 
   const statusText = (await stockStatus.textContent()) ?? "";
   const addToCartButton = page.locator('button[data-testid="add-to-cart"]');

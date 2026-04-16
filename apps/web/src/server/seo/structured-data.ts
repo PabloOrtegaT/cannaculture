@@ -12,6 +12,7 @@ type ProductStructuredDataInput = {
   currency: "MXN" | "USD";
   priceCents: number;
   stockOnHand: number;
+  sku?: string | undefined;
 };
 
 type ArticleStructuredDataInput = {
@@ -37,21 +38,35 @@ export function buildProductJsonLd(input: ProductStructuredDataInput) {
   const canonicalUrl = buildCanonicalUrl(input.pathname);
   const imageUrl = new URL("/favicon.ico", getSiteBaseUrl()).toString();
 
-  return {
+  const offer: Record<string, unknown> = {
+    "@type": "Offer",
+    url: canonicalUrl,
+    priceCurrency: input.currency,
+    price: (input.priceCents / 100).toFixed(2),
+    availability:
+      input.stockOnHand > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    itemCondition: "https://schema.org/NewCondition",
+  };
+
+  const product: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: input.name,
     description: input.description,
     image: [imageUrl],
-    offers: {
-      "@type": "Offer",
-      url: canonicalUrl,
-      priceCurrency: input.currency,
-      price: (input.priceCents / 100).toFixed(2),
-      availability:
-        input.stockOnHand > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    brand: {
+      "@type": "Brand",
+      name: SEO_BRAND_NAME,
     },
+    offers: offer,
   };
+
+  if (input.sku) {
+    product.sku = input.sku;
+    offer.sku = input.sku;
+  }
+
+  return product;
 }
 
 export function buildArticleJsonLd(input: ArticleStructuredDataInput) {

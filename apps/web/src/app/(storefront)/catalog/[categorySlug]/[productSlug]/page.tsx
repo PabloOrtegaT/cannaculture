@@ -268,6 +268,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           currency: result.product.currency,
           priceCents: defaultVariant?.priceCents ?? result.product.priceCents,
           stockOnHand: result.variants.reduce((acc, v) => acc + v.stockOnHand, 0),
+          sku: defaultVariant?.sku,
         })}
       />
     </div>

@@ -42,7 +42,10 @@ export function ProductCard({
       <Link href={href} className="block focus:outline-none">
         {/* Image area */}
         <div className="relative flex h-40 items-center justify-center bg-gradient-to-br from-secondary/40 to-secondary/70">
-          <Package className="h-12 w-12 text-muted-foreground/20 transition-transform duration-300 group-hover:scale-110" />
+          <Package
+            aria-hidden
+            className="h-12 w-12 text-muted-foreground/20 transition-transform duration-300 group-hover:scale-110"
+          />
 
           {pricing.hasDiscount && (
             <div className="absolute top-2 left-2">

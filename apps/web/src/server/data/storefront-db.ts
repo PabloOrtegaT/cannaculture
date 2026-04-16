@@ -721,23 +721,48 @@ const variants: ProductVariant[] = [
 
 const newsPosts: NewsPost[] = [
   newsPostSchema.parse({
-    id: "2f0d7069-c788-4ee8-8f40-f0f0df00ebfe",
-    slug: "spring-growing-season",
-    title: "Spring Growing Season Is Here",
-    summary: "Everything you need to start seeds, feed plants, and light indoor grows.",
-    body: "Our spring collection is stocked with curated seeds, grow lights, fertilizers, and tools designed for home growers. Whether you are planting a balcony herb garden or setting up an indoor grow space, we have the essentials to get started.",
+    id: "4f9b2d23-e5a6-5bc2-ad33-c6e7f8a9b012",
+    slug: "substrates-101",
+    title: "Substrates 101: Coco Coir vs Potting Soil",
+    summary:
+      "Understand drainage, aeration, and mixing ratios for healthier roots and faster growth.",
+    body: "Coco coir retains moisture while allowing excellent drainage. Potting soil is more forgiving for beginners but can compact over time. Many indoor growers blend the two with perlite for the perfect balance of water retention and aeration.",
     status: "published",
-    publishedAt: "2026-03-03T09:00:00.000Z",
-    createdAt: "2026-03-03T09:00:00.000Z",
-    updatedAt: "2026-03-03T09:00:00.000Z",
+    publishedAt: "2026-03-07T09:00:00.000Z",
+    createdAt: "2026-03-07T09:00:00.000Z",
+    updatedAt: "2026-03-07T09:00:00.000Z",
+  }),
+  newsPostSchema.parse({
+    id: "3e8a1c12-d4f5-4ab1-9c22-b5d6e7f8a901",
+    slug: "choose-first-grow-light",
+    title: "How to Choose Your First Grow Light",
+    summary:
+      "Match wattage and spectrum to your space. LEDs are efficient, cool, and great for beginners.",
+    body: "Start by measuring your grow area. Seedlings and leafy greens need lower intensity, while fruiting plants need more. LED panels and strips offer great efficiency and run cooler than traditional bulbs, making them ideal for small indoor spaces.",
+    status: "published",
+    publishedAt: "2026-03-05T09:00:00.000Z",
+    createdAt: "2026-03-05T09:00:00.000Z",
+    updatedAt: "2026-03-05T09:00:00.000Z",
+  }),
+  newsPostSchema.parse({
+    id: "4f9b2d23-e5a6-5bc2-ad33-c6e7f8a9b012",
+    slug: "substrates-101",
+    title: "Substrates 101: Coco Coir vs Potting Soil",
+    summary:
+      "Understand drainage, aeration, and mixing ratios for healthier roots and faster growth.",
+    body: "Coco coir retains moisture while allowing excellent drainage. Potting soil is more forgiving for beginners but can compact over time. Many indoor growers blend the two with perlite for the perfect balance of water retention and aeration.",
+    status: "published",
+    publishedAt: "2026-03-07T09:00:00.000Z",
+    createdAt: "2026-03-07T09:00:00.000Z",
+    updatedAt: "2026-03-07T09:00:00.000Z",
   }),
 ];
 
 const promoBanners: PromoBanner[] = [
   promoBannerSchema.parse({
     id: "75d315c7-a326-49c5-a7e2-8e4f8ad587ce",
-    title: "Spring Garden Picks: Save on seeds, lights, and pots",
-    subtitle: "Best starters for this planting season.",
+    title: "Indoor Starter Picks: Save on seeds, lights, and substrates",
+    subtitle: "Curated essentials for new and experienced growers.",
     ctaLabel: "Start planting",
     ctaHref: "/catalog",
     startsAt: "2026-03-01T00:00:00.000Z",
@@ -749,8 +774,8 @@ const promoBanners: PromoBanner[] = [
 const featuredSales: FeaturedSale[] = [
   featuredSaleSchema.parse({
     id: "9999cb71-b322-4055-9b38-cf1ead6f3f77",
-    title: "Featured Garden Deals",
-    description: "Seasonal picks for home growers.",
+    title: "Indoor Starter Deals",
+    description: "Hand-picked combos for home growers.",
     productIds: [
       "64043f75-f238-4ca8-a45d-1ee4932e986c",
       fixtureUuid(3001),

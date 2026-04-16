@@ -5,6 +5,8 @@ import { Monitor, Wrench, Heart, BookOpen, Zap, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/storefront/product-card";
 import { JsonLdScript } from "@/components/seo/json-ld-script";
+import { TrustSignals } from "@/features/home/trust-signals";
+import { GrowingGuide } from "@/features/home/growing-guide";
 import {
   getHomeContent,
   listCatalogProducts,
@@ -77,11 +79,11 @@ export default async function HomePage() {
           <div className="flex items-center justify-between gap-4 bg-[#1a2e1a] px-8 py-6">
             <div>
               <p className="text-base font-bold text-white leading-snug mb-1">
-                Grow Indoors, All Year.
+                LED Grow Lights for Indoor Gardens.
               </p>
-              <p className="text-xs text-white/60 mb-3">Explore lights and substrates</p>
+              <p className="text-xs text-white/60 mb-3">Panels, strips and bulbs for every space</p>
               <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
-                <Link href="/catalog">Shop Now</Link>
+                <Link href="/catalog/grow-lights">Shop Lights</Link>
               </Button>
             </div>
             <div className="h-12 w-12 shrink-0 rounded-full border border-primary/30 bg-primary/10 flex items-center justify-center">
@@ -91,11 +93,13 @@ export default async function HomePage() {
           <div className="flex items-center justify-between gap-4 bg-[#f3f7ee] px-8 py-6">
             <div>
               <p className="text-base font-bold text-foreground leading-snug mb-1">
-                Seeds, Pots & Tools.
+                Heirloom Seeds & Starter Kits.
               </p>
-              <p className="text-xs text-muted-foreground mb-3">Everything to start planting</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                Curated varieties for home growers
+              </p>
               <Button asChild size="sm" variant="outline">
-                <Link href="/catalog">Shop Now</Link>
+                <Link href="/catalog/plant-seeds">Shop Seeds</Link>
               </Button>
             </div>
             <div className="h-12 w-12 shrink-0 rounded-full border border-emerald-200 bg-emerald-50 flex items-center justify-center">
@@ -138,6 +142,8 @@ export default async function HomePage() {
         </section>
       )}
 
+      <TrustSignals />
+
       {/* ── Featured products ─────────────────────────────────── */}
       {home.featuredProducts.length > 0 && (
         <section className="space-y-5">
@@ -177,6 +183,8 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <GrowingGuide />
 
       {/* ── Latest news ───────────────────────────────────────── */}
       {home.news.length > 0 && (

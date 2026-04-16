@@ -12,6 +12,7 @@ import {
 import { createPageMetadata, SEO_BRAND_NAME } from "@/server/seo/metadata";
 import { buildBreadcrumbJsonLd } from "@/server/seo/structured-data";
 import { getRelatedCategoryLinks } from "@/features/catalog/related-links";
+import { CategoryBuyingGuide } from "@/features/catalog/category-buying-guide";
 
 type CategoryPageProps = {
   params: Promise<{
@@ -109,6 +110,8 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           <button type="submit" className="hidden" />
         </form>
       </section>
+
+      <CategoryBuyingGuide categorySlug={category.slug} />
 
       <section className="grid gap-4 md:grid-cols-2">
         {products.map((entry) => (

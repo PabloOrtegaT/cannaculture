@@ -1,6 +1,18 @@
+import { categoryTemplateKeySchema } from "@base-ecommerce/domain";
 import Link from "next/link";
 import { AccessDenied } from "@/components/admin/access-denied";
 import { CategoriesTable } from "@/components/admin/tables";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { createCategoryAction, updateCategoryAction } from "@/app/(admin)/admin/actions";
 import { listAdminCategories, listAdminCategoryAttributes } from "@/server/admin/admin-service";
 import { getRouteAccess } from "@/server/admin/role-guard";
@@ -20,48 +32,67 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const categories = listAdminCategories();
   const categoryAttributes = listAdminCategoryAttributes();
-  const selectedCategoryForEdit = categories.find((category) => category.id === resolvedSearchParams?.editCategory);
+  const selectedCategoryForEdit = categories.find(
+    (category) => category.id === resolvedSearchParams?.editCategory,
+  );
 
   return (
     <main className="space-y-6">
       <section className="grid gap-4 rounded-lg border bg-card p-6 text-card-foreground lg:grid-cols-2">
-        <form action={createCategoryAction} className="space-y-3 rounded-md border bg-muted p-3" data-testid="create-category-form">
+        <form
+          action={createCategoryAction}
+          className="space-y-3 rounded-md border bg-muted p-3"
+          data-testid="create-category-form"
+        >
           <h1 className="text-xl font-semibold">Create category</h1>
-          <label className="block text-xs font-medium text-muted-foreground" htmlFor="create-category-name">
+          <Label className="text-xs text-muted-foreground" htmlFor="create-category-name">
             Name
-          </label>
-          <input
+          </Label>
+          <Input
             id="create-category-name"
             type="text"
             name="name"
             placeholder="Category name"
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            className="bg-background"
             required
           />
-          <label className="block text-xs font-medium text-muted-foreground" htmlFor="create-category-slug">
+          <Label className="text-xs text-muted-foreground" htmlFor="create-category-slug">
             Slug
-          </label>
-          <input
+          </Label>
+          <Input
             id="create-category-slug"
             type="text"
             name="slug"
             placeholder="category-slug"
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            className="bg-background"
             required
           />
-          <label className="block text-xs font-medium text-muted-foreground" htmlFor="create-category-description">
+          <Label className="text-xs text-muted-foreground" htmlFor="create-category-description">
             Description
-          </label>
-          <textarea
+          </Label>
+          <Textarea
             id="create-category-description"
             name="description"
             placeholder="Optional category description"
             rows={3}
-            className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            className="bg-background"
           />
-          <button type="submit" className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
-            Add category
-          </button>
+          <Label className="text-xs text-muted-foreground" htmlFor="create-category-template">
+            Template
+          </Label>
+          <Select name="templateKey" required>
+            <SelectTrigger id="create-category-template" className="bg-background">
+              <SelectValue placeholder="Select a template" />
+            </SelectTrigger>
+            <SelectContent>
+              {categoryTemplateKeySchema.options.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button type="submit">Add category</Button>
         </form>
 
         {selectedCategoryForEdit ? (
@@ -72,51 +103,64 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
           >
             <h2 className="text-lg font-semibold">Edit category</h2>
             <input type="hidden" name="id" value={selectedCategoryForEdit.id} />
-            <label className="block text-xs font-medium text-muted-foreground" htmlFor="edit-category-name">
+            <Label className="text-xs text-muted-foreground" htmlFor="edit-category-name">
               Name
-            </label>
-            <input
+            </Label>
+            <Input
               id="edit-category-name"
               type="text"
               name="name"
               defaultValue={selectedCategoryForEdit.name}
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              className="bg-background"
               required
             />
-            <label className="block text-xs font-medium text-muted-foreground" htmlFor="edit-category-slug">
+            <Label className="text-xs text-muted-foreground" htmlFor="edit-category-slug">
               Slug
-            </label>
-            <input
+            </Label>
+            <Input
               id="edit-category-slug"
               type="text"
               name="slug"
               defaultValue={selectedCategoryForEdit.slug}
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              className="bg-background"
               required
             />
-            <label className="block text-xs font-medium text-muted-foreground" htmlFor="edit-category-description">
+            <Label className="text-xs text-muted-foreground" htmlFor="edit-category-description">
               Description
-            </label>
-            <textarea
+            </Label>
+            <Textarea
               id="edit-category-description"
               name="description"
               defaultValue={selectedCategoryForEdit.description}
               rows={3}
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              className="bg-background"
             />
-            <p className="text-xs text-muted-foreground">Template key: {selectedCategoryForEdit.templateKey}</p>
+            <Label className="text-xs text-muted-foreground" htmlFor="edit-category-template">
+              Template
+            </Label>
+            <Select name="templateKey" required defaultValue={selectedCategoryForEdit.templateKey}>
+              <SelectTrigger id="edit-category-template" className="bg-background">
+                <SelectValue placeholder="Select a template" />
+              </SelectTrigger>
+              <SelectContent>
+                {categoryTemplateKeySchema.options.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="flex gap-2">
-              <button type="submit" className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
-                Save category changes
-              </button>
-              <Link href="/admin/categories" className="rounded-md border px-3 py-2 text-sm hover:bg-background">
-                Cancel
-              </Link>
+              <Button type="submit">Save category changes</Button>
+              <Button variant="outline" asChild>
+                <Link href="/admin/categories">Cancel</Link>
+              </Button>
             </div>
           </form>
         ) : (
           <div className="rounded-md border bg-muted p-3 text-sm text-muted-foreground">
-            Select <span className="font-medium text-foreground">Edit</span> on a category row to load the edit form.
+            Select <span className="font-medium text-foreground">Edit</span> on a category row to
+            load the edit form.
           </div>
         )}
       </section>
@@ -136,7 +180,8 @@ export default async function AdminCategoriesPage({ searchParams }: AdminCategor
               <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
                 {entry.attributes.map((attribute) => (
                   <li key={attribute.key}>
-                    {attribute.key} ({attribute.type}) {attribute.required ? "required" : "optional"}
+                    {attribute.key} ({attribute.type}){" "}
+                    {attribute.required ? "required" : "optional"}
                   </li>
                 ))}
               </ul>

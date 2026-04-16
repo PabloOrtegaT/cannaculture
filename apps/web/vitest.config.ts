@@ -15,6 +15,7 @@ export default defineConfig({
         "src/server/admin/mutation-errors.ts",
         "src/server/admin/role-guard.ts",
         "src/server/admin/stock-mode.ts",
+        "src/server/admin/variant-attributes.ts",
         "src/server/config/host-policy.ts",
       ],
       thresholds: {

@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { z } from "zod";
 import { CheckCircle2, Package, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatCurrencyFromCents } from "@/features/catalog/pricing";
+import { getSessionUser } from "@/server/auth/session";
+import { getOrderSummaryForUser } from "@/server/orders/service";
 import { createPageMetadata } from "@/server/seo/metadata";
 
 export const metadata: Metadata = createPageMetadata({
@@ -20,7 +25,12 @@ type CheckoutSuccessPageProps = {
 
 export default async function CheckoutSuccessPage({ searchParams }: CheckoutSuccessPageProps) {
   const params = searchParams ? await searchParams : undefined;
-  const orderId = params?.order;
+  const parsedOrderId = z.string().uuid().safeParse(params?.order);
+  const orderId = parsedOrderId.success ? parsedOrderId.data : undefined;
+  const user = await getSessionUser();
+  const orderSummary =
+    user && orderId ? await getOrderSummaryForUser({ userId: user.id, orderId }) : null;
+  const orderReference = orderSummary?.order.orderNumber ?? orderId;
 
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center space-y-6">
@@ -35,14 +45,40 @@ export default async function CheckoutSuccessPage({ searchParams }: CheckoutSucc
         </p>
       </div>
 
-      {orderId && (
+      {orderReference && (
         <Card className="max-w-xs w-full">
           <CardContent className="p-4 flex items-center gap-3">
             <Package className="h-5 w-5 text-muted-foreground shrink-0" />
             <div className="text-left min-w-0">
-              <p className="text-xs text-muted-foreground">Order reference</p>
-              <p className="text-sm font-mono font-medium truncate">{orderId}</p>
+              <p className="text-xs text-muted-foreground">Order reference:</p>
+              <p className="text-sm font-mono font-medium truncate">{orderReference}</p>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {orderSummary && (
+        <Card className="max-w-md w-full">
+          <CardContent className="p-4 space-y-2 text-left">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="success" className="text-xs">
+                {orderSummary.order.status.replace(/_/g, " ")}
+              </Badge>
+              <Badge variant="secondary" className="text-xs">
+                {orderSummary.order.paymentStatus.replace(/_/g, " ")}
+              </Badge>
+            </div>
+            {orderSummary.leadItem && (
+              <p className="text-sm text-muted-foreground">
+                {orderSummary.leadItem.name} — {orderSummary.leadItem.variantName}
+              </p>
+            )}
+            <p className="text-sm font-semibold">
+              {formatCurrencyFromCents(
+                orderSummary.order.totalCents,
+                orderSummary.order.currency as "MXN" | "USD",
+              )}
+            </p>
           </CardContent>
         </Card>
       )}

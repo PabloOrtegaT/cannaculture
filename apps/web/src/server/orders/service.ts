@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type { CartState } from "@/features/cart/cart";
 import { getDb } from "@/server/db/client";
 import {
@@ -135,6 +135,31 @@ export async function getOrderById(orderId: string) {
   const db = getDb();
   const rows = await db.select().from(ordersTable).where(eq(ordersTable.id, orderId)).limit(1);
   return rows[0] ?? null;
+}
+
+export async function getOrderSummaryForUser(input: { userId: string; orderId: string }) {
+  const db = getDb();
+  const orders = await db
+    .select()
+    .from(ordersTable)
+    .where(and(eq(ordersTable.id, input.orderId), eq(ordersTable.userId, input.userId)))
+    .limit(1);
+  const order = orders[0] ?? null;
+  if (!order) {
+    return null;
+  }
+
+  const leadItems = await db
+    .select()
+    .from(orderItemsTable)
+    .where(eq(orderItemsTable.orderId, order.id))
+    .orderBy(desc(orderItemsTable.createdAt))
+    .limit(1);
+
+  return {
+    order,
+    leadItem: leadItems[0] ?? null,
+  };
 }
 
 export async function getOrderByPaymentSessionId(paymentSessionId: string) {

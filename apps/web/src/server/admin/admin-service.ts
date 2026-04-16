@@ -919,7 +919,9 @@ export async function listAdminOrdersReadModel(): Promise<AdminOrderRow[]> {
     totalCents: entry.order.totalCents,
     currency: currencySchema.parse(entry.order.currency),
     itemCount: entry.order.itemCount,
-    productLabel: entry.leadItem?.name ?? "Catalog item",
+    productLabel: entry.leadItem
+      ? `${entry.leadItem.name} — ${entry.leadItem.variantName}`
+      : "Catalog item",
     createdAt: entry.order.createdAt.toISOString(),
   }));
 }

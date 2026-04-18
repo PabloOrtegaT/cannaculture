@@ -100,6 +100,12 @@ function verifyStripeSignature(payload: string, signatureHeader: string, webhook
     return false;
   }
 
+  const now = Math.floor(Date.now() / 1000);
+  const ts = Number.parseInt(parsed.timestamp, 10);
+  if (Number.isNaN(ts) || Math.abs(now - ts) > 5 * 60) {
+    return false;
+  }
+
   const signedPayload = `${parsed.timestamp}.${payload}`;
   const expected = createHmac("sha256", webhookSecret).update(signedPayload).digest("hex");
   return parsed.signatures.some((signature) => equalSignature(expected, signature));
@@ -127,7 +133,7 @@ function createMockProvider(method: CheckoutProvider, id: PaymentProviderId, dis
     async parseWebhookEvent(request) {
       const config = getPaymentRuntimeConfig();
       const signature = request.headers.get("x-mock-webhook-signature");
-      if (config.mockWebhookSecret && signature !== config.mockWebhookSecret) {
+      if (config.mockWebhookSecret && (!signature || !equalSignature(config.mockWebhookSecret, signature))) {
         throw new Error("Invalid mock webhook signature.");
       }
 

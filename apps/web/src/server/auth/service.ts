@@ -6,6 +6,7 @@ import { passwordResetTokensTable, usersTable, verificationTokensTable } from "@
 import { AUTH_REDIRECTS, EMAIL_VERIFICATION_WINDOW_MS, PASSWORD_RESET_WINDOW_MS } from "./constants";
 import { sendPasswordResetEmail, sendVerificationEmail } from "./email";
 import { hashPassword, verifyPassword } from "./password";
+import { revokeAllRefreshSessionsForUser } from "./refresh-sessions";
 import { createOpaqueToken, createTokenExpiry, isExpired } from "./tokens";
 
 export type AuthSessionUser = {
@@ -175,6 +176,10 @@ export async function resetPasswordByToken(token: string, nextPassword: string) 
     .where(eq(usersTable.id, entry.userId));
 
   await db.delete(passwordResetTokensTable).where(eq(passwordResetTokensTable.token, token));
+
+  // F3-1: revoke all refresh sessions for this user so surviving attacker sessions die.
+  await revokeAllRefreshSessionsForUser(entry.userId);
+
   return { ok: true as const, redirectTo: AUTH_REDIRECTS.resetSuccess };
 }
 

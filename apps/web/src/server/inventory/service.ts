@@ -273,8 +273,8 @@ export async function decrementInventoryForPaidOrder(orderId: string) {
     });
   }
 
-  await Promise.all(
-    grouped.map((row) =>
+  if (grouped.length > 0) {
+    const batchItems = grouped.map((row) =>
       db
         .update(inventoryStocksTable)
         .set({
@@ -291,8 +291,12 @@ export async function decrementInventoryForPaidOrder(orderId: string) {
           updatedAt: now,
         })
         .where(eq(inventoryStocksTable.variantId, row.variantId)),
-    ),
-  );
+    );
+    const first = batchItems[0];
+    if (first) {
+      await db.batch([first, ...batchItems.slice(1)]);
+    }
+  }
 
   return {
     decrementedCount: grouped.length,

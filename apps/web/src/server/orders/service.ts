@@ -41,58 +41,63 @@ export async function createPendingCheckoutOrder(input: {
   const orderNumber = input.orderNumber ?? createOrderNumber();
   const orderId = input.id ?? crypto.randomUUID();
 
-  const [order] = await db
-    .insert(ordersTable)
-    .values({
-      id: orderId,
-      userId: input.userId,
-      orderNumber,
-      status: "pending_payment",
-      paymentStatus: "pending",
-      currency: input.totals.currency,
-      subtotalCents: input.totals.subtotalCents,
-      discountCents: input.totals.discountCents,
-      shippingCents: input.totals.shippingCents,
-      totalCents: input.totals.totalCents,
-      itemCount: input.totals.itemCount,
-      couponCode: input.couponCode,
-      couponSnapshot: input.couponSnapshot ? JSON.stringify(input.couponSnapshot) : null,
-      createdAt,
-      updatedAt: createdAt,
-    })
-    .returning();
+  const orderValues = {
+    id: orderId,
+    userId: input.userId,
+    orderNumber,
+    status: "pending_payment" as const,
+    paymentStatus: "pending" as const,
+    currency: input.totals.currency,
+    subtotalCents: input.totals.subtotalCents,
+    discountCents: input.totals.discountCents,
+    shippingCents: input.totals.shippingCents,
+    totalCents: input.totals.totalCents,
+    itemCount: input.totals.itemCount,
+    couponCode: input.couponCode,
+    couponSnapshot: input.couponSnapshot ? JSON.stringify(input.couponSnapshot) : null,
+    createdAt,
+    updatedAt: createdAt,
+  };
 
-  if (!order) {
+  const itemValues = input.cart.items.map((line) => ({
+    id: crypto.randomUUID(),
+    orderId: orderId,
+    productId: line.productId,
+    variantId: line.variantId,
+    name: line.name,
+    variantName: line.variantName,
+    href: line.href,
+    currency: line.currency,
+    unitPriceCents: line.unitPriceCents,
+    quantity: line.quantity,
+    lineTotalCents: line.quantity * line.unitPriceCents,
+    unavailableReason: line.unavailableReason,
+    createdAt,
+  }));
+
+  const timelineValues = {
+    id: crypto.randomUUID(),
+    orderId: orderId,
+    status: "pending_payment" as const,
+    actorType: "customer" as const,
+    actorId: input.userId,
+    note: "Checkout session initialized.",
+    createdAt,
+  };
+
+  const batchResult = await db.batch([
+    db.insert(ordersTable).values(orderValues).returning(),
+    db.insert(orderItemsTable).values(itemValues),
+    db.insert(orderStatusTimelineTable).values(timelineValues),
+  ]);
+
+  const orderRows = batchResult[0];
+
+  if (!orderRows || orderRows.length === 0) {
     throw new Error("Could not create checkout order.");
   }
 
-  for (const line of input.cart.items) {
-    await db.insert(orderItemsTable).values({
-      id: crypto.randomUUID(),
-      orderId: order.id,
-      productId: line.productId,
-      variantId: line.variantId,
-      name: line.name,
-      variantName: line.variantName,
-      href: line.href,
-      currency: line.currency,
-      unitPriceCents: line.unitPriceCents,
-      quantity: line.quantity,
-      lineTotalCents: line.quantity * line.unitPriceCents,
-      unavailableReason: line.unavailableReason,
-      createdAt,
-    });
-  }
-
-  await appendOrderStatusTimeline({
-    orderId: order.id,
-    status: "pending_payment",
-    actorType: "customer",
-    actorId: input.userId,
-    note: "Checkout session initialized.",
-  });
-
-  return order;
+  return orderRows[0];
 }
 
 export async function attachCheckoutPaymentSession(input: {

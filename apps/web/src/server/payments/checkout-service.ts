@@ -177,7 +177,7 @@ export async function createCheckoutSessionForUser(input: {
   let orderCreated = false;
 
   try {
-    const order = await createPendingCheckoutOrder({
+    await createPendingCheckoutOrder({
       id: orderId,
       orderNumber,
       userId: input.userId,
@@ -189,15 +189,15 @@ export async function createCheckoutSessionForUser(input: {
 
     const provider = resolvePaymentProvider(input.provider);
     const successUrl = buildAbsoluteUrl(
-      buildCheckoutPath(input.successPath ?? "/checkout/success", order.id),
+      buildCheckoutPath(input.successPath ?? "/checkout/success", orderId),
     );
     const cancelUrl = buildAbsoluteUrl(
-      buildCheckoutPath(input.cancelPath ?? "/checkout/cancel", order.id),
+      buildCheckoutPath(input.cancelPath ?? "/checkout/cancel", orderId),
     );
 
     const paymentSession = await provider.createCheckoutSession({
-      orderId: order.id,
-      orderNumber: order.orderNumber,
+      orderId: orderId,
+      orderNumber,
       totals,
       successUrl,
       cancelUrl,
@@ -205,22 +205,22 @@ export async function createCheckoutSessionForUser(input: {
     });
 
     await attachCheckoutPaymentSession({
-      orderId: order.id,
+      orderId: orderId,
       paymentSession,
       amountCents: totals.totalCents,
       currency: totals.currency,
     });
 
     await appendOrderStatusTimeline({
-      orderId: order.id,
+      orderId: orderId,
       status: "pending_payment",
       actorType: "system",
       note: `Checkout session created with ${paymentSession.providerId}.`,
     });
 
     return {
-      orderId: order.id,
-      orderNumber: order.orderNumber,
+      orderId: orderId,
+      orderNumber,
       providerId: paymentSession.providerId,
       providerDisplayName: provider.displayName,
       paymentSessionId: paymentSession.sessionId,

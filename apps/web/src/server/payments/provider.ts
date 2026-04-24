@@ -55,6 +55,32 @@ function equalSignature(expected: string, actual: string) {
   return timingSafeEqual(expectedBuffer, actualBuffer);
 }
 
+function parseMpSignature(signatureHeader: string) {
+  const parts = signatureHeader.split(",").map((p) => p.trim());
+  const tsPart = parts.find((p) => p.startsWith("ts="));
+  const v1Part = parts.find((p) => p.startsWith("v1="));
+  if (!tsPart || !v1Part) return null;
+  return {
+    ts: tsPart.slice(3),
+    v1: v1Part.slice(3),
+  };
+}
+
+async function hmacSha256Hex(secret: string, message: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(message));
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function parseStripeSignatureHeader(signatureHeader: string) {
   const entries = signatureHeader.split(",").map((segment) => segment.trim());
   const timestamp = entries.find((entry) => entry.startsWith("t="))?.slice(2);
@@ -71,6 +97,12 @@ function parseStripeSignatureHeader(signatureHeader: string) {
 function verifyStripeSignature(payload: string, signatureHeader: string, webhookSecret: string) {
   const parsed = parseStripeSignatureHeader(signatureHeader);
   if (!parsed.timestamp || parsed.signatures.length === 0) {
+    return false;
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const ts = Number.parseInt(parsed.timestamp, 10);
+  if (Number.isNaN(ts) || Math.abs(now - ts) > 5 * 60) {
     return false;
   }
 
@@ -101,7 +133,7 @@ function createMockProvider(method: CheckoutProvider, id: PaymentProviderId, dis
     async parseWebhookEvent(request) {
       const config = getPaymentRuntimeConfig();
       const signature = request.headers.get("x-mock-webhook-signature");
-      if (config.mockWebhookSecret && signature !== config.mockWebhookSecret) {
+      if (config.mockWebhookSecret && (!signature || !equalSignature(config.mockWebhookSecret, signature))) {
         throw new Error("Invalid mock webhook signature.");
       }
 
@@ -291,32 +323,12 @@ function createMercadoPagoProvider(accessToken: string): PaymentProviderAdapter 
     },
     async parseWebhookEvent(request) {
       const config = getPaymentRuntimeConfig();
-      const signatureHeader = request.headers.get("x-signature") ?? "";
+      const signatureHeader = request.headers.get("x-mercadopago-signature");
+      const requestId = request.headers.get("x-request-id") ?? "";
       const payload = await request.text();
 
-      if (config.mercadoPagoWebhookSecret) {
-        const entries = signatureHeader.split(",").map((s) => s.trim());
-        const timestamp = entries.find((e) => e.startsWith("ts="))?.slice(3);
-        const signatures = entries
-          .filter((e) => e.startsWith("v1="))
-          .map((e) => e.slice(3))
-          .filter(Boolean);
-
-        if (!timestamp || signatures.length === 0) {
-          throw new Error("Invalid Mercado Pago webhook signature format.");
-        }
-
-        const signedPayload = `${timestamp}.${payload}`;
-        const expected = createHmac("sha256", config.mercadoPagoWebhookSecret)
-          .update(signedPayload)
-          .digest("hex");
-
-        const valid = signatures.some((signature) =>
-          equalSignature(expected, signature),
-        );
-        if (!valid) {
-          throw new Error("Invalid Mercado Pago webhook signature.");
-        }
+      if (!signatureHeader || !config.mercadoPagoWebhookSecret) {
+        throw new Error("Mercado Pago webhook secret or signature missing.");
       }
 
       const parsed = JSON.parse(payload) as {
@@ -332,6 +344,25 @@ function createMercadoPagoProvider(accessToken: string): PaymentProviderAdapter 
           external_reference?: string;
         };
       };
+
+      // F4-3: Real HMAC verification. MP signs the "manifest" with the webhook secret.
+      const sigParsed = parseMpSignature(signatureHeader);
+      if (!sigParsed) {
+        throw new Error("Invalid Mercado Pago signature format.");
+      }
+
+      const dataId = String(parsed.data?.id ?? parsed.id ?? "");
+      const manifest = `id:${dataId};request-id:${requestId};ts:${sigParsed.ts};`;
+      const expected = await hmacSha256Hex(config.mercadoPagoWebhookSecret, manifest);
+      if (!equalSignature(expected, sigParsed.v1)) {
+        throw new Error("Invalid Mercado Pago webhook signature.");
+      }
+
+      // Reject replays older than 5 minutes.
+      const nowMs = Date.now();
+      if (Math.abs(nowMs - Number(sigParsed.ts) * 1000) > 5 * 60 * 1000) {
+        throw new Error("Mercado Pago signature timestamp out of tolerance.");
+      }
 
       const eventType = parsed.type ?? parsed.action ?? "unknown";
       const outcome = eventType.includes("approved")

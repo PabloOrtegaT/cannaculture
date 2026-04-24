@@ -7,6 +7,7 @@ out/
 .open-next/
 .wrangler/
 cloudflare-env.d.ts
+*.tsbuildinfo
 
 # tests
 coverage/

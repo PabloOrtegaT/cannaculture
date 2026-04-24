@@ -13,6 +13,12 @@ const mockCompletePayloadSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  // F4-4: This route exists only for local dev / E2E. Refuse in production.
+  const isDev = process.env.NODE_ENV === "development" || process.env.NEXTJS_ENV === "development";
+  if (!isDev) {
+    return new NextResponse("Not found", { status: 404 });
+  }
+
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

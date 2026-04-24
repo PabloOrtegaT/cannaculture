@@ -5,7 +5,7 @@
 CREATE TRIGGER IF NOT EXISTS trg_inventory_stock_non_negative
 BEFORE UPDATE ON inventoryStock
 FOR EACH ROW
-WHEN NEW.onHandQty < 0
+WHEN NEW.onHandQty < 0 OR NEW.availableQty < 0
 BEGIN
     SELECT RAISE(ABORT, 'Insufficient stock: onHandQty would go negative');
 END;

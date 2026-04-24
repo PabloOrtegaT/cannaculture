@@ -278,23 +278,14 @@ export async function decrementInventoryForPaidOrder(orderId: string) {
       db
         .update(inventoryStocksTable)
         .set({
-          onHandQty: sql`CASE
-            WHEN ${inventoryStocksTable.onHandQty} > ${row.quantity}
-              THEN ${inventoryStocksTable.onHandQty} - ${row.quantity}
-            ELSE 0
-          END`,
-          availableQty: sql`CASE
-            WHEN ${inventoryStocksTable.availableQty} > ${row.quantity}
-              THEN ${inventoryStocksTable.availableQty} - ${row.quantity}
-            ELSE 0
-          END`,
+          onHandQty: sql`${inventoryStocksTable.onHandQty} - ${row.quantity}`,
+          availableQty: sql`${inventoryStocksTable.availableQty} - ${row.quantity}`,
           updatedAt: now,
         })
         .where(eq(inventoryStocksTable.variantId, row.variantId)),
     );
-    const first = batchItems[0];
-    if (first) {
-      await db.batch([first, ...batchItems.slice(1)]);
+    if (batchItems.length > 0) {
+      await db.batch(batchItems as [typeof batchItems[number], ...typeof batchItems[number][]]);
     }
   }
 

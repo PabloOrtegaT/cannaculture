@@ -2,6 +2,7 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import type { CartState } from "@/features/cart/cart";
 import { getDb } from "@/server/db/client";
 import {
+  couponRedemptionsTable,
   inventoryHoldsTable,
   inventoryStocksTable,
   orderItemsTable,
@@ -9,6 +10,10 @@ import {
   orderStatusTimelineTable,
   paymentAttemptsTable,
 } from "@/server/db/schema";
+import {
+  assertValidOrderStatusTransition,
+  assertValidPaymentStatusTransition,
+} from "./state-machine";
 import type {
   CheckoutPaymentSession,
   CheckoutTotals,
@@ -35,6 +40,7 @@ export async function createPendingCheckoutOrder(input: {
   totals: CheckoutTotals;
   couponCode?: string;
   couponSnapshot?: OrderCouponSnapshot;
+  couponRedemption?: { couponId: string; orderId: string; userId: string };
   id?: string;
   orderNumber?: string;
   holdLines?: Array<{ variantId: string; quantity: number }>;
@@ -121,10 +127,21 @@ export async function createPendingCheckoutOrder(input: {
     }
   }
 
+  const redemptionStatement = input.couponRedemption
+    ? db.insert(couponRedemptionsTable).values({
+        id: crypto.randomUUID(),
+        couponId: input.couponRedemption.couponId,
+        orderId: input.couponRedemption.orderId,
+        userId: input.couponRedemption.userId,
+        createdAt,
+      })
+    : null;
+
   const batchStatements = [
     db.insert(ordersTable).values(orderValues).returning(),
     db.insert(orderItemsTable).values(itemValues),
     db.insert(orderStatusTimelineTable).values(timelineValues),
+    ...(redemptionStatement ? [redemptionStatement] : []),
     ...holdStatements,
   ];
 
@@ -240,6 +257,14 @@ export async function updateOrderPaymentState(input: {
 }) {
   const db = getDb();
   const updatedAt = nowDate();
+
+  const order = await getOrderById(input.orderId);
+  if (!order) {
+    throw new Error(`Order ${input.orderId} not found`);
+  }
+
+  assertValidOrderStatusTransition(order.status as OrderStatus, input.status);
+  assertValidPaymentStatusTransition(order.paymentStatus as PaymentStatus, input.paymentStatus);
 
   await db
     .update(ordersTable)

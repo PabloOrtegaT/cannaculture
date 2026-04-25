@@ -23,6 +23,7 @@ export const couponSchema = z
     startsAt: z.string().datetime(),
     endsAt: z.string().datetime(),
     usageLimit: z.number().int().positive().optional(),
+    perUserLimit: z.number().int().positive().optional(),
     usageCount: z.number().int().nonnegative().default(0),
     isActive: z.boolean().default(true),
     createdAt: z.string().datetime(),

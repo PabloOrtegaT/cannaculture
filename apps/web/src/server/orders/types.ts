@@ -15,11 +15,20 @@ export const orderStatusSchema = z.enum([
   "pending_payment",
   "paid",
   "payment_failed",
+  "shipped",
+  "delivered",
   "cancelled",
+  "refunded",
 ]);
 export type OrderStatus = z.infer<typeof orderStatusSchema>;
 
-export const paymentStatusSchema = z.enum(["pending", "succeeded", "failed", "cancelled"]);
+export const paymentStatusSchema = z.enum([
+  "pending",
+  "succeeded",
+  "failed",
+  "cancelled",
+  "refunded",
+]);
 export type PaymentStatus = z.infer<typeof paymentStatusSchema>;
 
 export type CheckoutTotals = {

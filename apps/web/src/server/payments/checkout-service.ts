@@ -3,11 +3,14 @@ import {
   isCouponApplicable,
   type Coupon,
 } from "@cannaculture/domain";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { calculateCartTotals, getUnavailableCartItems, type CartState } from "@/features/cart/cart";
 import { getHostRuntimeConfig } from "@/server/config/runtime-env";
 import { getProfileRuntimeStore } from "@/server/data/runtime-store";
 import { getUserCartSnapshot } from "@/server/cart/service";
+import { getDb } from "@/server/db/client";
+import { couponRedemptionsTable } from "@/server/db/schema";
 import { validateInventoryForOrder, type StockConflictLine } from "@/server/inventory/service";
 import {
   appendOrderStatusTimeline,
@@ -89,6 +92,51 @@ function toCouponSnapshot(coupon: Coupon): OrderCouponSnapshot {
     ...(typeof coupon.amountOffCents === "number" ? { amountOffCents: coupon.amountOffCents } : {}),
     ...(coupon.currency ? { currency: coupon.currency } : {}),
   };
+}
+
+export async function assertCouponRedemptionAllowed(coupon: Coupon, userId: string, orderId: string) {
+  const db = getDb();
+
+  const existingForOrder = await db
+    .select()
+    .from(couponRedemptionsTable)
+    .where(
+      and(
+        eq(couponRedemptionsTable.couponId, coupon.id),
+        eq(couponRedemptionsTable.orderId, orderId),
+      ),
+    )
+    .limit(1);
+
+  if (existingForOrder.length > 0) {
+    throw new CheckoutCouponError("This coupon has already been applied to this order.");
+  }
+
+  if (typeof coupon.usageLimit === "number") {
+    const globalResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(couponRedemptionsTable)
+      .where(eq(couponRedemptionsTable.couponId, coupon.id));
+
+    const globalCount = globalResult[0]?.count ?? 0;
+    if (globalCount >= coupon.usageLimit) {
+      throw new CheckoutCouponError("This coupon has reached its maximum number of uses.");
+    }
+  }
+
+  if (typeof coupon.perUserLimit === "number") {
+    const userResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(couponRedemptionsTable)
+      .where(
+        and(eq(couponRedemptionsTable.couponId, coupon.id), eq(couponRedemptionsTable.userId, userId)),
+      );
+
+    const userCount = userResult[0]?.count ?? 0;
+    if (userCount >= coupon.perUserLimit) {
+      throw new CheckoutCouponError("You have already used this coupon the maximum number of times.");
+    }
+  }
 }
 
 function assertCartReadyForCheckout(cart: CartState) {
@@ -174,6 +222,11 @@ export async function createCheckoutSessionForUser(input: {
 
   const orderId = crypto.randomUUID();
   const orderNumber = createOrderNumber();
+
+  if (coupon) {
+    await assertCouponRedemptionAllowed(coupon, input.userId, orderId);
+  }
+
   let orderCreated = false;
 
   try {
@@ -183,7 +236,13 @@ export async function createCheckoutSessionForUser(input: {
       userId: input.userId,
       cart: cartSnapshot.cart,
       totals,
-      ...(coupon ? { couponCode: coupon.code, couponSnapshot: toCouponSnapshot(coupon) } : {}),
+      ...(coupon
+        ? {
+            couponCode: coupon.code,
+            couponSnapshot: toCouponSnapshot(coupon),
+            couponRedemption: { couponId: coupon.id, orderId, userId: input.userId },
+          }
+        : {}),
       holdLines: cartSnapshot.cart.items.map((item) => ({
         variantId: item.variantId,
         quantity: item.quantity,

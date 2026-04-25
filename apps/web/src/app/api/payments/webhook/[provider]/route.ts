@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { PRIVATE_NO_STORE } from "@/server/http/cache-headers";
 import { resolveProviderFromWebhookRoute } from "@/server/payments/provider";
-import { processPaymentWebhookEvent } from "@/server/payments/webhook-service";
+import {
+  MAX_WEBHOOK_PAYLOAD_BYTES,
+  processPaymentWebhookEvent,
+} from "@/server/payments/webhook-service";
 import { trackError, trackWarn } from "@/server/observability/telemetry";
 import { enforceRateLimit, getClientIpFromRequest } from "@/server/security/rate-limit";
 
@@ -33,6 +36,27 @@ export async function POST(request: Request, context: WebhookRouteContext) {
       { error: "Rate limited." },
       { status: 429, headers: PRIVATE_NO_STORE },
     );
+  }
+
+  const contentLength = request.headers.get("content-length");
+  if (contentLength) {
+    const size = Number.parseInt(contentLength, 10);
+    if (!Number.isNaN(size) && size > MAX_WEBHOOK_PAYLOAD_BYTES) {
+      trackWarn({
+        scope: "api.payments.webhook.post",
+        message: "payload_too_large",
+        metadata: {
+          provider: params.provider,
+          ip: clientIp,
+          contentLength: size,
+          maxBytes: MAX_WEBHOOK_PAYLOAD_BYTES,
+        },
+      });
+      return NextResponse.json(
+        { error: "Payload too large." },
+        { status: 413, headers: PRIVATE_NO_STORE },
+      );
+    }
   }
 
   let event;

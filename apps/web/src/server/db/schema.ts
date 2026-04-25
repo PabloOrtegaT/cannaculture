@@ -306,4 +306,25 @@ export const paymentWebhookEventsTable = sqliteTable(
   }),
 );
 
+export const couponRedemptionsTable = sqliteTable(
+  "couponRedemption",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    couponId: text("couponId").notNull(),
+    orderId: text("orderId")
+      .notNull()
+      .references(() => ordersTable.id, { onDelete: "cascade" }),
+    userId: text("userId")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    createdAt: integer("createdAt", { mode: "timestamp_ms" }).notNull().default(nowSql),
+  },
+  (table) => ({
+    couponOrderUnique: uniqueIndex("coupon_redemption_coupon_order_unique").on(table.couponId, table.orderId),
+    couponUserIdx: index("coupon_redemption_coupon_user_idx").on(table.couponId, table.userId),
+  }),
+);
+
 export type DbUser = typeof usersTable.$inferSelect;

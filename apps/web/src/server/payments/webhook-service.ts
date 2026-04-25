@@ -17,6 +17,7 @@ import {
   getOrderByPaymentSessionId,
   updateOrderPaymentState,
 } from "@/server/orders/service";
+import { trackWarn } from "@/server/observability/telemetry";
 import type { PaymentWebhookEvent } from "@/server/orders/types";
 
 type ProcessWebhookResult =
@@ -30,6 +31,22 @@ type ProcessWebhookResult =
       orderId: string | null;
       outcome: "succeeded" | "failed" | "cancelled" | "pending";
     };
+
+export const MAX_WEBHOOK_PAYLOAD_BYTES = 16384;
+const TRUNCATION_MARKER = "...[TRUNCATED]";
+
+export function truncateWebhookPayload(payload: string): string {
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(payload);
+  if (bytes.length <= MAX_WEBHOOK_PAYLOAD_BYTES) {
+    return payload;
+  }
+  const markerBytes = encoder.encode(TRUNCATION_MARKER);
+  const maxContentBytes = MAX_WEBHOOK_PAYLOAD_BYTES - markerBytes.length;
+  const truncated = bytes.slice(0, maxContentBytes);
+  const decoded = new TextDecoder().decode(truncated);
+  return decoded + TRUNCATION_MARKER;
+}
 
 function nowDate() {
   return new Date();
@@ -70,6 +87,19 @@ export async function processPaymentWebhookEvent(
   const db = getDb();
   const receivedAt = nowDate();
 
+  const truncatedPayload = truncateWebhookPayload(event.payload);
+  if (truncatedPayload !== event.payload) {
+    trackWarn({
+      scope: "payments.webhook-service",
+      message: "payload_truncated",
+      metadata: {
+        provider: event.providerId,
+        eventId: event.eventId,
+        maxBytes: MAX_WEBHOOK_PAYLOAD_BYTES,
+      },
+    });
+  }
+
   const [inserted] = await db
     .insert(paymentWebhookEventsTable)
     .values({
@@ -77,7 +107,7 @@ export async function processPaymentWebhookEvent(
       provider: event.providerId,
       eventId: event.eventId,
       eventType: event.eventType,
-      payload: event.payload,
+      payload: truncatedPayload,
       outcome: "received",
       receivedAt,
     })

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Sprout, Leaf, Truck, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,8 +26,13 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center py-12">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Fill in your details to get started</p>
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30">
+            <Sprout className="h-6 w-6 text-emerald-600" aria-hidden="true" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Start your growing journey</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Join growers who trust Cannaculture for premium indoor supplies
+          </p>
         </div>
 
         {params.error && (
@@ -37,7 +42,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           </Alert>
         )}
 
-        <Card>
+        <Card className="border-emerald-200/50 dark:border-emerald-900/30">
           <CardHeader className="pb-4">
             <CardTitle className="text-base">Account details</CardTitle>
             <CardDescription>All fields are required</CardDescription>
@@ -84,7 +89,28 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="border-t pt-4">
+          <CardFooter className="flex flex-col gap-4 border-t pt-4">
+            {/* Value props */}
+            <div className="grid grid-cols-3 gap-2 w-full">
+              <div className="flex flex-col items-center gap-1 text-center">
+                <Leaf className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                <span className="text-[10px] text-muted-foreground leading-tight">
+                  Curated supplies
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-center">
+                <Truck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                <span className="text-[10px] text-muted-foreground leading-tight">
+                  Fast shipping
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-center">
+                <ShieldCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                <span className="text-[10px] text-muted-foreground leading-tight">
+                  Indoor-grow picks
+                </span>
+              </div>
+            </div>
             <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link href="/login" className="text-foreground font-medium hover:underline">

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, Leaf } from "lucide-react";
+import { ChevronRight, Leaf, Package2, ShieldCheck, Sprout, Truck } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +59,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
     result.category.templateKey,
     defaultVariant?.attributeValues ?? {},
   );
+  const totalStockOnHand = result.variants.reduce((acc, v) => acc + v.stockOnHand, 0);
+  const stockLabel =
+    totalStockOnHand <= 0
+      ? "Currently out of stock"
+      : totalStockOnHand <= 5
+        ? `Low stock across variants (${totalStockOnHand})`
+        : `${totalStockOnHand} units across variants`;
   const hasDetailContent =
     detailMeta.heroLines.length > 0 || detailMeta.specs.length > 0 || detailMeta.tips.length > 0;
   const relatedCategoryLinks = getRelatedCategoryLinks({
@@ -87,7 +94,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+      <nav
+        aria-label="Breadcrumb"
+        className="flex items-center gap-1.5 text-sm text-muted-foreground"
+      >
         <Link href="/catalog" className="hover:text-foreground transition-colors">
           Catalog
         </Link>
@@ -99,49 +109,97 @@ export default async function ProductPage({ params }: ProductPageProps) {
           {result.category.name}
         </Link>
         <ChevronRight className="h-3.5 w-3.5" />
-        <span className="text-foreground font-medium truncate">{result.product.name}</span>
+        <span className="text-foreground font-medium truncate" aria-current="page">
+          {result.product.name}
+        </span>
       </nav>
 
       {/* Product header */}
-      <div className="space-y-3">
-        <h1 className="font-sans text-4xl font-semibold leading-tight tracking-normal">
-          {result.product.name}
-        </h1>
-        {result.product.description && (
-          <p className="text-muted-foreground max-w-2xl">{result.product.description}</p>
-        )}
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-2xl font-bold">
-            {formatCurrencyFromCents(basePricing.currentCents, result.product.currency)}
-          </span>
-          {basePricing.hasDiscount && (
-            <>
-              <span className="text-muted-foreground line-through">
-                {formatCurrencyFromCents(basePricing.compareAtCents ?? 0, result.product.currency)}
-              </span>
-              <Badge variant="default">-{basePricing.discountPercent}%</Badge>
-            </>
-          )}
-          {detailMeta.badges.map((badge, idx) => (
-            <Badge key={`badge-${idx}`} variant="outline">
-              {badge}
-            </Badge>
-          ))}
-        </div>
-        {detailMeta.heroLines.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {detailMeta.heroLines.map((line, idx) => (
-              <span
-                key={`hero-${idx}`}
-                className="inline-flex items-center gap-1.5 rounded-full border bg-muted/50 px-3 py-1 text-sm text-muted-foreground"
+      <section className="overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-50/70 via-background to-amber-50/40 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
+        <div className="grid gap-6 p-6 md:grid-cols-[1fr_280px] md:p-8">
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="rounded-full bg-background/80">
+                {result.category.name}
+              </Badge>
+              <Badge
+                variant={totalStockOnHand > 0 ? "success" : "secondary"}
+                className="rounded-full"
               >
-                <Leaf className="h-3.5 w-3.5" />
-                {line}
+                {stockLabel}
+              </Badge>
+            </div>
+
+            <div className="space-y-3">
+              <h1 className="font-sans text-4xl font-semibold leading-tight tracking-normal md:text-5xl">
+                {result.product.name}
+              </h1>
+              {result.product.description && (
+                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
+                  {result.product.description}
+                </p>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-2xl font-bold md:text-3xl">
+                {formatCurrencyFromCents(basePricing.currentCents, result.product.currency)}
               </span>
-            ))}
+              {basePricing.hasDiscount && (
+                <>
+                  <span className="text-muted-foreground line-through">
+                    {formatCurrencyFromCents(basePricing.compareAtCents ?? 0, result.product.currency)}
+                  </span>
+                  <Badge variant="default">Save {basePricing.discountPercent}%</Badge>
+                </>
+              )}
+            </div>
+
+            {(detailMeta.badges.length > 0 || detailMeta.heroLines.length > 0) && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {detailMeta.badges.map((badge, idx) => (
+                  <Badge key={`badge-${idx}`} variant="outline" className="rounded-full bg-background/70">
+                    {badge}
+                  </Badge>
+                ))}
+                {detailMeta.heroLines.map((line, idx) => (
+                  <span
+                    key={`hero-${idx}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border bg-background/70 px-3 py-1 text-sm text-muted-foreground"
+                  >
+                    <Leaf className="h-3.5 w-3.5" />
+                    {line}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          <div className="rounded-xl border bg-card/80 p-4 backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Why growers pick this
+            </p>
+            <div className="mt-4 space-y-3 text-sm text-muted-foreground">
+              <div className="flex items-start gap-2.5">
+                <Sprout className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                <span>Made easier to compare across variants before you commit.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <Package2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                <span>Stock is checked live so your cart reflects current availability.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <Truck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                <span>Shipping cost is calculated at checkout based on your order.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                <span>Secure checkout flow with order tracking in your account area.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Separator />
 
@@ -151,9 +209,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {hasDetailContent ? (
           <div className="space-y-4">
             {detailMeta.specs.length > 0 && (
-              <Card>
+              <Card className="overflow-hidden border-emerald-200/40 dark:border-emerald-900/30">
                 <CardHeader>
-                  <CardTitle className="text-base">Specifications</CardTitle>
+                  <CardTitle className="text-base">Plant-focused specifications</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <dl className="divide-y">
@@ -172,9 +230,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
             )}
 
             {detailMeta.tips.length > 0 && (
-              <Card>
+              <Card className="overflow-hidden border-amber-200/50 dark:border-amber-900/30">
                 <CardHeader>
-                  <CardTitle className="text-base">Care & growing tips</CardTitle>
+                  <CardTitle className="text-base">Before you add it to your grow</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <ul className="list-disc pl-4 space-y-1 text-sm text-muted-foreground">
@@ -212,10 +270,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
 
       {(relatedCategoryLinks.length > 0 || relatedProductLinks.length > 0) && (
-        <section className="space-y-4 rounded-lg border bg-card p-4 text-card-foreground">
+        <section className="space-y-4 rounded-xl border bg-card p-5 text-card-foreground">
           {relatedCategoryLinks.length > 0 && (
             <div className="space-y-2">
-              <h2 className="text-sm font-semibold">Categorías relacionadas</h2>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                Keep building your setup
+              </p>
+              <h2 className="text-sm font-semibold">Related categories</h2>
               <div className="flex flex-wrap gap-2">
                 {relatedCategoryLinks.map((entry) => (
                   <Link
@@ -232,7 +293,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           {relatedProductLinks.length > 0 && (
             <div className="space-y-2">
-              <h2 className="text-sm font-semibold">Más productos en {result.category.name}</h2>
+              <h2 className="text-sm font-semibold">More in {result.category.name}</h2>
               <div className="grid gap-2 sm:grid-cols-2">
                 {relatedProductLinks.map((entry) => (
                   <Link

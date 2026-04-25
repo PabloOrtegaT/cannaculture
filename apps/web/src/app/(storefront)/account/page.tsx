@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Package, User, LogOut, ShoppingBag } from "lucide-react";
+import { Package, Sprout, LogOut, ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,8 +39,16 @@ export default async function AccountPage() {
 
   return (
     <div className="space-y-8 max-w-3xl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">My account</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3 rounded-2xl border bg-gradient-to-br from-emerald-50/60 via-background to-background p-5 dark:from-emerald-950/20 dark:via-background dark:to-background">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+            Grower account
+          </p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">My account</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Track orders, review payment progress, and return to your grow supplies anytime.
+          </p>
+        </div>
         <Button asChild variant="ghost" size="sm">
           <Link href="/logout">
             <LogOut className="h-4 w-4" />
@@ -53,12 +61,14 @@ export default async function AccountPage() {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-primary/10 p-2.5">
-              <User className="h-5 w-5 text-primary" />
+            <div className="rounded-full bg-emerald-50 dark:bg-emerald-950/30 p-2.5">
+              <Sprout className="h-5 w-5 text-emerald-600" aria-hidden="true" />
             </div>
             <div>
               <CardTitle className="text-base">{user.email}</CardTitle>
-              <p className="text-xs text-muted-foreground mt-0.5 capitalize">{user.role} account</p>
+              <p className="text-xs text-muted-foreground mt-0.5 capitalize">
+                {user.role} account
+              </p>
             </div>
           </div>
         </CardHeader>
@@ -67,24 +77,24 @@ export default async function AccountPage() {
       {/* Orders */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Package className="h-5 w-5 text-muted-foreground" />
+          <Package className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
           <h2 className="text-xl font-semibold">Recent orders</h2>
         </div>
 
         {orders.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12 text-center gap-3">
-              <div className="rounded-full bg-muted p-4">
-                <ShoppingBag className="h-7 w-7 text-muted-foreground" />
+              <div className="rounded-full bg-emerald-50 dark:bg-emerald-950/30 p-4">
+                <ShoppingBag className="h-7 w-7 text-emerald-600" aria-hidden="true" />
               </div>
               <div>
                 <p className="font-medium">No orders yet</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Your completed orders will appear here
+                  Browse our catalog and start building your grow setup
                 </p>
               </div>
               <Button asChild variant="outline" size="sm">
-                <Link href="/catalog">Start shopping</Link>
+                <Link href="/catalog">Explore the catalog</Link>
               </Button>
             </CardContent>
           </Card>
@@ -96,7 +106,9 @@ export default async function AccountPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-mono font-semibold text-sm">{entry.order.orderNumber}</p>
+                        <p className="font-mono font-semibold text-sm">
+                          {entry.order.orderNumber}
+                        </p>
                         <Badge
                           variant={statusVariants[entry.order.status] ?? "secondary"}
                           className="text-xs"
@@ -112,7 +124,7 @@ export default async function AccountPage() {
                       </div>
                       {entry.leadItem && (
                         <p className="text-sm text-muted-foreground truncate">
-                          {entry.leadItem.name} — {entry.leadItem.variantName}
+                          {entry.leadItem.name} - {entry.leadItem.variantName}
                         </p>
                       )}
                     </div>

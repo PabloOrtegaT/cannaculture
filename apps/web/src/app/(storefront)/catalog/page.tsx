@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/storefront/product-card";
 import { MobileFilterToggle } from "@/components/storefront/mobile-filter-toggle";
@@ -13,8 +13,9 @@ import { createPageMetadata, SEO_BRAND_NAME } from "@/server/seo/metadata";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = createPageMetadata({
-  title: `Catálogo de cultivo indoor | ${SEO_BRAND_NAME}`,
-  description: "Explora semillas, luces y sustratos para cultivar en interior con Cannaculture.",
+  title: `Indoor Growing Catalog | ${SEO_BRAND_NAME}`,
+  description:
+    "Browse seeds, grow lights, substrates and accessories for indoor growing with Cannaculture.",
   pathname: "/catalog",
 });
 
@@ -39,9 +40,9 @@ function normalizeSort(sort?: string): ProductSort {
 
 const sortLabels: Record<ProductSort, string> = {
   featured: "Featured",
-  "name-asc": "Name A–Z",
-  "price-asc": "Price: Low → High",
-  "price-desc": "Price: High → Low",
+  "name-asc": "Name A-Z",
+  "price-asc": "Price: Low to High",
+  "price-desc": "Price: High to Low",
 };
 
 export default async function CatalogPage({ searchParams }: CatalogPageProps) {
@@ -100,7 +101,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
               name="category"
               value=""
               defaultChecked={!categorySlug}
-              className="h-3.5 w-3.5 accent-foreground"
+              className="h-3.5 w-3.5 accent-emerald-600"
             />
             <span
               className={cn(
@@ -118,7 +119,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 name="category"
                 value={cat.slug}
                 defaultChecked={categorySlug === cat.slug}
-                className="h-3.5 w-3.5 accent-foreground"
+                className="h-3.5 w-3.5 accent-emerald-600"
               />
               <span
                 className={cn(
@@ -148,7 +149,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 name="sort"
                 value={s}
                 defaultChecked={sort === s}
-                className="h-3.5 w-3.5 accent-foreground"
+                className="h-3.5 w-3.5 accent-emerald-600"
               />
               <span
                 className={cn(
@@ -177,7 +178,9 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
       {/* Page header */}
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b pb-5">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">Shop</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-1">
+            Shop
+          </p>
           <h1 className="text-3xl font-bold tracking-tight">Catalog</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Found <strong className="text-foreground">{products.length}</strong>{" "}
@@ -195,7 +198,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 type="search"
                 name="q"
                 defaultValue={query}
-                placeholder="Search products…"
+                placeholder="Search products..."
                 className="h-9 w-52 rounded-md border border-input bg-background pl-8 pr-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
               {categorySlug && <input type="hidden" name="category" value={categorySlug} />}
@@ -210,15 +213,21 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         </div>
       </div>
 
-      {/* Mobile filter toggle — client component */}
+      {/* Mobile filter toggle */}
       <form method="GET" action="/catalog">
         <MobileFilterToggle>{filterForm}</MobileFilterToggle>
       </form>
 
       {/* Body: sidebar + grid */}
       <div className="flex gap-8">
-        {/* Sidebar — desktop only */}
-        <aside className="hidden md:block w-52 shrink-0 bg-muted/30 border-r">
+        {/* Sidebar */}
+        <aside className="hidden md:block w-52 shrink-0 rounded-lg border bg-emerald-50/30 dark:bg-emerald-950/10 p-4">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b">
+            <Sprout className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+              Filter your grow
+            </span>
+          </div>
           <form method="GET" action="/catalog" className="sticky top-24 space-y-0">
             {filterForm}
           </form>
@@ -228,9 +237,15 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         <div className="flex-1 min-w-0">
           {products.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-20 text-center gap-3">
-              <p className="text-muted-foreground font-medium">No products found.</p>
+              <div className="rounded-full bg-emerald-50 dark:bg-emerald-950/30 p-4">
+                <Sprout className="h-7 w-7 text-emerald-600" aria-hidden="true" />
+              </div>
+              <p className="font-medium">No products found</p>
+              <p className="text-sm text-muted-foreground">
+                Try adjusting your filters or search terms
+              </p>
               <Button asChild variant="link" size="sm">
-                <Link href="/catalog">Clear filters</Link>
+                <Link href="/catalog">Clear all filters</Link>
               </Button>
             </div>
           ) : (

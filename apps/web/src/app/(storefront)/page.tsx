@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Monitor, Wrench, Heart, BookOpen, Zap, Home } from "lucide-react";
+import { Sprout, Sun, Droplets, FlaskConical, Shovel, Flower2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/storefront/product-card";
 import { JsonLdScript } from "@/components/seo/json-ld-script";
@@ -16,7 +16,7 @@ import { createPageMetadata, SEO_BRAND_NAME, SEO_BRAND_SUMMARY_ES } from "@/serv
 import { buildArticleJsonLd } from "@/server/seo/structured-data";
 
 export const metadata: Metadata = createPageMetadata({
-  title: `${SEO_BRAND_NAME} | Todo para cultivo indoor`,
+  title: `${SEO_BRAND_NAME} | Everything for indoor growing`,
   description: SEO_BRAND_SUMMARY_ES,
   pathname: "/",
   type: "website",
@@ -24,14 +24,14 @@ export const metadata: Metadata = createPageMetadata({
 
 export const revalidate = 60;
 
-// Cycles through for visual variety per category index
+// Plant-relevant icons and colors per category index
 const CATEGORY_STYLES = [
-  { bg: "from-emerald-50 to-emerald-100", icon: Home, iconColor: "text-emerald-600" },
-  { bg: "from-blue-50 to-blue-100", icon: Monitor, iconColor: "text-blue-600" },
-  { bg: "from-pink-50 to-pink-100", icon: Heart, iconColor: "text-pink-500" },
-  { bg: "from-amber-50 to-amber-100", icon: BookOpen, iconColor: "text-amber-600" },
-  { bg: "from-indigo-50 to-indigo-100", icon: Zap, iconColor: "text-indigo-600" },
-  { bg: "from-teal-50 to-teal-100", icon: Wrench, iconColor: "text-teal-600" },
+  { bg: "from-emerald-50 to-emerald-100", icon: Sprout, iconColor: "text-emerald-600" },
+  { bg: "from-amber-50 to-amber-100", icon: Sun, iconColor: "text-amber-600" },
+  { bg: "from-sky-50 to-sky-100", icon: Droplets, iconColor: "text-sky-600" },
+  { bg: "from-violet-50 to-violet-100", icon: FlaskConical, iconColor: "text-violet-600" },
+  { bg: "from-teal-50 to-teal-100", icon: Shovel, iconColor: "text-teal-600" },
+  { bg: "from-rose-50 to-rose-100", icon: Flower2, iconColor: "text-rose-500" },
 ];
 
 export default async function HomePage() {
@@ -44,9 +44,9 @@ export default async function HomePage() {
       {/* ── Split Hero ────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] overflow-hidden rounded-xl border">
         {/* Left: headline + CTA */}
-        <div className="flex flex-col justify-center gap-4 bg-gradient-to-br from-muted/60 to-muted p-8 md:p-10">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            {home.activeBanner ? "Sale" : "Welcome"}
+        <div className="flex flex-col justify-center gap-4 bg-gradient-to-br from-emerald-50/60 to-muted dark:from-emerald-950/30 dark:to-muted p-8 md:p-10">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+            {home.activeBanner ? "Limited offer" : "Indoor growing supplies"}
           </p>
           <h1 className="text-4xl sm:text-5xl font-black tracking-tight leading-[1.05]">
             {home.activeBanner ? (
@@ -60,14 +60,15 @@ export default async function HomePage() {
             )}
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-            Seeds, lights, nutrients, and tools for every indoor garden.
+            Seeds, grow lights, nutrients, substrates, and tools — everything your indoor garden
+            needs, chosen by growers.
           </p>
           <div>
             <Button asChild size="lg">
               <Link href={home.activeBanner?.ctaHref ?? "/catalog"}>
                 {home.activeBanner
                   ? (home.activeBanner.ctaLabel ?? "Shop the sale")
-                  : "Explore catalog"}
+                  : "Shop the catalog"}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
@@ -76,34 +77,36 @@ export default async function HomePage() {
 
         {/* Right: two stacked promo tiles */}
         <div className="hidden md:grid grid-rows-2 divide-y border-l">
-          <div className="flex items-center justify-between gap-4 bg-[#1a2e1a] px-8 py-6">
+          <div className="flex items-center justify-between gap-4 bg-emerald-950 dark:bg-emerald-950/80 px-8 py-6">
             <div>
               <p className="text-base font-bold text-white leading-snug mb-1">
-                LED Grow Lights for Indoor Gardens.
+                LED Grow Lights
               </p>
-              <p className="text-xs text-white/60 mb-3">Panels, strips and bulbs for every space</p>
+              <p className="text-xs text-white/60 mb-3">
+                Panels, strips, and bulbs sized for any indoor space
+              </p>
               <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
-                <Link href="/catalog/grow-lights">Shop Lights</Link>
+                <Link href="/catalog/grow-lights">Shop lights</Link>
               </Button>
             </div>
             <div className="h-12 w-12 shrink-0 rounded-full border border-primary/30 bg-primary/10 flex items-center justify-center">
-              <Monitor className="h-5 w-5 text-primary" />
+              <Sun className="h-5 w-5 text-primary" />
             </div>
           </div>
-          <div className="flex items-center justify-between gap-4 bg-[#f3f7ee] px-8 py-6">
+          <div className="flex items-center justify-between gap-4 bg-emerald-50 dark:bg-emerald-900/20 px-8 py-6">
             <div>
               <p className="text-base font-bold text-foreground leading-snug mb-1">
-                Heirloom Seeds & Starter Kits.
+                Heirloom Seeds &amp; Starter Kits
               </p>
               <p className="text-xs text-muted-foreground mb-3">
-                Curated varieties for home growers
+                Curated varieties for home growers and compact indoor setups
               </p>
               <Button asChild size="sm" variant="outline">
-                <Link href="/catalog/plant-seeds">Shop Seeds</Link>
+                <Link href="/catalog/plant-seeds">Shop seeds</Link>
               </Button>
             </div>
-            <div className="h-12 w-12 shrink-0 rounded-full border border-emerald-200 bg-emerald-50 flex items-center justify-center">
-              <Wrench className="h-5 w-5 text-emerald-600" />
+            <div className="h-12 w-12 shrink-0 rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+              <Sprout className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
         </div>
@@ -113,7 +116,7 @@ export default async function HomePage() {
       {categories.length > 0 && (
         <section>
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
-            Browse by category
+            Shop by growing need
           </p>
           <div className="overflow-x-auto -mx-6 px-6">
             <div className="flex gap-3 pb-1 w-max min-w-full">
@@ -149,10 +152,10 @@ export default async function HomePage() {
         <section className="space-y-5">
           <div className="border-b pb-4">
             <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">
-              Handpicked
+              Staff picks
             </p>
             <div className="flex flex-wrap items-end justify-between gap-3">
-              <h2 className="text-2xl font-bold tracking-tight">Featured products</h2>
+              <h2 className="text-2xl font-bold tracking-tight">Featured for growers</h2>
               <Button variant="ghost" asChild className="shrink-0">
                 <Link href="/catalog">
                   View all <ArrowRight className="h-4 w-4" />
@@ -191,9 +194,9 @@ export default async function HomePage() {
         <section className="space-y-5">
           <div className="border-b pb-4">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">
-              Updates
+              From the grow room
             </p>
-            <h2 className="text-2xl font-bold tracking-tight">Latest news</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Grower updates</h2>
           </div>
           <div className="rounded-lg bg-muted/30 p-4 grid gap-4 sm:grid-cols-2">
             {home.news.map((news) => (

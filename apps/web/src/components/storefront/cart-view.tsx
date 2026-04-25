@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
+  Sprout,
   ShoppingBag,
   Minus,
   Plus,
@@ -10,6 +11,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   ArrowRight,
+  Truck,
+  ShieldCheck,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -89,16 +92,18 @@ export function CartView({ authenticated }: CartViewProps) {
   if (cart.items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-        <div className="rounded-full bg-muted p-6">
-          <ShoppingBag className="h-10 w-10 text-muted-foreground" />
+        <div className="rounded-full bg-emerald-50 dark:bg-emerald-950/30 p-6">
+          <ShoppingBag className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div>
           <h1 className="text-2xl font-bold">Your cart is empty</h1>
-          <p className="mt-1 text-muted-foreground">Add some products to get started</p>
+          <p className="mt-1 text-muted-foreground">
+            Browse seeds, grow lights, and supplies to start your indoor garden.
+          </p>
         </div>
         <Button asChild>
           <Link href="/catalog">
-            Explore products <ArrowRight className="h-4 w-4" />
+            Browse the catalog <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
       </div>
@@ -107,8 +112,16 @@ export function CartView({ authenticated }: CartViewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Your cart</h1>
+      <div className="flex flex-wrap items-end justify-between gap-3 rounded-2xl border bg-gradient-to-br from-emerald-50/60 via-background to-amber-50/30 p-5 dark:from-emerald-950/20 dark:via-background dark:to-amber-950/10">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+            Checkout ready
+          </p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">Your grow cart</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Review quantities, confirm availability, and continue when your setup looks right.
+          </p>
+        </div>
         <Badge variant="secondary">
           {totals.itemCount} {totals.itemCount === 1 ? "item" : "items"}
         </Badge>
@@ -168,9 +181,9 @@ export function CartView({ authenticated }: CartViewProps) {
             <Card key={item.variantId}>
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
-                  {/* Item image placeholder */}
-                  <div className="h-16 w-16 shrink-0 rounded-lg bg-muted flex items-center justify-center">
-                    <ShoppingBag className="h-6 w-6 text-muted-foreground/40" />
+                  {/* Item thumbnail - plant-branded tint */}
+                  <div className="h-16 w-16 shrink-0 rounded-lg bg-gradient-to-br from-emerald-50 to-emerald-100/60 dark:from-emerald-950/30 dark:to-emerald-900/20 flex items-center justify-center">
+                    <Sprout className="h-6 w-6 text-emerald-500/50 dark:text-emerald-400/40" />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -237,6 +250,9 @@ export function CartView({ authenticated }: CartViewProps) {
           <Card>
             <CardContent className="p-5 space-y-4">
               <h2 className="font-semibold">Order summary</h2>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Shipping and final payment details are confirmed in the next step.
+              </p>
               <Separator />
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
@@ -254,6 +270,16 @@ export function CartView({ authenticated }: CartViewProps) {
                 <span>{formatCurrencyFromCents(totals.subtotalCents, currency)}</span>
               </div>
               <CheckoutSessionForm authenticated={authenticated} canCheckout={canCheckout} />
+              <div className="flex items-center justify-center gap-4 text-[11px] text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <ShieldCheck className="h-3 w-3 text-primary" aria-hidden="true" />
+                  Indoor-grow essentials
+                </span>
+                <span className="flex items-center gap-1">
+                  <Truck className="h-3 w-3 text-primary" aria-hidden="true" />
+                  Shipping shown at checkout
+                </span>
+              </div>
             </CardContent>
           </Card>
           <Button asChild variant="outline" className="w-full">

@@ -2,7 +2,18 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ShoppingCart, ArrowRight, Minus, Plus } from "lucide-react";
+import {
+  ShoppingCart,
+  ArrowRight,
+  Minus,
+  Plus,
+  Truck,
+  ShieldCheck,
+  Headset,
+  Lock,
+  Lightbulb,
+  Check,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -192,8 +203,8 @@ export function ProductPurchasePanel({
   return (
     <Card className="sticky top-20">
       <CardContent className="p-5 space-y-5">
-        {/* Price */}
-        <div className="space-y-1">
+        {/* Price + stock */}
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="text-2xl font-bold">
               {formatCurrencyFromCents(price.currentCents, currency)}
@@ -203,14 +214,14 @@ export function ProductPurchasePanel({
                 <span className="text-muted-foreground line-through text-sm">
                   {formatCurrencyFromCents(price.compareAtCents ?? 0, currency)}
                 </span>
-                <Badge variant="default">-{price.discountPercent}%</Badge>
+                <Badge variant="default">Save {price.discountPercent}%</Badge>
               </>
             )}
           </div>
           <div className="flex items-center gap-2">
             {isCheckingAvailability ? (
               <Badge variant="secondary" data-testid="stock-status">
-                Checking stock...
+                Checking availability...
               </Badge>
             ) : isOutOfStock ? (
               <Badge variant="destructive" data-testid="stock-status">
@@ -218,17 +229,18 @@ export function ProductPurchasePanel({
               </Badge>
             ) : resolvedStock <= 5 ? (
               <Badge variant="warning" data-testid="stock-status">
-                Only {resolvedStock} left
+                Only {resolvedStock} left - order soon
               </Badge>
             ) : (
-              <Badge variant="success" data-testid="stock-status">
-                {resolvedStock} in stock
+              <Badge variant="success" data-testid="stock-status" className="gap-1">
+                <Check className="h-3 w-3" aria-hidden="true" />
+                In stock now
               </Badge>
             )}
-            {resolvedAvailability.reason && (
-              <span className="text-xs text-muted-foreground">{resolvedAvailability.reason}</span>
-            )}
           </div>
+          {resolvedAvailability.reason && (
+            <p className="text-xs text-muted-foreground">{resolvedAvailability.reason}</p>
+          )}
         </div>
 
         <Separator />
@@ -236,7 +248,7 @@ export function ProductPurchasePanel({
         {/* Variant selection */}
         {variants.length > 1 && (
           <div className="space-y-1.5">
-            <Label htmlFor={variantSelectId}>Variant</Label>
+            <Label htmlFor={variantSelectId}>Select option</Label>
             <Select
               value={selectedVariant.id}
               onValueChange={(value) => {
@@ -248,7 +260,7 @@ export function ProductPurchasePanel({
               }}
             >
               <SelectTrigger id={variantSelectId} className="w-full">
-                <SelectValue placeholder="Choose a variant" />
+                <SelectValue placeholder="Choose an option" />
               </SelectTrigger>
               <SelectContent>
                 {variants.map((v) => (
@@ -327,6 +339,39 @@ export function ProductPurchasePanel({
         >
           {feedback ?? " "}
         </p>
+
+        {/* Beginner tip bar */}
+        <div className="flex items-start gap-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/40 dark:border-amber-800/30 px-3.5 py-3">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
+            <Lightbulb className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed pt-0.5">
+            <span className="font-medium text-foreground">Grower tip:</span>{" "}
+            Not sure which option to pick? Start with the default - our most popular
+            choice for indoor setups.
+          </p>
+        </div>
+
+        {/* Trust / confidence grid */}
+        <Separator />
+        <div className="grid grid-cols-2 gap-3 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Truck className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
+            <span>Shipping at checkout</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
+            <span>Indoor-grow picks</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Headset className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
+            <span>Buying guidance</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Lock className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
+            <span>Secure checkout</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

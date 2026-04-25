@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Sprout } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -43,8 +43,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center py-12">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Sign in to your account to continue</p>
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30">
+            <Sprout className="h-6 w-6 text-emerald-600" aria-hidden="true" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">Welcome back, grower</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Sign in to manage your orders and grow setup
+          </p>
         </div>
 
         {successMessage && (
@@ -54,7 +59,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </Alert>
         )}
 
-        <Card>
+        <Card className="border-emerald-200/50 dark:border-emerald-900/30">
           <CardHeader className="pb-4">
             <CardTitle className="text-base">Sign in</CardTitle>
             <CardDescription>Enter your email and password</CardDescription>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { CreditCard, AlertCircle, Lock } from "lucide-react";
+import { CreditCard, AlertCircle, Lock, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -132,9 +132,17 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
     return (
       <div className="space-y-3">
         <Separator />
-        <p className="text-sm text-muted-foreground">You need to be signed in to checkout.</p>
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-foreground">Sign in before checkout</p>
+          <p className="text-sm text-muted-foreground">
+            Your cart is already saved. Sign in to continue to payment and track your order later.
+          </p>
+        </div>
         <Button asChild className="w-full">
-          <Link href="/login?next=/cart">Sign in to continue</Link>
+          <Link href="/login?next=/cart">
+            <Lock className="h-4 w-4" />
+            Sign in to checkout
+          </Link>
         </Button>
       </div>
     );
@@ -143,6 +151,13 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
       <Separator />
+
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-foreground">Checkout details</p>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Choose how you want to pay and add any coupon code before we send you to the payment step.
+        </p>
+      </div>
 
       {/* Payment method */}
       <div className="space-y-1.5">
@@ -160,15 +175,12 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
             </option>
           ))}
         </select>
-        {selectedProvider && (
+        {selectedProvider && selectedProvider.mode !== "live" && (
           <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <Badge
-              variant={selectedProvider.mode === "live" ? "success" : "secondary"}
-              className="text-[10px]"
-            >
-              {selectedProvider.mode}
+            <Badge variant="secondary" className="text-[10px]">
+              Test mode
             </Badge>
-            {selectedProvider.activeProvider}
+            <span>This method is running in a non-live environment.</span>
           </span>
         )}
       </div>
@@ -184,6 +196,9 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
           maxLength={32}
           disabled={submitting}
         />
+        <p className="text-[11px] text-muted-foreground">
+          We’ll validate your code before creating the checkout session.
+        </p>
       </div>
 
       {error && (
@@ -195,15 +210,24 @@ export function CheckoutSessionForm({ authenticated, canCheckout }: CheckoutSess
 
       <Button type="submit" className="w-full" size="lg" disabled={submitDisabled}>
         {submitting ? (
-          "Creating checkout..."
+          "Preparing secure checkout..."
         ) : (
           <>
             <Lock className="h-4 w-4" />
             <CreditCard className="h-4 w-4" />
-            Continue to payment
+            Proceed to secure payment
           </>
         )}
       </Button>
+      <div className="space-y-1 rounded-lg border bg-muted/30 px-3 py-2 text-center">
+        <p className="text-[10px] text-muted-foreground leading-relaxed flex items-center justify-center gap-1">
+          <ShieldCheck className="h-3 w-3 text-primary shrink-0" aria-hidden="true" />
+          Your payment is processed securely. We never store your card details.
+        </p>
+        <p className="text-[10px] text-muted-foreground">
+          Stock is checked before checkout so your order reflects current availability.
+        </p>
+      </div>
     </form>
   );
 }

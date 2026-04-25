@@ -42,6 +42,8 @@ const webServer = {
     AUTH_SECRET: process.env.AUTH_SECRET ?? "playwright-auth-secret-please-change",
     AUTH_REFRESH_TOKEN_SECRET:
       process.env.AUTH_REFRESH_TOKEN_SECRET ?? "playwright-refresh-secret-please-change",
+    AUTH_ADMIN_REFRESH_TOKEN_SECRET:
+      process.env.AUTH_ADMIN_REFRESH_TOKEN_SECRET ?? process.env.AUTH_REFRESH_TOKEN_SECRET ?? "playwright-refresh-secret-please-change",
     NEXT_DIST_DIR: process.env.NEXT_DIST_DIR ?? nextDistDir,
   },
   reuseExistingServer,

@@ -51,6 +51,7 @@ function isValidResendFromEmail(value: string) {
 const runtimeEnvSchema = z.object({
   AUTH_SECRET: z.preprocess(parseOptionalString, z.string().min(16).optional()),
   AUTH_REFRESH_TOKEN_SECRET: z.preprocess(parseOptionalString, z.string().min(16).optional()),
+  AUTH_ADMIN_REFRESH_TOKEN_SECRET: z.preprocess(parseOptionalString, z.string().min(16).optional()),
   APP_BASE_URL: z.preprocess(parseOptionalString, z.string().url().optional()),
   ADMIN_BASE_URL: z.preprocess(parseOptionalString, z.string().url().optional()),
   AUTH_ACCESS_TTL_SECONDS: z.preprocess(
@@ -112,6 +113,19 @@ export function getAuthRuntimeConfig() {
   if (!refreshTokenSecret) {
     throw new Error("AUTH_REFRESH_TOKEN_SECRET is required in production.");
   }
+
+  const adminRefreshTokenSecret =
+    env.AUTH_ADMIN_REFRESH_TOKEN_SECRET ?? env.AUTH_REFRESH_TOKEN_SECRET ?? env.AUTH_SECRET;
+  if (!env.AUTH_ADMIN_REFRESH_TOKEN_SECRET && !isDev) {
+    console.warn(
+      "AUTH_ADMIN_REFRESH_TOKEN_SECRET is not set. Falling back to AUTH_REFRESH_TOKEN_SECRET. " +
+        "Set a separate admin refresh token secret for improved security.",
+    );
+  }
+  if (!adminRefreshTokenSecret) {
+    throw new Error("AUTH_ADMIN_REFRESH_TOKEN_SECRET or AUTH_REFRESH_TOKEN_SECRET is required in production.");
+  }
+
   return {
     accessTtlSeconds: env.AUTH_ACCESS_TTL_SECONDS ?? 60 * 15,
     refreshIdleDays: env.AUTH_REFRESH_IDLE_DAYS ?? 30,
@@ -119,6 +133,7 @@ export function getAuthRuntimeConfig() {
     adminRefreshIdleHours: env.AUTH_ADMIN_REFRESH_IDLE_HOURS ?? 8,
     adminRefreshAbsoluteDays: env.AUTH_ADMIN_REFRESH_ABSOLUTE_DAYS ?? 7,
     refreshTokenSecret,
+    adminRefreshTokenSecret,
   };
 }
 

@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   buildAbsoluteUrl,
   isAllowedOnAdminHost,
+  isLocalDevelopmentHost,
   normalizeHost,
+  resolveAdminEntryHref,
   resolveHostPolicy,
   resolveSharedCookieDomain,
+  resolveSurfaceForHost,
 } from "@/server/config/host-policy";
 
 describe("host-policy", () => {
@@ -101,6 +104,15 @@ describe("host-policy", () => {
       });
       expect(policy.adminRequireCfAccess).toBe(true);
     });
+
+    it("handles invalid URLs gracefully", () => {
+      const policy = resolveHostPolicy({
+        appBaseUrl: "not-a-url",
+        adminBaseUrl: "also-not-a-url",
+      });
+      expect(policy.appHost).toBe("");
+      expect(policy.adminHost).toBe("");
+    });
   });
 
   describe("resolveSharedCookieDomain", () => {
@@ -111,6 +123,23 @@ describe("host-policy", () => {
     it("returns undefined for blocked localhost hosts", () => {
       expect(resolveSharedCookieDomain("http://localhost:3000", "http://localhost:3001")).toBeUndefined();
       expect(resolveSharedCookieDomain("http://127.0.0.1:3000", "http://127.0.0.1:3001")).toBeUndefined();
+      // One blocked and one not — must hit the blockedHosts branch (not the identical-host early return)
+      expect(resolveSharedCookieDomain("http://localhost:3000", "http://example.com")).toBeUndefined();
+      expect(resolveSharedCookieDomain("http://example.com", "http://localhost:3000")).toBeUndefined();
+    });
+
+    it("returns undefined when a hostname cannot be parsed", () => {
+      expect(resolveSharedCookieDomain("not-a-url", "http://example.com")).toBeUndefined();
+      expect(resolveSharedCookieDomain("http://example.com", "not-a-url")).toBeUndefined();
+    });
+
+    it("returns parent domain when one hostname is a direct subdomain of the other", () => {
+      expect(resolveSharedCookieDomain("http://sub.admin.example.com", "http://admin.example.com")).toBe(
+        ".admin.example.com",
+      );
+      expect(resolveSharedCookieDomain("http://admin.example.com", "http://sub.admin.example.com")).toBe(
+        ".admin.example.com",
+      );
     });
 
     it("returns parent domain for subdomain siblings", () => {
@@ -129,13 +158,82 @@ describe("host-policy", () => {
       expect(resolveSharedCookieDomain("http://a.com", "http://b.com")).toBeUndefined();
     });
 
-    it.todo("ccTLD edge case (known-failing)", () => {
-      // ccTLDs like .co.uk are 3+ segment registrable domains.
-      // Current implementation slices the last 2 segments, so .co.uk is treated as the registrable part,
-      // which means app.example.co.uk and admin.example.co.uk share .co.uk instead of .example.co.uk.
-      // This is a known limitation of the naive registrableLikeDomain implementation.
-      const result = resolveSharedCookieDomain("http://app.example.co.uk", "http://admin.example.co.uk");
-      expect(result).toBe(".example.co.uk");
+    it("returns correct registrable domain for ccTLD subdomains", () => {
+      // ccTLDs like .co.uk have 3+ segment registrable domains.
+      // PSL correctly identifies example.co.uk as the registrable domain.
+      expect(resolveSharedCookieDomain("http://app.example.co.uk", "http://admin.example.co.uk")).toBe(
+        ".example.co.uk",
+      );
+    });
+
+    it("returns undefined for unrelated domains even with same suffix", () => {
+      expect(
+        resolveSharedCookieDomain("http://admin.example.com", "http://storefront.other.com"),
+      ).toBeUndefined();
+    });
+  });
+
+  describe("resolveAdminEntryHref", () => {
+    it("returns pathname when admin and app share the same host", () => {
+      expect(resolveAdminEntryHref("http://example.com", "http://example.com")).toBe("/admin");
+    });
+
+    it("returns absolute URL when hosts differ", () => {
+      expect(resolveAdminEntryHref("http://example.com", "http://admin.example.com")).toBe(
+        "http://admin.example.com/admin",
+      );
+    });
+
+    it("returns pathname when admin host is empty", () => {
+      expect(resolveAdminEntryHref("http://example.com", "not-a-url")).toBe("/admin");
+    });
+  });
+
+  describe("isLocalDevelopmentHost", () => {
+    it("returns true for localhost", () => {
+      expect(isLocalDevelopmentHost("localhost")).toBe(true);
+      expect(isLocalDevelopmentHost("localhost:3000")).toBe(true);
+    });
+
+    it("returns true for 127.0.0.1", () => {
+      expect(isLocalDevelopmentHost("127.0.0.1")).toBe(true);
+    });
+
+    it("returns true for loopback aliases", () => {
+      expect(isLocalDevelopmentHost("app.lvh.me")).toBe(true);
+      expect(isLocalDevelopmentHost("app.localhost")).toBe(true);
+    });
+
+    it("returns false for production hosts", () => {
+      expect(isLocalDevelopmentHost("example.com")).toBe(false);
+    });
+  });
+
+  describe("resolveSurfaceForHost", () => {
+    it("returns admin when host matches adminHost", () => {
+      const policy = resolveHostPolicy({
+        appBaseUrl: "http://store.example.com",
+        adminBaseUrl: "http://admin.example.com",
+      });
+      expect(resolveSurfaceForHost(policy, "admin.example.com")).toBe("admin");
+      expect(resolveSurfaceForHost(policy, "admin.example.com:3000")).toBe("admin");
+    });
+
+    it("returns storefront when host does not match adminHost", () => {
+      const policy = resolveHostPolicy({
+        appBaseUrl: "http://store.example.com",
+        adminBaseUrl: "http://admin.example.com",
+      });
+      expect(resolveSurfaceForHost(policy, "store.example.com")).toBe("storefront");
+      expect(resolveSurfaceForHost(policy, "other.com")).toBe("storefront");
+    });
+
+    it("returns storefront for empty host", () => {
+      const policy = resolveHostPolicy({
+        appBaseUrl: "http://store.example.com",
+        adminBaseUrl: "http://admin.example.com",
+      });
+      expect(resolveSurfaceForHost(policy, "")).toBe("storefront");
     });
   });
 

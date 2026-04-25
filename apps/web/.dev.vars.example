@@ -2,6 +2,7 @@ NEXTJS_ENV=development
 STORE_PROFILE=plant-seeds
 AUTH_SECRET=replace-with-long-random-string
 AUTH_REFRESH_TOKEN_SECRET=replace-with-another-long-random-string
+AUTH_ADMIN_REFRESH_TOKEN_SECRET=replace-with-admin-refresh-secret
 APP_BASE_URL=http://storefront.lvh.me:3000
 ADMIN_BASE_URL=http://admin.lvh.me:3000
 AUTH_ACCESS_TTL_SECONDS=900

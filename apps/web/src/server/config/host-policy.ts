@@ -1,3 +1,5 @@
+import psl from "psl";
+
 export type HostSurface = "storefront" | "admin";
 
 type HostPolicyInput = {
@@ -160,16 +162,6 @@ function parseHostnameFromUrl(urlValue: string) {
   }
 }
 
-function registrableLikeDomain(hostname: string) {
-  const segments = normalizeHost(hostname)
-    .split(".")
-    .filter(Boolean);
-  if (segments.length < 2) {
-    return "";
-  }
-  return segments.slice(-2).join(".");
-}
-
 export function resolveSharedCookieDomain(appBaseUrl: string, adminBaseUrl: string) {
   const appHostname = parseHostnameFromUrl(appBaseUrl);
   const adminHostname = parseHostnameFromUrl(adminBaseUrl);
@@ -189,8 +181,8 @@ export function resolveSharedCookieDomain(appBaseUrl: string, adminBaseUrl: stri
     return `.${appHostname}`;
   }
 
-  const appRegistrable = registrableLikeDomain(appHostname);
-  const adminRegistrable = registrableLikeDomain(adminHostname);
+  const appRegistrable = psl.get(appHostname);
+  const adminRegistrable = psl.get(adminHostname);
   if (!appRegistrable || appRegistrable !== adminRegistrable) {
     return undefined;
   }

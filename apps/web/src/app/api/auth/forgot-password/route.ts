@@ -45,11 +45,12 @@ export async function POST(request: Request) {
   }
 
   // Rate limit by email (prevents enumeration with rotating IPs)
+  // Stricter than per-IP: 3 attempts per hour per email address.
   const emailHash = hashEmailForRateLimit(payload.data.email);
   const emailRateLimit = await enforceRateLimit({
     key: `auth:forgot-password:email:${emailHash}`,
-    maxRequests: 5,
-    windowMs: 60_000,
+    maxRequests: 3,
+    windowMs: 3_600_000,
   });
   if (!emailRateLimit.allowed) {
     trackWarn({

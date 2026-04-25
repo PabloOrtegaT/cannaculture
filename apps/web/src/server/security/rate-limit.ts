@@ -39,7 +39,24 @@ export async function enforceRateLimit(options: RateLimitOptions): Promise<RateL
   return enforceRateLimitInMemory(options);
 }
 
-// In-memory fallback for local development without Durable Objects
+/**
+ * In-memory fallback for local development without Durable Objects.
+ *
+ * ⚠️ PRODUCTION LIMITATION — Cloudflare Workers distributes requests across
+ * many isolates and PoPs. A `Map` local to a single isolate is **not**
+ * shared globally. An attacker rotating IPs or hitting different edge
+ * locations will see independent counters, effectively bypassing the limit.
+ *
+ * For production traffic, configure the `RATE_LIMITER` Durable Object
+ * binding (see `rate-limit-durable-object.ts`). The DO is globally
+ * consistent and immune to this split-brain problem. The in-memory path
+ * below is acceptable only for:
+ *   - Local development (`wrangler dev` without the DO binding)
+ *   - Very low-risk endpoints where approximate rate limiting is sufficient
+ *
+ * If DO is unavailable, alternatives worth evaluating are Workers KV
+ * (with its ~60 s eventual-consistency caveats) or short-TTL rows in D1.
+ */
 const globalStore = new Map<string, number[]>();
 
 function enforceRateLimitInMemory(options: RateLimitOptions): RateLimitResult {

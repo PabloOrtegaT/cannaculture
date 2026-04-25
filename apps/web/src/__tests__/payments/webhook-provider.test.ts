@@ -150,6 +150,38 @@ describe("payment webhook provider dispatcher", () => {
         "Invalid Stripe webhook signature."
       );
     });
+
+    it("rejects an event missing a provider-issued id", async () => {
+      const { resolveProviderFromWebhookRoute } = await import(
+        "@/server/payments/provider"
+      );
+      const provider = resolveProviderFromWebhookRoute("stripe");
+      const payload = JSON.stringify({
+        type: "checkout.session.completed",
+        created: Math.floor(Date.now() / 1000),
+        data: {
+          object: {
+            id: "cs_123",
+            client_reference_id: "order-123",
+            payment_intent: "pi_123",
+          },
+        },
+      });
+      const now = Math.floor(Date.now() / 1000);
+      const signedPayload = `${now}.${payload}`;
+      const signature = createHmac("sha256", testStripeSecret)
+        .update(signedPayload)
+        .digest("hex");
+      const request = new Request("http://localhost/webhook", {
+        method: "POST",
+        headers: { "stripe-signature": `t=${now},v1=${signature}` },
+        body: payload,
+      });
+
+      await expect(provider.parseWebhookEvent(request)).rejects.toThrow(
+        "Stripe webhook event missing provider-issued id."
+      );
+    });
   });
 
   describe("Mercado Pago parseWebhookEvent", () => {
@@ -251,6 +283,35 @@ describe("payment webhook provider dispatcher", () => {
 
       await expect(provider.parseWebhookEvent(request)).rejects.toThrow(
         "Mercado Pago webhook secret or signature missing."
+      );
+    });
+
+    it("rejects an event missing a provider-issued id", async () => {
+      const { resolveProviderFromWebhookRoute } = await import(
+        "@/server/payments/provider"
+      );
+      const provider = resolveProviderFromWebhookRoute("mercadopago");
+      const ts = Math.floor(Date.now() / 1000);
+      const dataId = "12345";
+      const requestId = "req-abc";
+      const payload = JSON.stringify({
+        type: "payment.approved",
+        date_created: new Date().toISOString(),
+        data: { id: dataId, metadata: { orderId: "order-123" } },
+      });
+      const manifest = `id:${dataId};request-id:${requestId}`;
+      const signature = hmacSha256Hex(testMpSecret, manifest);
+      const request = new Request("http://localhost/webhook", {
+        method: "POST",
+        headers: {
+          "x-mercadopago-signature": `ts=${ts},v1=${signature}`,
+          "x-request-id": requestId,
+        },
+        body: payload,
+      });
+
+      await expect(provider.parseWebhookEvent(request)).rejects.toThrow(
+        "Mercado Pago webhook event missing provider-issued id."
       );
     });
   });

@@ -232,9 +232,13 @@ function createStripeProvider(stripeSecretKey: string): PaymentProviderAdapter {
               ? "failed"
               : "pending";
 
+      if (!parsed.id) {
+        throw new Error("Stripe webhook event missing provider-issued id.");
+      }
+
       return {
         providerId: "stripe",
-        eventId: parsed.id ?? `stripe_${crypto.randomUUID()}`,
+        eventId: parsed.id,
         eventType,
         occurredAt: typeof parsed.created === "number" ? new Date(parsed.created * 1000) : new Date(),
         ...(object?.metadata?.orderId || object?.client_reference_id
@@ -364,9 +368,13 @@ function createMercadoPagoProvider(accessToken: string): PaymentProviderAdapter 
             ? "cancelled"
             : "pending";
 
+      if (parsed.id === undefined || parsed.id === null) {
+        throw new Error("Mercado Pago webhook event missing provider-issued id.");
+      }
+
       return {
         providerId: "mercadopago",
-        eventId: String(parsed.id ?? `mercadopago_${crypto.randomUUID()}`),
+        eventId: String(parsed.id),
         eventType,
         occurredAt: parsed.date_created ? new Date(parsed.date_created) : new Date(),
         ...(parsed.data?.metadata?.orderId || parsed.data?.external_reference

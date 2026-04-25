@@ -267,26 +267,35 @@ export async function decrementInventoryForPaidOrder(orderId: string) {
     };
   });
 
-  if (ensureValues.length > 0) {
-    await db.insert(inventoryStocksTable).values(ensureValues).onConflictDoNothing({
-      target: inventoryStocksTable.variantId,
-    });
-  }
+  const updateStatements = grouped.map((row) =>
+    db
+      .update(inventoryStocksTable)
+      .set({
+        onHandQty: sql`${inventoryStocksTable.onHandQty} - ${row.quantity}`,
+        availableQty: sql`${inventoryStocksTable.availableQty} - ${row.quantity}`,
+        updatedAt: now,
+      })
+      .where(eq(inventoryStocksTable.variantId, row.variantId)),
+  );
 
-  if (grouped.length > 0) {
-    const batchItems = grouped.map((row) =>
-      db
-        .update(inventoryStocksTable)
-        .set({
-          onHandQty: sql`${inventoryStocksTable.onHandQty} - ${row.quantity}`,
-          availableQty: sql`${inventoryStocksTable.availableQty} - ${row.quantity}`,
-          updatedAt: now,
-        })
-        .where(eq(inventoryStocksTable.variantId, row.variantId)),
+  const batchStatements = [
+    ...(ensureValues.length > 0
+      ? [
+          db
+            .insert(inventoryStocksTable)
+            .values(ensureValues)
+            .onConflictDoNothing({
+              target: inventoryStocksTable.variantId,
+            }),
+        ]
+      : []),
+    ...updateStatements,
+  ];
+
+  if (batchStatements.length > 0) {
+    await db.batch(
+      batchStatements as [typeof batchStatements[number], ...typeof batchStatements[number][]],
     );
-    if (batchItems.length > 0) {
-      await db.batch(batchItems as [typeof batchItems[number], ...typeof batchItems[number][]]);
-    }
   }
 
   return {
@@ -400,12 +409,15 @@ export async function restoreInventoryFromHolds(orderId: string) {
       .where(eq(inventoryStocksTable.variantId, hold.variantId)),
   );
 
-  const first = restoreStatements[0];
-  if (first) {
-    await db.batch([first, ...restoreStatements.slice(1)]);
-  }
+  const deleteStatement = db
+    .delete(inventoryHoldsTable)
+    .where(eq(inventoryHoldsTable.orderId, orderId));
 
-  await db.delete(inventoryHoldsTable).where(eq(inventoryHoldsTable.orderId, orderId));
+  const batchStatements = [...restoreStatements, deleteStatement];
+
+  await db.batch(
+    batchStatements as [typeof batchStatements[number], ...typeof batchStatements[number][]],
+  );
 
   return { restoredCount: holds.length };
 }
@@ -433,13 +445,21 @@ export async function sweepExpiredInventoryHolds() {
       .where(eq(inventoryStocksTable.variantId, hold.variantId)),
   );
 
-  if (restoreStatements.length > 0) {
-    await db.batch(restoreStatements as [typeof restoreStatements[number], ...typeof restoreStatements[number][]]);
-  }
-
   const expiredIds = expired.map((h) => h.id);
-  if (expiredIds.length > 0) {
-    await db.delete(inventoryHoldsTable).where(inArray(inventoryHoldsTable.id, expiredIds));
+  const deleteStatement =
+    expiredIds.length > 0
+      ? db.delete(inventoryHoldsTable).where(inArray(inventoryHoldsTable.id, expiredIds))
+      : null;
+
+  const batchStatements = [
+    ...restoreStatements,
+    ...(deleteStatement ? [deleteStatement] : []),
+  ];
+
+  if (batchStatements.length > 0) {
+    await db.batch(
+      batchStatements as [typeof batchStatements[number], ...typeof batchStatements[number][]],
+    );
   }
 
   return { sweptCount: expired.length, restoredCount: expired.length };

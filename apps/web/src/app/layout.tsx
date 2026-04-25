@@ -1,22 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
 import { FlashToastHost } from "@/components/feedback/flash-toast-host";
 import { themeInitializationScript } from "@/features/theme/theme-script";
 import { paletteInitializationScript } from "@/features/theme/palette-script";
 import { popFlashToast } from "@/server/feedback/flash-toast";
 import { getSiteBaseUrl, SEO_BRAND_NAME, SEO_BRAND_SUMMARY_ES } from "@/server/seo/metadata";
+import "./fonts.css";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: getSiteBaseUrl(),
@@ -46,10 +35,45 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="color-scheme" content="light dark" />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/fonts/inter-latin-400-normal.woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/fonts/inter-latin-500-normal.woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/fonts/inter-latin-600-normal.woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/fonts/inter-latin-700-normal.woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/fonts/geist-mono-latin-400-normal.woff2"
+          crossOrigin="anonymous"
+        />
         <script dangerouslySetInnerHTML={{ __html: themeInitializationScript }} />
         <script dangerouslySetInnerHTML={{ __html: paletteInitializationScript }} />
       </head>
-      <body className={`${inter.variable} ${geistMono.variable} antialiased`}>
+      <body className="antialiased">
         <FlashToastHost initialToast={flashToast} />
         <div className="mx-auto w-full max-w-5xl">{children}</div>
       </body>

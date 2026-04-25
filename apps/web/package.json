@@ -33,6 +33,8 @@
     "@cannaculture/domain": "file:../../packages/domain",
     "@cannaculture/ui": "file:../../packages/ui",
     "@cannaculture/validation": "file:../../packages/validation",
+    "@fontsource/geist-mono": "^5.2.7",
+    "@fontsource/inter": "^5.2.8",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-separator": "^1.1.8",

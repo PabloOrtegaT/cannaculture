@@ -99,9 +99,16 @@ type MaybeCloudflareEnv = Record<string, string | undefined> & {
   DB?: unknown;
 };
 
+let cachedRuntimeEnv: RuntimeEnv | undefined;
+let cachedDbBinding: unknown | undefined;
+
 export function getRuntimeEnvironment(): RuntimeEnv {
+  if (cachedRuntimeEnv) {
+    return cachedRuntimeEnv;
+  }
   const raw = readRawEnvironment();
-  return runtimeEnvSchema.parse(raw);
+  cachedRuntimeEnv = runtimeEnvSchema.parse(raw);
+  return cachedRuntimeEnv;
 }
 
 export function getAuthRuntimeConfig() {
@@ -206,6 +213,9 @@ export function getAuthSweepRuntimeConfig() {
 }
 
 export function getDatabaseBinding() {
+  if (cachedDbBinding !== undefined) {
+    return cachedDbBinding;
+  }
   const raw = readRawEnvironment();
   const binding = raw.DB;
   if (!binding) {
@@ -213,6 +223,7 @@ export function getDatabaseBinding() {
       'Cloudflare D1 binding "DB" is not available. Run migrations and ensure wrangler D1 binding is configured.',
     );
   }
+  cachedDbBinding = binding;
   return binding;
 }
 

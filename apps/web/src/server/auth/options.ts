@@ -26,7 +26,13 @@ function shouldUseAdminBaseForRelativeRedirect(pathOrUrl: string) {
   return Boolean(nextPath && isAdminPath(nextPath));
 }
 
+let cachedAuthOptions: NextAuthOptions | undefined;
+
 export function getAuthOptions(): NextAuthOptions {
+  if (cachedAuthOptions) {
+    return cachedAuthOptions;
+  }
+
   const env = getRuntimeEnvironment();
   const db = getDb();
   const hostConfig = getHostRuntimeConfig();
@@ -198,5 +204,6 @@ export function getAuthOptions(): NextAuthOptions {
 
   options.secret = authSecret;
 
+  cachedAuthOptions = options;
   return options;
 }

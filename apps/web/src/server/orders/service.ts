@@ -135,7 +135,7 @@ export async function createPendingCheckoutOrder(input: {
 
     const orderRows = batchResult[0];
 
-    if (!orderRows || orderRows.length === 0) {
+    if (!Array.isArray(orderRows) || orderRows.length === 0) {
       throw new Error("Could not create checkout order.");
     }
 

@@ -105,15 +105,18 @@ export function ProductPurchasePanel({
           if (active) setAvailability(null);
           return;
         }
-        const raw = await response.json();
+        const raw: unknown = await response.json();
         if (
           raw &&
           typeof raw === "object" &&
+          "variantId" in raw &&
           typeof raw.variantId === "string" &&
+          "stockOnHand" in raw &&
           typeof raw.stockOnHand === "number" &&
           Number.isFinite(raw.stockOnHand) &&
+          "isPurchasable" in raw &&
           typeof raw.isPurchasable === "boolean" &&
-          (raw.reason === undefined || typeof raw.reason === "string")
+          (!("reason" in raw) || typeof raw.reason === "string")
         ) {
           if (active) {
             setAvailability(raw as VariantAvailability);

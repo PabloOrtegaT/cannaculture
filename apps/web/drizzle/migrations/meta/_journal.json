@@ -15,6 +15,48 @@
       "when": 1777136683281,
       "tag": "0001_skinny_morlocks",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1773876561000,
+      "tag": "0002_fuzzy_tattooine",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1773960565000,
+      "tag": "0003_nervous_mandalore",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1776902885000,
+      "tag": "0004_stoic_gotham",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1777064069000,
+      "tag": "0005_tricky_ferelden",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1777064069000,
+      "tag": "0006_kind_skyrim",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1777136722000,
+      "tag": "0007_bold_endor",
+      "breakpoints": true
     }
   ]
 }

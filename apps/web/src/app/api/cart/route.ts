@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   }
 
   const clientIp = getClientIpFromRequest(request);
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: `cart:read:${user.id}:${clientIp}`,
     maxRequests: 60,
     windowMs: 60_000,
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   }
 
   const clientIp = getClientIpFromRequest(request);
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: `cart:write:${user.id}:${clientIp}`,
     maxRequests: 40,
     windowMs: 60_000,

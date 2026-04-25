@@ -10,7 +10,7 @@ function redirect303(request: Request, pathname: string) {
 
 export async function POST(request: Request) {
   const clientIp = getClientIpFromRequest(request);
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: `auth:register:${clientIp}`,
     maxRequests: 10,
     windowMs: 60_000,

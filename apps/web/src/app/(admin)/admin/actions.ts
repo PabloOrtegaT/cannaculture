@@ -54,7 +54,7 @@ async function runAdminMutation(config: MutationConfig) {
   const requestHeaders = await headers();
   const clientIp = getClientIpFromHeaders(requestHeaders);
   const rateLimitKey = actor ? `admin:mutation:${actor.id}` : `admin:mutation:${clientIp}`;
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: rateLimitKey,
     maxRequests: 30,
     windowMs: 60_000,

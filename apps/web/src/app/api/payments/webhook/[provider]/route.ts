@@ -13,7 +13,7 @@ type WebhookRouteContext = {
 export async function POST(request: Request, context: WebhookRouteContext) {
   const params = await context.params;
   const clientIp = getClientIpFromRequest(request);
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: `webhook:${params.provider}:${clientIp}`,
     maxRequests: 100,
     windowMs: 60_000,

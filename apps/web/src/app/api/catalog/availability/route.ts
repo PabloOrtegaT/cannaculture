@@ -7,7 +7,7 @@ const variantIdSchema = z.string().min(1).max(128);
 
 export async function GET(request: Request) {
   const clientIp = getClientIpFromRequest(request);
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: `api:catalog:availability:${clientIp}`,
     maxRequests: 60,
     windowMs: 60_000,

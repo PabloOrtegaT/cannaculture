@@ -38,7 +38,7 @@ function readErrorText(error: unknown): string {
 
 export async function GET(request: Request) {
   const clientIp = getClientIpFromRequest(request);
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: `checkout:options:${clientIp}`,
     maxRequests: 30,
     windowMs: 60_000,
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
   }
 
   const clientIp = getClientIpFromRequest(request);
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: `checkout:create:${user.id}:${clientIp}`,
     maxRequests: 20,
     windowMs: 60_000,

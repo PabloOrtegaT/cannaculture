@@ -6,7 +6,7 @@ import { enforceRateLimit, getClientIpFromRequest } from "@/server/security/rate
 const handler = async (request: Request, context: unknown) => {
   if (request.method === "POST") {
     const clientIp = getClientIpFromRequest(request);
-    const rateLimit = enforceRateLimit({
+    const rateLimit = await enforceRateLimit({
       key: `auth:nextauth:post:${clientIp}`,
       maxRequests: 20,
       windowMs: 60_000,

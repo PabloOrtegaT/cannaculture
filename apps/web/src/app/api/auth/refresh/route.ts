@@ -8,7 +8,7 @@ import { enforceRateLimit, getClientIpFromRequest } from "@/server/security/rate
 
 export async function POST(request: Request) {
   const clientIp = getClientIpFromRequest(request);
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: `auth:refresh:${clientIp}`,
     maxRequests: 120,
     windowMs: 60_000,

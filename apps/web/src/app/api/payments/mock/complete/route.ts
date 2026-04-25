@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   }
 
   const clientIp = getClientIpFromRequest(request);
-  const rateLimit = enforceRateLimit({
+  const rateLimit = await enforceRateLimit({
     key: `payments:mock-complete:${user.id}:${clientIp}`,
     maxRequests: 5,
     windowMs: 60_000,

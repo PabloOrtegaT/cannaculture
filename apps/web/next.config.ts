@@ -1,25 +1,22 @@
 import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
-const cspReportOnly = [
+const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
+  "img-src 'self' data: https:",
+  "font-src 'self'",
   "connect-src 'self'",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
 ].join("; ");
 
-const securityHeaders = [
+const commonSecurityHeaders = [
   {
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
-  },
-  {
-    key: "X-Frame-Options",
-    value: "DENY",
   },
   {
     key: "X-Content-Type-Options",
@@ -34,8 +31,16 @@ const securityHeaders = [
     value: "camera=(), microphone=(), geolocation=()",
   },
   {
-    key: "Content-Security-Policy-Report-Only",
-    value: cspReportOnly,
+    key: "Content-Security-Policy",
+    value: csp,
+  },
+];
+
+const adminSecurityHeaders = [
+  ...commonSecurityHeaders,
+  {
+    key: "X-Frame-Options",
+    value: "DENY",
   },
 ];
 
@@ -51,8 +56,12 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/admin/:path*",
+        headers: adminSecurityHeaders,
+      },
+      {
         source: "/:path*",
-        headers: securityHeaders,
+        headers: commonSecurityHeaders,
       },
     ];
   },

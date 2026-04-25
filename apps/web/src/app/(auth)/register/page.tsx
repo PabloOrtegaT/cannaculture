@@ -79,8 +79,8 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                   name="password"
                   type="password"
                   required
-                  minLength={8}
-                  placeholder="Min. 8 characters"
+                  minLength={12}
+                  placeholder="Min. 12 characters with uppercase, lowercase, and number"
                   autoComplete="new-password"
                 />
               </div>

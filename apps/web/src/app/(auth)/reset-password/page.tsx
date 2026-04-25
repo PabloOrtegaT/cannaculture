@@ -43,7 +43,7 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
         <Card>
           <CardHeader className="pb-4">
             <CardTitle className="text-base">New password</CardTitle>
-            <CardDescription>Must be at least 8 characters</CardDescription>
+            <CardDescription>Must be at least 12 characters with uppercase, lowercase, and number</CardDescription>
           </CardHeader>
           <CardContent>
             <form action="/api/auth/reset-password" method="post" className="space-y-4">
@@ -55,8 +55,8 @@ export default async function ResetPasswordPage({ searchParams }: ResetPasswordP
                   name="password"
                   type="password"
                   required
-                  minLength={8}
-                  placeholder="Min. 8 characters"
+                  minLength={12}
+                  placeholder="Min. 12 characters with uppercase, lowercase, and number"
                   autoComplete="new-password"
                   disabled={!token}
                 />

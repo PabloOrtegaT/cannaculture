@@ -1,6 +1,6 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type { CartState } from "@/features/cart/cart";
-import { getDb } from "@/server/db/client";
+import { getDb, type AppDb } from "@/server/db/client";
 import {
   couponRedemptionsTable,
   inventoryHoldsTable,
@@ -304,6 +304,31 @@ export async function appendOrderStatusTimeline(input: {
   });
 }
 
+async function fetchLeadItemsForOrders(
+  db: AppDb,
+  orderIds: string[],
+): Promise<Map<string, typeof orderItemsTable.$inferSelect>> {
+  if (orderIds.length === 0) {
+    return new Map();
+  }
+
+  const allItems = await db
+    .select()
+    .from(orderItemsTable)
+    .where(inArray(orderItemsTable.orderId, orderIds))
+    .orderBy(desc(orderItemsTable.createdAt));
+
+  const leadItemsByOrderId = new Map<string, typeof orderItemsTable.$inferSelect>();
+  for (const item of allItems) {
+    const existing = leadItemsByOrderId.get(item.orderId);
+    if (!existing || item.createdAt > existing.createdAt) {
+      leadItemsByOrderId.set(item.orderId, item);
+    }
+  }
+
+  return leadItemsByOrderId;
+}
+
 export async function listOrdersForUser(userId: string) {
   const db = getDb();
   const orders = await db
@@ -312,23 +337,19 @@ export async function listOrdersForUser(userId: string) {
     .where(eq(ordersTable.userId, userId))
     .orderBy(desc(ordersTable.createdAt));
 
-  const rows: Array<{
-    order: typeof ordersTable.$inferSelect;
-    leadItem: typeof orderItemsTable.$inferSelect | null;
-  }> = [];
-  for (const order of orders) {
-    const items = await db
-      .select()
-      .from(orderItemsTable)
-      .where(eq(orderItemsTable.orderId, order.id))
-      .orderBy(desc(orderItemsTable.createdAt))
-      .limit(1);
-    rows.push({
-      order,
-      leadItem: items[0] ?? null,
-    });
+  if (orders.length === 0) {
+    return [];
   }
-  return rows;
+
+  const leadItemsByOrderId = await fetchLeadItemsForOrders(
+    db,
+    orders.map((o) => o.id),
+  );
+
+  return orders.map((order) => ({
+    order,
+    leadItem: leadItemsByOrderId.get(order.id) ?? null,
+  }));
 }
 
 export async function listOrdersForAdmin(limit = 50) {
@@ -339,22 +360,17 @@ export async function listOrdersForAdmin(limit = 50) {
     .orderBy(desc(ordersTable.createdAt))
     .limit(limit);
 
-  const rows: Array<{
-    order: typeof ordersTable.$inferSelect;
-    leadItem: typeof orderItemsTable.$inferSelect | null;
-  }> = [];
-  for (const order of orders) {
-    const items = await db
-      .select()
-      .from(orderItemsTable)
-      .where(eq(orderItemsTable.orderId, order.id))
-      .orderBy(desc(orderItemsTable.createdAt))
-      .limit(1);
-    rows.push({
-      order,
-      leadItem: items[0] ?? null,
-    });
+  if (orders.length === 0) {
+    return [];
   }
 
-  return rows;
+  const leadItemsByOrderId = await fetchLeadItemsForOrders(
+    db,
+    orders.map((o) => o.id),
+  );
+
+  return orders.map((order) => ({
+    order,
+    leadItem: leadItemsByOrderId.get(order.id) ?? null,
+  }));
 }

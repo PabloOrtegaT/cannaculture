@@ -4,25 +4,19 @@ import type { Role } from "@cannaculture/domain";
 
 const nowSql = sql`(unixepoch('now') * 1000)`;
 
-export const usersTable = sqliteTable(
-  "user",
-  {
-    id: text("id")
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
-    name: text("name"),
-    email: text("email").unique(),
-    emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
-    image: text("image"),
-    role: text("role").$type<Role>().notNull().default("catalog"),
-    passwordHash: text("passwordHash"),
-    createdAt: integer("createdAt", { mode: "timestamp_ms" }).notNull().default(nowSql),
-    updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).notNull().default(nowSql),
-  },
-  (table) => ({
-    emailIdx: uniqueIndex("user_email_unique").on(table.email),
-  }),
-);
+export const usersTable = sqliteTable("user", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name"),
+  email: text("email").unique(),
+  emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
+  image: text("image"),
+  role: text("role").$type<Role>().notNull().default("catalog"),
+  passwordHash: text("passwordHash"),
+  createdAt: integer("createdAt", { mode: "timestamp_ms" }).notNull().default(nowSql),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" }).notNull().default(nowSql),
+});
 
 export const accountsTable = sqliteTable(
   "account",

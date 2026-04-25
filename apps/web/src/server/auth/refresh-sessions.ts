@@ -3,6 +3,7 @@ import { and, desc, eq, gt, isNull, lt, or } from "drizzle-orm";
 import type { HostSurface } from "@/server/config/host-policy";
 import { getAuthRuntimeConfig } from "@/server/config/runtime-env";
 import { getDb } from "@/server/db/client";
+import type { AppDb } from "@/server/db/client";
 import { authRefreshSessionsTable } from "@/server/db/schema";
 import { createOpaqueToken } from "./tokens";
 import { getRefreshWindowMs } from "./refresh-session-policy";
@@ -329,4 +330,24 @@ export async function touchRefreshSessionById(sessionId: string) {
       idleExpiresAt: nextIdleExpiry,
     })
     .where(and(eq(authRefreshSessionsTable.id, sessionId), isNull(authRefreshSessionsTable.revokedAt)));
+}
+
+const SWEEP_THRESHOLD_MS = 30 * 24 * 60 * 60 * 1000;
+
+export async function sweepExpiredRefreshSessions(db: AppDb) {
+  const now = nowDate();
+  const threshold = new Date(now.getTime() - SWEEP_THRESHOLD_MS);
+
+  const deleted = await db
+    .delete(authRefreshSessionsTable)
+    .where(
+      or(
+        lt(authRefreshSessionsTable.idleExpiresAt, threshold),
+        lt(authRefreshSessionsTable.absoluteExpiresAt, threshold),
+        lt(authRefreshSessionsTable.revokedAt, threshold),
+      ),
+    )
+    .returning({ id: authRefreshSessionsTable.id });
+
+  return deleted.length;
 }

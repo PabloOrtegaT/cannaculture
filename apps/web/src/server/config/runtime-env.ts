@@ -90,6 +90,7 @@ const runtimeEnvSchema = z.object({
   MERCADOPAGO_WEBHOOK_SECRET: z.preprocess(parseOptionalString, z.string().min(1).optional()),
   MOCK_PAYMENT_WEBHOOK_SECRET: z.preprocess(parseOptionalString, z.string().min(1).optional()),
   INVENTORY_SWEEPER_TOKEN: z.preprocess(parseOptionalString, z.string().min(1).optional()),
+  AUTH_REFRESH_SWEEP_TOKEN: z.preprocess(parseOptionalString, z.string().min(1).optional()),
 });
 
 export type RuntimeEnv = z.infer<typeof runtimeEnvSchema>;
@@ -194,6 +195,13 @@ export function getInventoryRuntimeConfig() {
   const env = getRuntimeEnvironment();
   return {
     sweeperToken: env.INVENTORY_SWEEPER_TOKEN,
+  };
+}
+
+export function getAuthSweepRuntimeConfig() {
+  const env = getRuntimeEnvironment();
+  return {
+    sweeperToken: env.AUTH_REFRESH_SWEEP_TOKEN,
   };
 }
 

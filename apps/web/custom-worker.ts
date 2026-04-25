@@ -10,32 +10,60 @@ const worker = {
 
   async scheduled(_controller: unknown, env: Record<string, unknown>) {
     const sweeperToken = env.INVENTORY_SWEEPER_TOKEN;
+    const authSweepToken = env.AUTH_REFRESH_SWEEP_TOKEN;
     const baseUrl = env.APP_BASE_URL;
 
-    if (!sweeperToken || !baseUrl) {
+    if (!baseUrl) {
       console.warn(
-        "[scheduled] Sweeper not configured: missing INVENTORY_SWEEPER_TOKEN or APP_BASE_URL",
+        "[scheduled] Sweeper not configured: missing APP_BASE_URL",
       );
       return;
     }
 
-    try {
-      const response = await fetch(`${baseUrl}/api/inventory/sweep`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${sweeperToken}`,
-        },
-      });
+    if (sweeperToken) {
+      try {
+        const response = await fetch(`${baseUrl}/api/inventory/sweep`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${sweeperToken}`,
+          },
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[scheduled] Sweeper failed: ${response.status} ${errorText}`);
-      } else {
-        const result = await response.json();
-        console.log("[scheduled] Sweeper result:", result);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`[scheduled] Inventory sweeper failed: ${response.status} ${errorText}`);
+        } else {
+          const result = await response.json();
+          console.log("[scheduled] Inventory sweeper result:", result);
+        }
+      } catch (error) {
+        console.error("[scheduled] Inventory sweeper error:", error);
       }
-    } catch (error) {
-      console.error("[scheduled] Sweeper error:", error);
+    } else {
+      console.warn("[scheduled] Inventory sweeper skipped: missing INVENTORY_SWEEPER_TOKEN");
+    }
+
+    if (authSweepToken) {
+      try {
+        const response = await fetch(`${baseUrl}/api/auth/sweep`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authSweepToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`[scheduled] Auth sweeper failed: ${response.status} ${errorText}`);
+        } else {
+          const result = await response.json();
+          console.log("[scheduled] Auth sweeper result:", result);
+        }
+      } catch (error) {
+        console.error("[scheduled] Auth sweeper error:", error);
+      }
+    } else {
+      console.warn("[scheduled] Auth sweeper skipped: missing AUTH_REFRESH_SWEEP_TOKEN");
     }
   },
 };

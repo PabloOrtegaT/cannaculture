@@ -16,6 +16,14 @@ function getHostPolicy() {
 }
 
 export function middleware(request: NextRequest) {
+  // F3-3: in production, require that the request actually traversed Cloudflare.
+  if (process.env.NEXTJS_ENV === "production") {
+    const cfConnectingIp = request.headers.get("cf-connecting-ip");
+    if (!cfConnectingIp) {
+      return new NextResponse("Direct Worker access is not permitted.", { status: 403 });
+    }
+  }
+
   const policy = getHostPolicy();
   if (!policy.appHost || !policy.adminHost || policy.appHost === policy.adminHost) {
     return NextResponse.next();
@@ -24,6 +32,7 @@ export function middleware(request: NextRequest) {
   const requestHost = normalizeHost(request.headers.get("x-forwarded-host") ?? request.headers.get("host"));
   const pathname = request.nextUrl.pathname;
   const search = request.nextUrl.search;
+
   const onAdminHost = requestHost === policy.adminHost;
   const onAppHost = requestHost === policy.appHost;
 

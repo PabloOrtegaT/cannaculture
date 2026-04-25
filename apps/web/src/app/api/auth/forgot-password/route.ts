@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { PRIVATE_NO_STORE } from "@/server/http/cache-headers";
 import { trackError, trackWarn } from "@/server/observability/telemetry";
 import {
   enforceRateLimit,
@@ -9,7 +10,10 @@ import { requestPasswordReset } from "@/server/auth/service";
 import { forgotPasswordInputSchema } from "@/server/auth/validation";
 
 function redirect303(request: Request, pathname: string) {
-  return NextResponse.redirect(new URL(pathname, request.url), { status: 303 });
+  return NextResponse.redirect(new URL(pathname, request.url), {
+    status: 303,
+    headers: PRIVATE_NO_STORE,
+  });
 }
 
 export async function POST(request: Request) {

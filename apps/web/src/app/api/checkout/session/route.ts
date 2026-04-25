@@ -1,6 +1,7 @@
 import { ZodError } from "zod";
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/server/auth/session";
+import { PRIVATE_NO_STORE } from "@/server/http/cache-headers";
 import {
   CheckoutCouponError,
   CheckoutStockConflictError,
@@ -50,25 +51,32 @@ export async function GET(request: Request) {
         status: 429,
         headers: {
           "Retry-After": String(rateLimit.retryAfterSeconds),
+          ...PRIVATE_NO_STORE,
         },
       },
     );
   }
 
-  return NextResponse.json({
-    providers: listCheckoutProviderOptions(),
-  });
+  return NextResponse.json(
+    {
+      providers: listCheckoutProviderOptions(),
+    },
+    { headers: PRIVATE_NO_STORE },
+  );
 }
 
 export async function POST(request: Request) {
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: PRIVATE_NO_STORE },
+    );
   }
   if (!user.emailVerified) {
     return NextResponse.json(
       { error: "Please verify your email before starting checkout." },
-      { status: 403 },
+      { status: 403, headers: PRIVATE_NO_STORE },
     );
   }
 
@@ -85,6 +93,7 @@ export async function POST(request: Request) {
         status: 429,
         headers: {
           "Retry-After": String(rateLimit.retryAfterSeconds),
+          ...PRIVATE_NO_STORE,
         },
       },
     );
@@ -102,10 +111,13 @@ export async function POST(request: Request) {
       ...(parsed.cancelPath ? { cancelPath: parsed.cancelPath } : {}),
     });
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, { headers: PRIVATE_NO_STORE });
   } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json({ error: "Invalid checkout payload." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid checkout payload." },
+        { status: 400, headers: PRIVATE_NO_STORE },
+      );
     }
     if (error instanceof Error) {
       if (error instanceof CheckoutCouponError) {
@@ -114,7 +126,7 @@ export async function POST(request: Request) {
             error: error.message,
             code: error.code,
           },
-          { status: 400 },
+          { status: 400, headers: PRIVATE_NO_STORE },
         );
       }
       if (error instanceof CheckoutStockConflictError) {
@@ -124,7 +136,7 @@ export async function POST(request: Request) {
             code: error.code,
             lines: error.lines,
           },
-          { status: 409 },
+          { status: 409, headers: PRIVATE_NO_STORE },
         );
       }
       if (
@@ -132,24 +144,32 @@ export async function POST(request: Request) {
         error.message === "Cart contains unavailable items." ||
         error.message === "Cart has no purchasable items."
       ) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(
+          { error: error.message },
+          { status: 400, headers: PRIVATE_NO_STORE },
+        );
       }
 
       const details = readErrorText(error).toLowerCase();
       if (details.includes("no such table: order")) {
         return NextResponse.json(
-          { error: "Orders schema is missing. Run `npm run db:migrate:local` and retry checkout." },
-          { status: 500 },
+          {
+            error: "Orders schema is missing. Run `npm run db:migrate:local` and retry checkout.",
+          },
+          { status: 500, headers: PRIVATE_NO_STORE },
         );
       }
       if (details.includes("foreign key constraint failed")) {
         return NextResponse.json(
           { error: "Your session is stale. Please sign out and sign in again." },
-          { status: 401 },
+          { status: 401, headers: PRIVATE_NO_STORE },
         );
       }
     }
     trackError("api.checkout.session.post", error, { userId: user.id });
-    return NextResponse.json({ error: "Could not create checkout session." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Could not create checkout session." },
+      { status: 500, headers: PRIVATE_NO_STORE },
+    );
   }
 }

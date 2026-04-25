@@ -6,6 +6,7 @@ import {
   reconcileCartState,
   replaceUserCart,
 } from "@/server/cart/service";
+import { PRIVATE_NO_STORE } from "@/server/http/cache-headers";
 import { trackError } from "@/server/observability/telemetry";
 import { enforceRateLimit, getClientIpFromRequest } from "@/server/security/rate-limit";
 import { cartWritePayloadSchema, normalizeParsedCartState } from "@/server/cart/validation";
@@ -13,7 +14,7 @@ import { cartWritePayloadSchema, normalizeParsedCartState } from "@/server/cart/
 export async function GET(request: Request) {
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: PRIVATE_NO_STORE });
   }
 
   const clientIp = getClientIpFromRequest(request);
@@ -29,19 +30,20 @@ export async function GET(request: Request) {
         status: 429,
         headers: {
           "Retry-After": String(rateLimit.retryAfterSeconds),
+          ...PRIVATE_NO_STORE,
         },
       },
     );
   }
 
   const snapshot = await getUserCartSnapshot(user.id);
-  return NextResponse.json(snapshot);
+  return NextResponse.json(snapshot, { headers: PRIVATE_NO_STORE });
 }
 
 export async function POST(request: Request) {
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: PRIVATE_NO_STORE });
   }
 
   const clientIp = getClientIpFromRequest(request);
@@ -57,6 +59,7 @@ export async function POST(request: Request) {
         status: 429,
         headers: {
           "Retry-After": String(rateLimit.retryAfterSeconds),
+          ...PRIVATE_NO_STORE,
         },
       },
     );
@@ -65,7 +68,10 @@ export async function POST(request: Request) {
   const payload = await request.json().catch(() => null);
   const parsed = cartWritePayloadSchema.safeParse(payload);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid cart payload." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid cart payload." },
+      { status: 400, headers: PRIVATE_NO_STORE },
+    );
   }
 
   const requestedCart = normalizeParsedCartState(parsed.data.cart);
@@ -74,19 +80,25 @@ export async function POST(request: Request) {
   try {
     if (isMerge) {
       const result = await mergeGuestCartIntoUserCart(user.id, requestedCart);
-      return NextResponse.json(result);
+      return NextResponse.json(result, { headers: PRIVATE_NO_STORE });
     }
 
     const reconciled = await reconcileCartState(requestedCart);
     const replaceResult = await replaceUserCart(user.id, reconciled.cart);
 
-    return NextResponse.json({
-      cart: reconciled.cart,
-      summary: reconciled.summary,
-      version: replaceResult.version,
-    });
+    return NextResponse.json(
+      {
+        cart: reconciled.cart,
+        summary: reconciled.summary,
+        version: replaceResult.version,
+      },
+      { headers: PRIVATE_NO_STORE },
+    );
   } catch (error) {
     trackError("api.cart.post", error, { userId: user.id });
-    return NextResponse.json({ error: "Could not update cart." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Could not update cart." },
+      { status: 500, headers: PRIVATE_NO_STORE },
+    );
   }
 }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/server/auth/session";
+import { PRIVATE_NO_STORE } from "@/server/http/cache-headers";
 import { getOrderById } from "@/server/orders/service";
 import { processPaymentWebhookEvent } from "@/server/payments/webhook-service";
 import { enforceRateLimit, getClientIpFromRequest } from "@/server/security/rate-limit";
@@ -16,12 +17,15 @@ export async function POST(request: Request) {
   // F4-4: This route exists only for local dev / E2E. Refuse in production.
   const isDev = process.env.NODE_ENV === "development" || process.env.NEXTJS_ENV === "development";
   if (!isDev) {
-    return new NextResponse("Not found", { status: 404 });
+    return new NextResponse("Not found", { status: 404, headers: PRIVATE_NO_STORE });
   }
 
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: PRIVATE_NO_STORE },
+    );
   }
 
   const clientIp = getClientIpFromRequest(request);
@@ -31,22 +35,34 @@ export async function POST(request: Request) {
     windowMs: 60_000,
   });
   if (!rateLimit.allowed) {
-    return NextResponse.json({ error: "Rate limited." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Rate limited." },
+      { status: 429, headers: PRIVATE_NO_STORE },
+    );
   }
 
   const payload = await request.json().catch(() => null);
   const parsed = mockCompletePayloadSchema.safeParse(payload);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid payload." },
+      { status: 400, headers: PRIVATE_NO_STORE },
+    );
   }
 
   const order = await getOrderById(parsed.data.orderId);
   if (!order || order.userId !== user.id) {
-    return NextResponse.json({ error: "Order not found." }, { status: 404 });
+    return NextResponse.json(
+      { error: "Order not found." },
+      { status: 404, headers: PRIVATE_NO_STORE },
+    );
   }
 
   if (order.status !== "pending_payment") {
-    return NextResponse.json({ error: "Order is not awaiting payment." }, { status: 409 });
+    return NextResponse.json(
+      { error: "Order is not awaiting payment." },
+      { status: 409, headers: PRIVATE_NO_STORE },
+    );
   }
 
   const eventId = `mock_${parsed.data.providerSessionId}_${parsed.data.outcome}`;
@@ -68,8 +84,11 @@ export async function POST(request: Request) {
     }),
   });
 
-  return NextResponse.json({
-    received: true,
-    result,
-  });
+  return NextResponse.json(
+    {
+      received: true,
+      result,
+    },
+    { headers: PRIVATE_NO_STORE },
+  );
 }

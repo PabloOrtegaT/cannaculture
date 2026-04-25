@@ -33,6 +33,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Build OpenNext bundle
+        run: npm run cf:build
+
+      - name: Assert bundle size < 3 MiB
+        run: |
+          size=$(wc -c < apps/web/.open-next/worker.js)
+          echo "worker.js size: $size bytes"
+          test "$size" -lt 3145728
+
   e2e:
     runs-on: ubuntu-latest
     needs: quality

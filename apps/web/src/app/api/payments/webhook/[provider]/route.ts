@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { PRIVATE_NO_STORE } from "@/server/http/cache-headers";
 import { resolveProviderFromWebhookRoute } from "@/server/payments/provider";
 import { processPaymentWebhookEvent } from "@/server/payments/webhook-service";
 import { trackError, trackWarn } from "@/server/observability/telemetry";
@@ -28,7 +29,10 @@ export async function POST(request: Request, context: WebhookRouteContext) {
         retryAfterSeconds: rateLimit.retryAfterSeconds,
       },
     });
-    return NextResponse.json({ error: "Rate limited." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Rate limited." },
+      { status: 429, headers: PRIVATE_NO_STORE },
+    );
   }
 
   let event;
@@ -39,31 +43,43 @@ export async function POST(request: Request, context: WebhookRouteContext) {
     trackError("api.payments.webhook.post", error, {
       provider: params.provider,
     });
-    return NextResponse.json({ error: "Invalid payment webhook event." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid payment webhook event." },
+      { status: 400, headers: PRIVATE_NO_STORE },
+    );
   }
 
   try {
     const result = await processPaymentWebhookEvent(event);
 
     if (result.kind === "duplicate") {
-      return NextResponse.json({
-        received: true,
-        idempotent: true,
-        eventId: result.eventId,
-      });
+      return NextResponse.json(
+        {
+          received: true,
+          idempotent: true,
+          eventId: result.eventId,
+        },
+        { headers: PRIVATE_NO_STORE },
+      );
     }
 
-    return NextResponse.json({
-      received: true,
-      idempotent: false,
-      eventId: result.eventId,
-      orderId: result.orderId,
-      outcome: result.outcome,
-    });
+    return NextResponse.json(
+      {
+        received: true,
+        idempotent: false,
+        eventId: result.eventId,
+        orderId: result.orderId,
+        outcome: result.outcome,
+      },
+      { headers: PRIVATE_NO_STORE },
+    );
   } catch (error) {
     trackError("api.payments.webhook.post", error, {
       provider: params.provider,
     });
-    return NextResponse.json({ error: "Webhook processing failed." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Webhook processing failed." },
+      { status: 500, headers: PRIVATE_NO_STORE },
+    );
   }
 }

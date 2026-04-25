@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import NextAuth from "next-auth";
 import { getAuthOptions } from "@/server/auth/options";
+import { PRIVATE_NO_STORE } from "@/server/http/cache-headers";
 import { enforceRateLimit, getClientIpFromRequest } from "@/server/security/rate-limit";
 
 const handler = async (request: Request, context: unknown) => {
@@ -18,6 +19,7 @@ const handler = async (request: Request, context: unknown) => {
           status: 429,
           headers: {
             "Retry-After": String(rateLimit.retryAfterSeconds),
+            ...PRIVATE_NO_STORE,
           },
         },
       );
@@ -25,7 +27,9 @@ const handler = async (request: Request, context: unknown) => {
   }
 
   const options = getAuthOptions();
-  return NextAuth(options)(request, context);
+  const response = await NextAuth(options)(request, context);
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
 };
 
 export { handler as GET, handler as POST };

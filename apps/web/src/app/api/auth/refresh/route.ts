@@ -3,6 +3,7 @@ import { readRefreshTokenForCurrentRequest, setRefreshCookie } from "@/server/au
 import { getRequestClientContext, resolveSurfaceFromRequest } from "@/server/auth/request-context";
 import { rotateRefreshSessionByToken } from "@/server/auth/refresh-sessions";
 import { normalizeHost } from "@/server/config/host-policy";
+import { PRIVATE_NO_STORE } from "@/server/http/cache-headers";
 import { trackWarn } from "@/server/observability/telemetry";
 import { enforceRateLimit, getClientIpFromRequest } from "@/server/security/rate-limit";
 
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
         status: 429,
         headers: {
           "Retry-After": String(rateLimit.retryAfterSeconds),
+          ...PRIVATE_NO_STORE,
         },
       },
     );
@@ -28,7 +30,10 @@ export async function POST(request: Request) {
   const surface = resolveSurfaceFromRequest(request);
   const token = await readRefreshTokenForCurrentRequest(surface);
   if (!token) {
-    return NextResponse.json({ error: "Missing refresh token." }, { status: 401 });
+    return NextResponse.json(
+      { error: "Missing refresh token." },
+      { status: 401, headers: PRIVATE_NO_STORE },
+    );
   }
 
   const rotated = await rotateRefreshSessionByToken(token, getRequestClientContext(request));
@@ -38,14 +43,20 @@ export async function POST(request: Request) {
       message: "invalid_or_expired_session",
       metadata: { ip: clientIp, surface },
     });
-    return NextResponse.json({ error: "Invalid or expired refresh session." }, { status: 401 });
+    return NextResponse.json(
+      { error: "Invalid or expired refresh session." },
+      { status: 401, headers: PRIVATE_NO_STORE },
+    );
   }
 
-  const response = NextResponse.json({
-    ok: true,
-    sid: rotated.session.id,
-    surface,
-  });
+  const response = NextResponse.json(
+    {
+      ok: true,
+      sid: rotated.session.id,
+      surface,
+    },
+    { headers: PRIVATE_NO_STORE },
+  );
   const requestHost = normalizeHost(request.headers.get("x-forwarded-host") ?? request.headers.get("host"));
   setRefreshCookie(response.cookies, surface, rotated.rawToken, requestHost);
   return response;

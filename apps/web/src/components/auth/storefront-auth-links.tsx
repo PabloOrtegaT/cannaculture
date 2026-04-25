@@ -7,6 +7,7 @@ import { LogIn, LogOut, LayoutDashboard, User, ShoppingCart } from "lucide-react
 import { useCartStore } from "@/features/cart/cart-store";
 import type { CartState } from "@/features/cart/cart";
 import { runSingleFlight } from "@/lib/single-flight";
+import { useHydratedValue } from "@/hooks/use-hydrated-value";
 
 type ViewerResponse = {
   authenticated: boolean;
@@ -17,16 +18,11 @@ type ViewerResponse = {
 
 export function StorefrontAuthLinks() {
   const [viewer, setViewer] = useState<ViewerResponse | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated] = useHydratedValue(false, true);
   const setCartAuthState = useCartStore((state) => state.setAuthState);
   const hydrateCart = useCartStore((state) => state.hydrateCart);
   const cartItems = useCartStore((state) => state.cart.items);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setting mounted flag after hydration is intentional; avoids server/client mismatch on cart badge
-    setHydrated(true);
-  }, []);
 
   useEffect(() => {
     let active = true;

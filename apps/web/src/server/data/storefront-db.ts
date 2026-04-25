@@ -744,18 +744,6 @@ const newsPosts: NewsPost[] = [
     createdAt: "2026-03-05T09:00:00.000Z",
     updatedAt: "2026-03-05T09:00:00.000Z",
   }),
-  newsPostSchema.parse({
-    id: "4f9b2d23-e5a6-5bc2-ad33-c6e7f8a9b012",
-    slug: "substrates-101",
-    title: "Substrates 101: Coco Coir vs Potting Soil",
-    summary:
-      "Understand drainage, aeration, and mixing ratios for healthier roots and faster growth.",
-    body: "Coco coir retains moisture while allowing excellent drainage. Potting soil is more forgiving for beginners but can compact over time. Many indoor growers blend the two with perlite for the perfect balance of water retention and aeration.",
-    status: "published",
-    publishedAt: "2026-03-07T09:00:00.000Z",
-    createdAt: "2026-03-07T09:00:00.000Z",
-    updatedAt: "2026-03-07T09:00:00.000Z",
-  }),
 ];
 
 const promoBanners: PromoBanner[] = [

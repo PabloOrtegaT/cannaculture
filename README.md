@@ -1,6 +1,6 @@
-# Plant Seeds Ecommerce
+# Cannaculture
 
-Plant-focused ecommerce fork built with Next.js, TypeScript, and workspace packages.
+Cannaculture — indoor-plant ecommerce built with Next.js, TypeScript, and workspace packages.
 This repository is the indoor-plant vertical (seeds, lights, fertilizers, growing supplies).
 
 ## Prerequisites
@@ -43,7 +43,7 @@ App URL: `http://localhost:3000`
 Default local seeded owner account:
 
 - Email: `owner@cannaculture.local`
-- Password: `ChangeMe123!`
+- Password: set via `DEV_OWNER_PASSWORD` environment variable
 
 Important: these credentials are for local development only (`db:seed` runs against local D1).
 Production does not auto-seed this user. Create your first owner account in production via register/verification flow or a controlled remote seed step.

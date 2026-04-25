@@ -11,30 +11,56 @@ const useRemote = process.argv.includes("--remote");
 const usePreview = process.argv.includes("--preview");
 
 const email = process.env.DEV_OWNER_EMAIL ?? "owner@cannaculture.local";
-const password = process.env.DEV_OWNER_PASSWORD ?? "ChangeMe123!";
+const password = process.env.DEV_OWNER_PASSWORD;
+if (!password) {
+  throw new Error("DEV_OWNER_PASSWORD environment variable is required. Set it before running seed.");
+}
 const userId = process.env.DEV_OWNER_USER_ID ?? "b2b0caf8-3d7a-4e55-a8ff-7e19633208c7";
 const cartId = process.env.DEV_OWNER_CART_ID ?? "aa38b784-84a3-4d9d-9981-eb758568c3a7";
 const now = Date.now();
 const passwordHash = hashSync(password, 10);
 
-const escapedEmail = email.replace(/'/g, "''");
-const escapedHash = passwordHash.replace(/'/g, "''");
+/**
+ * Format a JS value for safe use as a SQLite literal.
+ * Strings are single-quoted with embedded quotes doubled;
+ * numbers are emitted as-is; null/undefined become NULL.
+ */
+function sqlValue(value) {
+  if (typeof value === "string") {
+    return `'${value.replace(/'/g, "''")}'`;
+  }
+  if (typeof value === "number") {
+    return String(value);
+  }
+  if (value === null || value === undefined) {
+    return "NULL";
+  }
+  throw new Error(`Unsupported SQL value type: ${typeof value}`);
+}
 
-const command = [
-  `INSERT OR IGNORE INTO "user"`,
-  `("id","email","name","role","passwordHash","emailVerified","createdAt","updatedAt")`,
-  `VALUES ('${userId}','${escapedEmail}','Dev Owner','owner','${escapedHash}',${now},${now},${now});`,
-  `UPDATE "user" SET "name"='Dev Owner',"role"='owner',"passwordHash"='${escapedHash}',"emailVerified"=${now},"updatedAt"=${now}`,
-  `WHERE "email"='${escapedEmail}';`,
-  `DELETE FROM "authRefreshSession"`,
-  `WHERE "userId"=(SELECT "id" FROM "user" WHERE "email"='${escapedEmail}' LIMIT 1);`,
-  `INSERT OR IGNORE INTO "cart" ("id","userId","createdAt","updatedAt")`,
-  `SELECT '${cartId}', "id", ${now}, ${now} FROM "user" WHERE "email"='${escapedEmail}';`,
-  `DELETE FROM "cartItem"`,
-  `WHERE "cartId"=(SELECT "id" FROM "cart" WHERE "userId"=(SELECT "id" FROM "user" WHERE "email"='${escapedEmail}' LIMIT 1) LIMIT 1);`,
-  `UPDATE "cart" SET "updatedAt"=${now}`,
-  `WHERE "userId"=(SELECT "id" FROM "user" WHERE "email"='${escapedEmail}' LIMIT 1);`,
-].join(" ");
+const statements = [
+  `INSERT OR IGNORE INTO "user" ` +
+    `("id","email","name","role","passwordHash","emailVerified","createdAt","updatedAt") ` +
+    `VALUES (${sqlValue(userId)},${sqlValue(email)},${sqlValue("Dev Owner")},${sqlValue("owner")},${sqlValue(passwordHash)},${sqlValue(now)},${sqlValue(now)},${sqlValue(now)});`,
+
+  `UPDATE "user" ` +
+    `SET "name"=${sqlValue("Dev Owner")},"role"=${sqlValue("owner")},"passwordHash"=${sqlValue(passwordHash)},"emailVerified"=${sqlValue(now)},"updatedAt"=${sqlValue(now)} ` +
+    `WHERE "email"=${sqlValue(email)};`,
+
+  `DELETE FROM "authRefreshSession" ` +
+    `WHERE "userId"=(SELECT "id" FROM "user" WHERE "email"=${sqlValue(email)} LIMIT 1);`,
+
+  `INSERT OR IGNORE INTO "cart" ("id","userId","createdAt","updatedAt") ` +
+    `SELECT ${sqlValue(cartId)}, "id", ${sqlValue(now)}, ${sqlValue(now)} FROM "user" WHERE "email"=${sqlValue(email)};`,
+
+  `DELETE FROM "cartItem" ` +
+    `WHERE "cartId"=(SELECT "id" FROM "cart" WHERE "userId"=(SELECT "id" FROM "user" WHERE "email"=${sqlValue(email)} LIMIT 1) LIMIT 1);`,
+
+  `UPDATE "cart" SET "updatedAt"=${sqlValue(now)} ` +
+    `WHERE "userId"=(SELECT "id" FROM "user" WHERE "email"=${sqlValue(email)} LIMIT 1);`,
+];
+
+const command = statements.join(" ");
 
 try {
   const d1Args = [wranglerCliPath, "d1", "execute", "DB", "--config", "wrangler.jsonc"];

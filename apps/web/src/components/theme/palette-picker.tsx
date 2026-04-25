@@ -3,6 +3,7 @@
 import { Button } from "@cannaculture/ui";
 import { useEffect, useRef, useState } from "react";
 import { Palette } from "lucide-react";
+import { useHydratedValue } from "@/hooks/use-hydrated-value";
 import { PALETTE_STORAGE_KEY } from "@/features/theme/palette-script";
 
 type PaletteOption = {
@@ -21,16 +22,15 @@ const PALETTES: PaletteOption[] = [
   { name: "riviera", label: "Riviera", color: "oklch(0.62 0.16 195)"  },
 ];
 
+function getStoredPalette(): string {
+  return localStorage.getItem(PALETTE_STORAGE_KEY) ?? "amber";
+}
+
 export function PalettePicker() {
   const [open, setOpen] = useState(false);
-  // "amber" matches the server render; localStorage is synced after hydration in the effect below
-  const [active, setActive] = useState("amber");
+  // "amber" matches the server render; localStorage is synced after hydration
+  const [active, setActive] = useHydratedValue("amber", getStoredPalette);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading localStorage after hydration is intentional; server always renders "amber" to avoid mismatch
-    setActive(localStorage.getItem(PALETTE_STORAGE_KEY) ?? "amber");
-  }, []);
 
   useEffect(() => {
     if (!open) return;

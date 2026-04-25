@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { listCatalogProducts, listCategories } from "@/server/data/storefront-service";
 import { buildCanonicalUrl } from "@/server/seo/metadata";
 
+export const revalidate = 3600;
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
   const entries: MetadataRoute.Sitemap = [

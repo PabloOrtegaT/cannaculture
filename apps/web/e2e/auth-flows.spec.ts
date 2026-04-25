@@ -65,9 +65,13 @@ test("login page renders with email and password fields", async ({ page }) => {
 });
 
 test("login with valid credentials redirects to storefront", async ({ page }) => {
+  const password = process.env.DEV_OWNER_PASSWORD;
+  if (!password) {
+    throw new Error("DEV_OWNER_PASSWORD environment variable is required for E2E tests");
+  }
   await page.goto("/login");
   await page.getByLabel("Email").fill("owner@cannaculture.local");
-  await page.getByLabel("Password").fill("ChangeMe123!");
+  await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
 
   // Should navigate through after-login/sync-cart and end up on a storefront page

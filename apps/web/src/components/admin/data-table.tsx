@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/incompatible-library */
+/* eslint-disable react-hooks/incompatible-library -- @tanstack/react-table uses internal React hooks API that ESLint doesn't recognize */
 "use client";
 
 import * as React from "react";

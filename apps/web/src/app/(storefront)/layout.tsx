@@ -22,10 +22,16 @@ export default async function StorefrontLayout({
 }>) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+      >
+        Skip to main content
+      </a>
       <StorefrontHeader />
 
       {/* Page content */}
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">{children}</main>
+      <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">{children}</main>
 
       {/* Footer */}
       <footer className="border-t bg-muted/30">

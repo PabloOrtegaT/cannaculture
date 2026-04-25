@@ -50,7 +50,7 @@ npm run test:e2e
 3. Seed local D1: `npm run db:seed`
 
 - Default local app URL: `http://localhost:3000`
-- Default seeded owner: `owner@cannaculture.local` / `ChangeMe123!`
+- Default seeded owner: `owner@cannaculture.local` / password from `DEV_OWNER_PASSWORD` env var
 - For split storefront/admin hosts, set `APP_BASE_URL=http://storefront.lvh.me:3000` and `ADMIN_BASE_URL=http://admin.lvh.me:3000` in `.dev.vars`.
 - Runtime env precedence matters: explicit process env overrides Cloudflare `wrangler.jsonc` vars. Keep this in mind for local redirects and Playwright runs.
 

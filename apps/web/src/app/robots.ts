@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getSiteBaseUrl } from "@/server/seo/metadata";
 
+export const revalidate = 3600;
+
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = getSiteBaseUrl();
   const sitemapUrl = new URL("/sitemap.xml", baseUrl).toString();
@@ -14,6 +16,7 @@ export default function robots(): MetadataRoute.Robots {
           "/admin",
           "/account",
           "/cart",
+          "/checkout",
           "/login",
           "/register",
           "/forgot-password",

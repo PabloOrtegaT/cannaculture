@@ -11,6 +11,9 @@ function getEmailClient() {
 
 function getFromAddress() {
   const env = getRuntimeEnvironment();
+  if (process.env.NEXTJS_ENV === "production" && !env.RESEND_FROM_EMAIL) {
+    throw new Error("RESEND_FROM_EMAIL is required in production");
+  }
   return env.RESEND_FROM_EMAIL ?? "Cannaculture <noreply@cannaculture.com.mx>";
 }
 

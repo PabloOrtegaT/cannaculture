@@ -15,6 +15,24 @@ function fixtureUuid(seed) {
   return `10000000-0000-4000-8000-${String(seed).padStart(12, "0")}`;
 }
 
+/**
+ * Format a JS value for safe use as a SQLite literal.
+ * Strings are single-quoted with embedded quotes doubled;
+ * numbers are emitted as-is; null/undefined become NULL.
+ */
+function sqlValue(value) {
+  if (typeof value === "string") {
+    return `'${value.replace(/'/g, "''")}'`;
+  }
+  if (typeof value === "number") {
+    return String(value);
+  }
+  if (value === null || value === undefined) {
+    return "NULL";
+  }
+  throw new Error(`Unsupported SQL value type: ${typeof value}`);
+}
+
 const inventorySeedsByProfile = {
   "plant-seeds": [
     {
@@ -45,7 +63,10 @@ if (!seedRows) {
 }
 
 const valuesClause = seedRows
-  .map((row) => `('${row.variantId}', ${row.onHandQty}, ${row.onHandQty}, ${now}, ${now})`)
+  .map(
+    (row) =>
+      `(${sqlValue(row.variantId)}, ${sqlValue(row.onHandQty)}, ${sqlValue(row.onHandQty)}, ${sqlValue(now)}, ${sqlValue(now)})`,
+  )
   .join(", ");
 
 const command = [

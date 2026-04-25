@@ -55,10 +55,14 @@ function buildLoginUrl(nextPath: string) {
 }
 
 export async function loginAsSeedOwner(page: Page, options: LoginOptions = {}) {
+  const password = process.env.DEV_OWNER_PASSWORD;
+  if (!password) {
+    throw new Error("DEV_OWNER_PASSWORD environment variable is required for E2E tests");
+  }
   const nextPath = options.nextPath ?? "/auth/sync-cart?next=%2Fcart";
   await page.goto(buildLoginUrl(nextPath));
   await page.getByLabel("Email").fill("owner@cannaculture.local");
-  await page.getByLabel("Password").fill("ChangeMe123!");
+  await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
 
   if (nextPath.startsWith("/admin")) {

@@ -45,6 +45,7 @@ const webServer = {
     AUTH_ADMIN_REFRESH_TOKEN_SECRET:
       process.env.AUTH_ADMIN_REFRESH_TOKEN_SECRET ?? process.env.AUTH_REFRESH_TOKEN_SECRET ?? "playwright-refresh-secret-please-change",
     NEXT_DIST_DIR: process.env.NEXT_DIST_DIR ?? nextDistDir,
+    DEV_OWNER_PASSWORD: process.env.DEV_OWNER_PASSWORD ?? "",
   },
   reuseExistingServer,
   timeout: webServerTimeoutMs,

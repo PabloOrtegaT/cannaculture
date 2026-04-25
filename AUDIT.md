@@ -385,9 +385,9 @@ All findings in this report are grounded in direct reading of the repository. No
 
 ### Long-term / hygiene
 
-- [ ] **F6-2** — Brand consolidation (Cannaculture everywhere: README, AGENTS.md, email, titles, OG)
-- [ ] **F6-3** — Throw on startup if `RESEND_FROM_EMAIL` unset in production
-- [ ] **F6-4** — Replace `ChangeMe123!` literals with `DEV_OWNER_PASSWORD` env var
+- [x] **F6-2** — Brand consolidation (Cannaculture everywhere: README, AGENTS.md, email, titles, OG)
+- [x] **F6-3** — Throw on startup if `RESEND_FROM_EMAIL` unset in production
+- [x] **F6-4** — Replace `ChangeMe123!` literals with `DEV_OWNER_PASSWORD` env var
 - [ ] **F6-5** — Delete stale `playwright-test.config.ts`
 - [ ] **F6-7** — Extract `useHydratedValue` hook (centralise hydration pattern)
 - [ ] **F6-8** — Document `data-table.tsx` eslint disable reason

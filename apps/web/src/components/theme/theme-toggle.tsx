@@ -1,8 +1,9 @@
 "use client";
 
 import { Button } from "@cannaculture/ui";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
+import { useHydratedValue } from "@/hooks/use-hydrated-value";
 import {
   applyThemeToDocument,
   DEFAULT_THEME,
@@ -20,12 +21,7 @@ function getBrowserThemePreference(): Theme {
 
 export function ThemeToggle() {
   // Always start with DEFAULT_THEME to match server render; sync from browser after hydration
-  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reading theme preference from browser after hydration is intentional; init script handles visual before React loads
-    setTheme(getBrowserThemePreference());
-  }, []);
+  const [theme, setTheme] = useHydratedValue<Theme>(DEFAULT_THEME, getBrowserThemePreference);
 
   useEffect(() => {
     applyThemeToDocument(theme);

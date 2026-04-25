@@ -1,8 +1,8 @@
+import { Button } from "@cannaculture/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Sprout, Sun, Droplets, FlaskConical, Shovel, Flower2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/storefront/product-card";
 import { JsonLdScript } from "@/components/seo/json-ld-script";
 import { TrustSignals } from "@/features/home/trust-signals";

@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@cannaculture/ui";
 import { useEffect, useRef, useState } from "react";
 import { Palette } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { PALETTE_STORAGE_KEY } from "@/features/theme/palette-script";
 
 type PaletteOption = {

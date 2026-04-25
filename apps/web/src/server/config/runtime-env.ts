@@ -91,6 +91,9 @@ const runtimeEnvSchema = z.object({
   MOCK_PAYMENT_WEBHOOK_SECRET: z.preprocess(parseOptionalString, z.string().min(1).optional()),
   INVENTORY_SWEEPER_TOKEN: z.preprocess(parseOptionalString, z.string().min(1).optional()),
   AUTH_REFRESH_SWEEP_TOKEN: z.preprocess(parseOptionalString, z.string().min(1).optional()),
+  TELEMETRY_DESTINATION: z.preprocess(parseOptionalString, z.enum(["r2-logpush", "axiom", "baselime"]).optional()),
+  TELEMETRY_INGEST_URL: z.preprocess(parseOptionalString, z.string().url().optional()),
+  TELEMETRY_INGEST_TOKEN: z.preprocess(parseOptionalString, z.string().min(1).optional()),
 });
 
 export type RuntimeEnv = z.infer<typeof runtimeEnvSchema>;
@@ -202,6 +205,15 @@ export function getInventoryRuntimeConfig() {
   const env = getRuntimeEnvironment();
   return {
     sweeperToken: env.INVENTORY_SWEEPER_TOKEN,
+  };
+}
+
+export function getTelemetryRuntimeConfig() {
+  const env = getRuntimeEnvironment();
+  return {
+    destination: env.TELEMETRY_DESTINATION,
+    ingestUrl: env.TELEMETRY_INGEST_URL,
+    ingestToken: env.TELEMETRY_INGEST_TOKEN,
   };
 }
 

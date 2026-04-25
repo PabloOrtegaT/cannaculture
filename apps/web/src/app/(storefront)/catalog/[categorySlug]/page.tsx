@@ -1,9 +1,9 @@
+import { Button } from "@cannaculture/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Search, SlidersHorizontal, Sprout } from "lucide-react";
 import { notFound } from "next/navigation";
 import { JsonLdScript } from "@/components/seo/json-ld-script";
-import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/storefront/product-card";
 import {
   getCategoryBySlug,

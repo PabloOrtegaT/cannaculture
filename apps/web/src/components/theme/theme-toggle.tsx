@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@cannaculture/ui";
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   applyThemeToDocument,
   DEFAULT_THEME,

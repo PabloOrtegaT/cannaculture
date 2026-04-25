@@ -1,8 +1,8 @@
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@cannaculture/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, Sprout } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { LoginForm } from "@/components/auth/login-form";
 import { getOAuthProviderFlags } from "@/server/config/runtime-env";

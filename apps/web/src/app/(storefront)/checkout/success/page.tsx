@@ -1,10 +1,8 @@
+import { Badge, Button, Card, CardContent } from "@cannaculture/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { z } from "zod";
 import { CheckCircle2, Package, ArrowRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrencyFromCents } from "@/features/catalog/pricing";
 import { getSessionUser } from "@/server/auth/session";
 import { getOrderSummaryForUser } from "@/server/orders/service";

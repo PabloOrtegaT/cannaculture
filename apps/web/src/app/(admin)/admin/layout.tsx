@@ -1,3 +1,4 @@
+import { Badge } from "@cannaculture/ui";
 import Link from "next/link";
 import { forbidden, redirect } from "next/navigation";
 import { ActiveNavLink } from "@/components/admin/active-nav-link";
@@ -13,7 +14,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
   canAccessAdminRoute,

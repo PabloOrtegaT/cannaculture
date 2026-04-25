@@ -1,9 +1,8 @@
+import { Button, Card, CardContent } from "@cannaculture/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { z } from "zod";
 import { ArrowLeft, RefreshCw, XCircle, Sprout } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrencyFromCents } from "@/features/catalog/pricing";
 import { getSessionUser } from "@/server/auth/session";
 import { getOrderSummaryForUser } from "@/server/orders/service";

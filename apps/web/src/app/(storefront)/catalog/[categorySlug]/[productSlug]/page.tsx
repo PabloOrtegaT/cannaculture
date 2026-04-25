@@ -1,9 +1,8 @@
+import { Badge, Card, CardContent, CardHeader, CardTitle } from "@cannaculture/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, Leaf, Package2, ShieldCheck, Sprout, Truck } from "lucide-react";
 import { notFound } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { JsonLdScript } from "@/components/seo/json-ld-script";
 import { ProductPurchasePanel } from "@/components/storefront/product-purchase-panel";

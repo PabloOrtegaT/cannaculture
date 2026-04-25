@@ -1,6 +1,6 @@
+import { Button } from "@cannaculture/ui";
 import Link from "next/link";
 import { Sprout, Sun, Droplets, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const STEPS = [
   {

@@ -1,10 +1,9 @@
 "use client";
 
+import { Button, Badge } from "@cannaculture/ui";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LogIn, LogOut, LayoutDashboard, User, ShoppingCart } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/features/cart/cart-store";
 import type { CartState } from "@/features/cart/cart";
 import { runSingleFlight } from "@/lib/single-flight";

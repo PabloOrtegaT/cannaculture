@@ -1,11 +1,9 @@
 "use client";
 
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@cannaculture/ui";
 import { useState } from "react";
 import { CheckCircle2, XCircle, Ban, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 type MockCheckoutClientProps = {

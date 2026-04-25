@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge, Button, Card, CardContent, Label } from "@cannaculture/ui";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
@@ -14,10 +15,6 @@ import {
   Lightbulb,
   Check,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,

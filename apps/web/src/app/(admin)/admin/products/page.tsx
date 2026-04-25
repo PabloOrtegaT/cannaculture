@@ -1,8 +1,8 @@
+import { Button } from "@cannaculture/ui";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { AccessDenied } from "@/components/admin/access-denied";
 import { ProductsTable, VariantsTable } from "@/components/admin/tables";
-import { Button } from "@/components/ui/button";
 import { listAdminProducts, listAdminVariants } from "@/server/admin/admin-service";
 import { getRouteAccess } from "@/server/admin/role-guard";
 

@@ -1,10 +1,8 @@
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@cannaculture/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Package, Sprout, LogOut, ShoppingBag } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getSessionUser } from "@/server/auth/session";
 import { listOrdersForUser } from "@/server/orders/service";

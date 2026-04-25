@@ -1,8 +1,8 @@
 "use client";
 
+import { Button } from "@cannaculture/ui";
 import { useId, useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 type MobileFilterToggleProps = {
   children: React.ReactNode;

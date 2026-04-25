@@ -1,10 +1,8 @@
+import { Button, Input, Label } from "@cannaculture/ui";
 import { categoryTemplateKeySchema } from "@cannaculture/domain";
 import Link from "next/link";
 import { AccessDenied } from "@/components/admin/access-denied";
 import { CategoriesTable } from "@/components/admin/tables";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,

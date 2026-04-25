@@ -1,11 +1,8 @@
+import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input, Label } from "@cannaculture/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AlertCircle, Sprout, Leaf, Truck, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { createPageMetadata } from "@/server/seo/metadata";
 
 export const metadata: Metadata = createPageMetadata({

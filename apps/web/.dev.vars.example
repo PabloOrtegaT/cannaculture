@@ -24,3 +24,11 @@ MERCADOPAGO_WEBHOOK_SECRET=
 MOCK_PAYMENT_WEBHOOK_SECRET=
 INVENTORY_SWEEPER_TOKEN=
 AUTH_REFRESH_SWEEP_TOKEN=
+
+# Observability destination (optional)
+# Set to one of: "r2-logpush", "axiom", "baselime", or leave empty for dashboard-only.
+TELEMETRY_DESTINATION=
+# Ingest URL for Axiom / Baselime (required when TELEMETRY_DESTINATION is set)
+TELEMETRY_INGEST_URL=
+# Ingest token / API key for the chosen backend (required when TELEMETRY_DESTINATION is set)
+TELEMETRY_INGEST_TOKEN=

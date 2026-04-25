@@ -1,8 +1,8 @@
 // apps/web/src/components/storefront/product-card.tsx
+import { Badge } from "@cannaculture/ui";
 import type { AttributeValue, CategoryTemplateKey } from "@cannaculture/domain";
 import Link from "next/link";
 import { Leaf, Sun, Droplets, FlaskConical, Shovel, Flower2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { getProductCardMeta } from "@/features/catalog/product-card-meta";
 import { formatCurrencyFromCents, getPriceDisplay } from "@/features/catalog/pricing";
 

@@ -38,7 +38,16 @@
     { "tag": "v1", "new_sqlite_classes": ["RateLimiter"] }
   ],
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "_comment": "Dashboard-only by default. To wire a destination, choose ONE of:"
+    // 1) Logpush to R2: create a Logpush job in the Cloudflare dashboard
+    //    (Analytics > Logs > Logpush) targeting an R2 bucket, then add:
+    //    "logpush": true
+    // 2) Tail Worker: add a "tail_consumers" array referencing a separate Worker
+    //    that ingests logs (e.g. Axiom/Baselime tail worker).
+    // 3) Axiom/Baselime: add a "vars" binding with their ingest URL/token and
+    //    forward from the telemetry.ts sink (see docs/observability.md).
   },
   "triggers": {
     "crons": ["*/5 * * * *"]

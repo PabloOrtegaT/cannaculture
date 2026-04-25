@@ -1,7 +1,7 @@
+import { Button } from "@cannaculture/ui";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Search, Sprout } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/storefront/product-card";
 import { MobileFilterToggle } from "@/components/storefront/mobile-filter-toggle";
 import {
@@ -75,6 +75,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             name="priceMin"
             defaultValue={resolved?.priceMin ?? ""}
             placeholder="Min"
+            aria-label="Minimum price"
             min={0}
             className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
@@ -83,6 +84,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
             name="priceMax"
             defaultValue={resolved?.priceMax ?? ""}
             placeholder="Max"
+            aria-label="Maximum price"
             min={0}
             className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
@@ -199,6 +201,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
                 name="q"
                 defaultValue={query}
                 placeholder="Search products..."
+                aria-label="Search products"
                 className="h-9 w-52 rounded-md border border-input bg-background pl-8 pr-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
               {categorySlug && <input type="hidden" name="category" value={categorySlug} />}

@@ -3,14 +3,20 @@ STORE_PROFILE=plant-seeds
 AUTH_SECRET=replace-with-long-random-string
 AUTH_REFRESH_TOKEN_SECRET=replace-with-another-long-random-string
 AUTH_ADMIN_REFRESH_TOKEN_SECRET=replace-with-admin-refresh-secret
+# Base URLs for the storefront and admin hosts.
+# In production these are also referenced by wrangler.jsonc vars and routes.
 APP_BASE_URL=http://storefront.lvh.me:3000
 ADMIN_BASE_URL=http://admin.lvh.me:3000
+# Domain patterns used by wrangler.jsonc custom_domain routes (no protocol, no port).
+# Example: APP_DOMAIN=cannaculture.com.mx
+APP_DOMAIN=
+ADMIN_DOMAIN=
 AUTH_ACCESS_TTL_SECONDS=900
 AUTH_REFRESH_IDLE_DAYS=30
 AUTH_REFRESH_ABSOLUTE_DAYS=180
 AUTH_ADMIN_REFRESH_IDLE_HOURS=8
 AUTH_ADMIN_REFRESH_ABSOLUTE_DAYS=7
-ADMIN_REQUIRE_CF_ACCESS=false
+ADMIN_REQUIRE_CF_ACCESS=true
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=Cannaculture <noreply@cannaculture.com.mx>
 GOOGLE_CLIENT_ID=

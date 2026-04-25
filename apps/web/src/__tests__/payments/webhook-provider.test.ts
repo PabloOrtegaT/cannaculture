@@ -153,19 +153,8 @@ describe("payment webhook provider dispatcher", () => {
   });
 
   describe("Mercado Pago parseWebhookEvent", () => {
-    async function hmacSha256Hex(secret: string, message: string): Promise<string> {
-      const encoder = new TextEncoder();
-      const key = await crypto.subtle.importKey(
-        "raw",
-        encoder.encode(secret),
-        { name: "HMAC", hash: "SHA-256" },
-        false,
-        ["sign"],
-      );
-      const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(message));
-      return Array.from(new Uint8Array(signature))
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+    function hmacSha256Hex(secret: string, message: string): string {
+      return createHmac("sha256", secret).update(message).digest("hex");
     }
 
     it("accepts a valid HMAC signature", async () => {
@@ -182,8 +171,8 @@ describe("payment webhook provider dispatcher", () => {
         date_created: new Date().toISOString(),
         data: { id: dataId, metadata: { orderId: "order-123" } },
       });
-      const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
-      const signature = await hmacSha256Hex(testMpSecret, manifest);
+      const manifest = `id:${dataId};request-id:${requestId}`;
+      const signature = hmacSha256Hex(testMpSecret, manifest);
       const request = new Request("http://localhost/webhook", {
         method: "POST",
         headers: {
@@ -232,8 +221,8 @@ describe("payment webhook provider dispatcher", () => {
         type: "payment.approved",
         data: { id: dataId },
       });
-      const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
-      const signature = await hmacSha256Hex(testMpSecret, manifest);
+      const manifest = `id:${dataId};request-id:${requestId}`;
+      const signature = hmacSha256Hex(testMpSecret, manifest);
       const request = new Request("http://localhost/webhook", {
         method: "POST",
         headers: {
@@ -245,6 +234,23 @@ describe("payment webhook provider dispatcher", () => {
 
       await expect(provider.parseWebhookEvent(request)).rejects.toThrow(
         "Mercado Pago signature timestamp out of tolerance."
+      );
+    });
+
+    it("rejects a missing signature", async () => {
+      const { resolveProviderFromWebhookRoute } = await import(
+        "@/server/payments/provider"
+      );
+      const provider = resolveProviderFromWebhookRoute("mercadopago");
+      const payload = JSON.stringify({ id: "mp_123", type: "payment.approved" });
+      const request = new Request("http://localhost/webhook", {
+        method: "POST",
+        headers: {},
+        body: payload,
+      });
+
+      await expect(provider.parseWebhookEvent(request)).rejects.toThrow(
+        "Mercado Pago webhook secret or signature missing."
       );
     });
   });

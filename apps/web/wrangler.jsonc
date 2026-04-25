@@ -15,15 +15,18 @@
     }
   ],
   "vars": {
-    "APP_BASE_URL": "https://cannaculture.com.mx",
-    "ADMIN_BASE_URL": "https://admin.cannaculture.com.mx",
-    "NEXTAUTH_URL": "https://cannaculture.com.mx",
-    "NEXTAUTH_URL_INTERNAL": "https://cannaculture.com.mx",
-    "ADMIN_REQUIRE_CF_ACCESS": "false"
+    // Set these via environment variables before deploying:
+    // APP_BASE_URL, ADMIN_BASE_URL
+    "APP_BASE_URL": "${APP_BASE_URL}",
+    "ADMIN_BASE_URL": "${ADMIN_BASE_URL}",
+    "NEXTAUTH_URL": "${APP_BASE_URL}",
+    "NEXTAUTH_URL_INTERNAL": "${APP_BASE_URL}",
+    "ADMIN_REQUIRE_CF_ACCESS": "true"
   },
   "routes": [
-    { "pattern": "cannaculture.com.mx", "custom_domain": true },
-    { "pattern": "admin.cannaculture.com.mx", "custom_domain": true }
+    // Configure these for your domain:
+    { "pattern": "${APP_DOMAIN}", "custom_domain": true },
+    { "pattern": "${ADMIN_DOMAIN}", "custom_domain": true }
   ],
   "assets": {
     "binding": "ASSETS",

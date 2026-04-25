@@ -44,7 +44,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (policy.adminRequireCfAccess && isAdminPath(pathname)) {
+  if (policy.adminRequireCfAccess) {
     const accessIdentity = request.headers.get("cf-access-authenticated-user-email");
     if (!accessIdentity) {
       return new NextResponse("Cloudflare Access authentication required.", { status: 403 });

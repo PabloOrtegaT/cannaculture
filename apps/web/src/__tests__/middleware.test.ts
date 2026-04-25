@@ -72,4 +72,85 @@ describe("middleware", () => {
     expect(res.status).toBe(403);
     expect(res).toBeInstanceOf(NextResponse);
   });
+
+  it("rejects admin host requests without CF Access identity when ADMIN_REQUIRE_CF_ACCESS is true", () => {
+    const originalEnv = process.env.NEXTJS_ENV;
+    process.env.NEXTJS_ENV = "development";
+    process.env.APP_BASE_URL = "https://storefront.example.com";
+    process.env.ADMIN_BASE_URL = "https://admin.example.com";
+    process.env.ADMIN_REQUIRE_CF_ACCESS = "true";
+
+    const req = makeRequest("https://admin.example.com/admin/dashboard", {
+      host: "admin.example.com",
+    });
+
+    const res = middleware(req);
+
+    process.env.NEXTJS_ENV = originalEnv;
+    delete process.env.ADMIN_REQUIRE_CF_ACCESS;
+
+    expect(res.status).toBe(403);
+    expect(res).toBeInstanceOf(NextResponse);
+  });
+
+  it("rejects /api/auth/* on admin host without CF Access identity when ADMIN_REQUIRE_CF_ACCESS is true", () => {
+    const originalEnv = process.env.NEXTJS_ENV;
+    process.env.NEXTJS_ENV = "development";
+    process.env.APP_BASE_URL = "https://storefront.example.com";
+    process.env.ADMIN_BASE_URL = "https://admin.example.com";
+    process.env.ADMIN_REQUIRE_CF_ACCESS = "true";
+
+    const req = makeRequest("https://admin.example.com/api/auth/signin", {
+      host: "admin.example.com",
+    });
+
+    const res = middleware(req);
+
+    process.env.NEXTJS_ENV = originalEnv;
+    delete process.env.ADMIN_REQUIRE_CF_ACCESS;
+
+    expect(res.status).toBe(403);
+    expect(res).toBeInstanceOf(NextResponse);
+  });
+
+  it("allows admin host requests with CF Access identity when ADMIN_REQUIRE_CF_ACCESS is true", () => {
+    const originalEnv = process.env.NEXTJS_ENV;
+    process.env.NEXTJS_ENV = "development";
+    process.env.APP_BASE_URL = "https://storefront.example.com";
+    process.env.ADMIN_BASE_URL = "https://admin.example.com";
+    process.env.ADMIN_REQUIRE_CF_ACCESS = "true";
+
+    const req = makeRequest("https://admin.example.com/api/auth/signin", {
+      host: "admin.example.com",
+      "cf-access-authenticated-user-email": "admin@example.com",
+    });
+
+    const res = middleware(req);
+
+    process.env.NEXTJS_ENV = originalEnv;
+    delete process.env.ADMIN_REQUIRE_CF_ACCESS;
+
+    expect(res).toBeInstanceOf(NextResponse);
+    expect(res.status).toBe(200);
+  });
+
+  it("allows admin host requests without CF Access identity when ADMIN_REQUIRE_CF_ACCESS is false", () => {
+    const originalEnv = process.env.NEXTJS_ENV;
+    process.env.NEXTJS_ENV = "development";
+    process.env.APP_BASE_URL = "https://storefront.example.com";
+    process.env.ADMIN_BASE_URL = "https://admin.example.com";
+    process.env.ADMIN_REQUIRE_CF_ACCESS = "false";
+
+    const req = makeRequest("https://admin.example.com/admin/dashboard", {
+      host: "admin.example.com",
+    });
+
+    const res = middleware(req);
+
+    process.env.NEXTJS_ENV = originalEnv;
+    delete process.env.ADMIN_REQUIRE_CF_ACCESS;
+
+    expect(res).toBeInstanceOf(NextResponse);
+    expect(res.status).toBe(200);
+  });
 });

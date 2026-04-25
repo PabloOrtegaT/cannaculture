@@ -66,19 +66,8 @@ function parseMpSignature(signatureHeader: string) {
   };
 }
 
-async function hmacSha256Hex(secret: string, message: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(message));
-  return Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+function hmacSha256Hex(secret: string, message: string): string {
+  return createHmac("sha256", secret).update(message).digest("hex");
 }
 
 function parseStripeSignatureHeader(signatureHeader: string) {
@@ -352,8 +341,10 @@ function createMercadoPagoProvider(accessToken: string): PaymentProviderAdapter 
       }
 
       const dataId = String(parsed.data?.id ?? parsed.id ?? "");
-      const manifest = `id:${dataId};request-id:${requestId};ts:${sigParsed.ts};`;
-      const expected = await hmacSha256Hex(config.mercadoPagoWebhookSecret, manifest);
+      const manifest = requestId
+        ? `id:${dataId};request-id:${requestId}`
+        : `id:${dataId}`;
+      const expected = hmacSha256Hex(config.mercadoPagoWebhookSecret, manifest);
       if (!equalSignature(expected, sigParsed.v1)) {
         throw new Error("Invalid Mercado Pago webhook signature.");
       }
